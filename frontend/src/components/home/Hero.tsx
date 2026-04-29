@@ -6,10 +6,10 @@ export default function Hero() {
     <section className="relative w-full min-h-[560px] flex flex-col items-center justify-center px-4 overflow-hidden">
       {/* Background Image Optimization */}
       <Image
-        src="/images/hero-stadium.png" // Hãy thay bằng path thực tế trong public/
+        src="/hero-stadium.png"
         alt="Sân vận động hiện đại"
         fill
-        priority // Quan trọng: load ảnh này đầu tiên
+        priority
         className="object-cover"
       />
       {/* Overlay */}

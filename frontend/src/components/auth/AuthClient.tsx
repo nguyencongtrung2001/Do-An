@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 type AuthTab = "login" | "signup";
@@ -11,6 +11,7 @@ type Role = "player" | "owner";
 export default function AuthClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const initialTab = searchParams.get("tab") === "signup" ? "signup" : "login";
 
   const { login } = useAuth();
@@ -41,14 +42,12 @@ export default function AuthClient() {
   const switchTab = (tab: AuthTab) => {
     setActiveTab(tab);
     setErrorMsg(null);
-    // Optionally update URL without reloading
-    const newUrl = new URL(window.location.href);
-    if (tab === "signup") {
-      newUrl.searchParams.set("tab", "signup");
-    } else {
-      newUrl.searchParams.delete("tab");
-    }
-    window.history.replaceState({}, "", newUrl.toString());
+    
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab); // Will set ?tab=signup or ?tab=login
+    
+    // Use Next.js router to update URL instead of history API
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -96,15 +95,37 @@ export default function AuthClient() {
     
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/user/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      let url = "http://localhost:3000/user/register";
+      let body: BodyInit;
+      let headers: HeadersInit = {};
+
+      if (role === "owner") {
+        url = "http://localhost:3000/owner/register";
+        const formData = new FormData();
+        formData.append("ho_ten", signupName);
+        formData.append("email", signupEmail);
+        formData.append("so_dien_thoai", signupPhone);
+        formData.append("mat_khau", signupPassword);
+        formData.append("ten_dia_diem", signupLocationName);
+        formData.append("dia_chi", signupAddress);
+        if (cccdTruoc) formData.append("anh_cccd_truoc", cccdTruoc);
+        if (cccdSau) formData.append("anh_cccd_sau", cccdSau);
+        body = formData;
+      } else {
+        url = "http://localhost:3000/user/register";
+        headers = { "Content-Type": "application/json" };
+        body = JSON.stringify({
           ho_ten: signupName,
           email: signupEmail,
           so_dien_thoai: signupPhone,
           mat_khau: signupPassword
-        }),
+        });
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body,
       });
       const data = await res.json();
       
@@ -113,7 +134,11 @@ export default function AuthClient() {
       }
       
       login(data.token, data.user);
-      router.push("/");
+      if (role === "owner") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       if (error instanceof Error) {
         setErrorMsg(error.message);
