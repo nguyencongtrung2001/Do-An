@@ -29,6 +29,10 @@ export default function AuthClient() {
   const [signupPhone, setSignupPhone] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [signupLocationName, setSignupLocationName] = useState("");
+  const [signupAddress, setSignupAddress] = useState("");
+  const [cccdTruoc, setCccdTruoc] = useState<File | null>(null);
+  const [cccdSau, setCccdSau] = useState<File | null>(null);
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -329,17 +333,10 @@ export default function AuthClient() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
+                  className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
                   Google
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
-                >
-                  <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook" className="w-5 h-5" />
-                  Facebook
                 </button>
               </div>
 
@@ -370,18 +367,69 @@ export default function AuthClient() {
                 </div>
               </div>
 
-              {/* Business Name (only visible for Owner role) */}
+              {/* Owner Specific Fields */}
               {role === "owner" && (
-                <div className="flex flex-col gap-1.5 auth-fade-in">
-                  <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Tên doanh nghiệp / Sân</label>
-                  <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
-                    <span className="material-symbols-outlined text-slate-400 text-xl">business</span>
-                    <input
-                      className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
-                      type="text"
-                      placeholder="Sân bóng ABC"
-                      required
-                    />
+                <div className="flex flex-col gap-4 auth-fade-in">
+                  {/* Location Name */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Tên địa điểm / Cơ sở</label>
+                    <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+                      <span className="material-symbols-outlined text-slate-400 text-xl">stadium</span>
+                      <input
+                        className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
+                        type="text"
+                        placeholder="Ví dụ: Sân bóng ABC"
+                        required
+                        value={signupLocationName}
+                        onChange={(e) => setSignupLocationName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Địa chỉ</label>
+                    <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+                      <span className="material-symbols-outlined text-slate-400 text-xl">location_on</span>
+                      <input
+                        className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
+                        type="text"
+                        placeholder="Số nhà, Đường, Quận, Thành phố..."
+                        required
+                        value={signupAddress}
+                        onChange={(e) => setSignupAddress(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* CCCD Front */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh CCCD Mặt Trước</label>
+                    <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+                      <span className="material-symbols-outlined text-slate-400 text-xl">badge</span>
+                      <input
+                        className="flex-1 bg-transparent outline-none text-sm text-slate-900 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={(e) => setCccdTruoc(e.target.files?.[0] || null)}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* CCCD Back */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh CCCD Mặt Sau</label>
+                    <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+                      <span className="material-symbols-outlined text-slate-400 text-xl">badge</span>
+                      <input
+                        className="flex-1 bg-transparent outline-none text-sm text-slate-900 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={(e) => setCccdSau(e.target.files?.[0] || null)}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -488,17 +536,10 @@ export default function AuthClient() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
+                  className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
                   Google
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
-                >
-                  <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook" className="w-5 h-5" />
-                  Facebook
                 </button>
               </div>
 
