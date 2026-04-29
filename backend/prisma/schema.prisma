@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model anhsan {
+  ma_anh_san    String    @id @db.VarChar(50)
+  ma_san        String?   @db.VarChar(50)
+  duong_dan_anh String
+  ma_cloudinary String
+  ngay_tao      DateTime? @default(now()) @db.Timestamp(6)
+  san           san?      @relation(fields: [ma_san], references: [ma_san], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model danhgia {
+  ma_danh_gia         String         @id @db.VarChar(50)
+  ma_nguoi_dung       String?        @db.VarChar(50)
+  ma_dat_san_chi_tiet String?        @db.VarChar(50)
+  so_sao              Int?
+  ngay_danh_gia       DateTime?      @default(now()) @db.Timestamp(6)
+  datsanchitiet       datsanchitiet? @relation(fields: [ma_dat_san_chi_tiet], references: [ma_dat_san_chi_tiet], onDelete: NoAction, onUpdate: NoAction)
+  nguoidung           nguoidung?     @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model datsan {
+  ma_dat_san             String          @id @db.VarChar(50)
+  ma_nguoi_dung          String?         @db.VarChar(50)
+  tong_tien              Decimal         @db.Decimal(15, 2)
+  phuong_thuc_thanh_toan String          @db.VarChar(50)
+  ngay_tao               DateTime?       @default(now()) @db.Timestamp(6)
+  nguoidung              nguoidung?      @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+  datsanchitiet          datsanchitiet[]
+  giaodich               giaodich[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model datsanchitiet {
+  ma_dat_san_chi_tiet String    @id @db.VarChar(50)
+  ma_dat_san          String?   @db.VarChar(50)
+  ma_san              String?   @db.VarChar(50)
+  ngay_dat            DateTime  @db.Date
+  gio_bat_dau         DateTime  @db.Time(6)
+  gio_ket_thuc        DateTime  @db.Time(6)
+  tien_coc            Decimal   @default(0.00) @db.Decimal(15, 2)
+  tien_con_lai        Decimal   @default(0.00) @db.Decimal(15, 2)
+  trang_thai_dat      String    @default("Chờ xử lý") @db.VarChar(50)
+  danhgia             danhgia[]
+  datsan              datsan?   @relation(fields: [ma_dat_san], references: [ma_dat_san], onDelete: NoAction, onUpdate: NoAction)
+  san                 san?      @relation(fields: [ma_san], references: [ma_san], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model diadiem {
+  ma_dia_diem      String     @id @db.VarChar(50)
+  ma_nguoi_dung    String?    @db.VarChar(50)
+  ten_dia_diem     String     @db.VarChar(255)
+  dia_chi          String     @db.VarChar(255)
+  mo_ta            String?
+  kinh_do          Decimal    @db.Decimal(11, 8)
+  vi_do            Decimal    @db.Decimal(11, 8)
+  trang_thai_duyet Boolean?   @default(false)
+  ngay_tao         DateTime?  @default(now()) @db.Timestamp(6)
+  nguoidung        nguoidung? @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+  san              san[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model giaodich {
+  ma_giao_dich         String     @id @db.VarChar(50)
+  ma_dat_san           String?    @db.VarChar(50)
+  ma_nguoi_dung        String?    @db.VarChar(50)
+  duong_dan_thanh_toan String?
+  so_tien_tt           Decimal    @db.Decimal(15, 2)
+  ma_tham_chieu        String?    @db.VarChar(100)
+  ma_gd_vnpay          String?    @unique @db.VarChar(100)
+  ma_phan_hoi          String?    @db.VarChar(10)
+  ma_ngan_hang         String?    @db.VarChar(20)
+  thoi_gian_tt_vnpay   String?    @db.VarChar(20)
+  trang_thai_giao_dich String     @default("Chưa thanh toán") @db.VarChar(50)
+  noi_dung_thanh_toan  String?
+  ngay_tao             DateTime?  @default(now()) @db.Timestamp(6)
+  datsan               datsan?    @relation(fields: [ma_dat_san], references: [ma_dat_san], onDelete: NoAction, onUpdate: NoAction)
+  nguoidung            nguoidung? @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model nguoidung {
+  ma_nguoi_dung  String     @id @db.VarChar(50)
+  ho_ten         String     @db.VarChar(255)
+  email          String     @unique @db.VarChar(255)
+  so_dien_thoai  String?    @unique @db.VarChar(20)
+  mat_khau       String?    @db.VarChar(255)
+  ma_google      String?    @unique @db.VarChar(255)
+  anh_dai_dien   String?
+  anh_cloudinary String?    @db.VarChar(255)
+  vai_tro        String     @default("Khách hàng") @db.VarChar(50)
+  so_vi_du       Decimal    @default(0.00) @db.Decimal(15, 2)
+  anh_cccd_truoc String?
+  anh_cccd_sau   String?
+  trang_thai     Boolean?   @default(false)
+  ngay_tao       DateTime?  @default(now()) @db.Timestamp(6)
+  danhgia        danhgia[]
+  datsan         datsan[]
+  diadiem        diadiem[]
+  giaodich       giaodich[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model san {
+  ma_san         String          @id @db.VarChar(50)
+  ma_dia_diem    String?         @db.VarChar(50)
+  ten_san        String          @db.VarChar(255)
+  loai_the_thao  String          @db.VarChar(100)
+  gia_thue_30p   Decimal         @db.Decimal(15, 2)
+  trang_thai_san String          @default("Đang hoạt động") @db.VarChar(50)
+  ngay_tao       DateTime?       @default(now()) @db.Timestamp(6)
+  anhsan         anhsan[]
+  datsanchitiet  datsanchitiet[]
+  diadiem        diadiem?        @relation(fields: [ma_dia_diem], references: [ma_dia_diem], onDelete: NoAction, onUpdate: NoAction)
+}
