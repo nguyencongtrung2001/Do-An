@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { uploadCCCD } from '../middlewares/upload.middleware.js';
+import { uploadCCCD, uploadCourt } from '../middlewares/upload.middleware.js';
 import { ownerService } from '../services/owner.service.js';
+import { authenticate, type AuthRequest } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
@@ -35,6 +36,44 @@ router.post('/register', uploadCCCD, async (req, res, next) => {
       location: result.location,
       token: result.token
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/my-courts', authenticate, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user.id;
+    const courts = await ownerService.getMyCourts(userId);
+    res.json({ success: true, courts });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/add-court', authenticate, uploadCourt, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user.id;
+    const data = req.body;
+    
+    const files = req.files as any[];
+    const images = files?.map(f => ({ url: f.path, public_id: f.filename })) || [];
+
+    const court = await ownerService.addCourt(userId, data, images);
+    res.status(201).json({ success: true, message: "Thêm sân thành công", court });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/update-court/:ma_san', authenticate, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { ma_san } = req.params;
+    const data = req.body;
+
+    const court = await ownerService.updateCourt(userId, ma_san, data);
+    res.json({ success: true, message: "Cập nhật sân thành công", court });
   } catch (error) {
     next(error);
   }

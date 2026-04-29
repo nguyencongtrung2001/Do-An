@@ -23,8 +23,12 @@ export default function Navbar() {
     { label: "Bản đồ", href: "/map" },
     ...(mounted && isAuthenticated
       ? [
-          { label: "Cá nhân", href: "/profile" },
-          { label: "Lịch sử", href: "/history" },
+          ...(user?.vai_tro === "Chủ sân"
+            ? [{ label: "Quản lý sân", href: "/dashboard" }]
+            : [
+                { label: "Cá nhân", href: "/profile" },
+                { label: "Lịch sử", href: "/history" },
+              ]),
         ]
       : []),
     { label: "Chính sách", href: "/policy" },
@@ -66,7 +70,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {mounted && isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <Link href="/profile" className="flex items-center gap-2 group cursor-pointer">
+              <Link 
+                href={user?.vai_tro === "Chủ sân" ? "/dashboard" : "/profile"} 
+                className="flex items-center gap-2 group cursor-pointer"
+              >
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden">
                   {user?.anh_dai_dien ? (
                     <img src={user.anh_dai_dien} alt="Avatar" className="w-full h-full object-cover" />

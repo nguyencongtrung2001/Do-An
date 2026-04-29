@@ -14,3 +14,5 @@ export const uploadCCCD = multer({ storage }).fields([
   { name: 'anh_cccd_truoc', maxCount: 1 },
   { name: 'anh_cccd_sau', maxCount: 1 }
 ]);
+
+export const uploadCourt = multer({ storage }).array('images', 5);

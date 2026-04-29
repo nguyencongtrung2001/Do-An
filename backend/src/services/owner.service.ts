@@ -78,6 +78,100 @@ export class OwnerService {
     const token = generateToken({ id: result.user.ma_nguoi_dung, role: result.user.vai_tro });
     return { user: result.user, location: result.location, token };
   }
+
+  async getMyCourts(userId: string) {
+    // 1. Tìm các địa điểm của owner này
+    const locations = await prisma.diadiem.findMany({
+      where: { ma_nguoi_dung: userId },
+      include: {
+        san: {
+          include: {
+            anhsan: true
+          }
+        }
+      }
+    });
+
+    // 2. Gộp tất cả các sân từ các địa điểm
+    const allCourts = locations.flatMap(loc => loc.san);
+    return allCourts;
+  }
+
+  async addCourt(userId: string, data: any, images: { url: string; public_id: string }[]) {
+    const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
+
+    // 1. Tìm địa điểm đầu tiên của owner này (giả sử họ đang quản lý địa điểm này)
+    const location = await prisma.diadiem.findFirst({
+      where: { ma_nguoi_dung: userId }
+    });
+
+    if (!location) {
+      throw new ApiError(404, "Không tìm thấy địa điểm của bạn. Vui lòng liên hệ admin.");
+    }
+
+    // 2. Tạo mã sân (S001, S002...)
+    const lastSan = await prisma.san.findFirst({
+      orderBy: { ma_san: 'desc' }
+    });
+    let newSanId = "S001";
+    if (lastSan && lastSan.ma_san.startsWith("S")) {
+      const lastNumber = parseInt(lastSan.ma_san.replace("S", ""), 10);
+      if (!isNaN(lastNumber)) newSanId = `S${String(lastNumber + 1).padStart(3, '0')}`;
+    }
+
+    // 3. Tạo sân và ảnh sân
+    return prisma.$transaction(async (tx) => {
+      const san = await tx.san.create({
+        data: {
+          ma_san: newSanId,
+          ma_dia_diem: location.ma_dia_diem,
+          ten_san,
+          loai_the_thao,
+          gia_thue_30p: parseFloat(gia_thue_30p),
+          trang_thai_san: trang_thai_san || "Đang hoạt động"
+        }
+      });
+
+      if (images && images.length > 0) {
+        await tx.anhsan.createMany({
+          data: images.map(img => ({
+            ma_anh_san: `IMG_${Math.random().toString(36).substr(2, 9)}`,
+            ma_san: newSanId,
+            duong_dan_anh: img.url,
+            ma_cloudinary: img.public_id || "manual_upload"
+          }))
+        });
+      }
+
+      return san;
+    });
+  }
+
+  async updateCourt(userId: string, maSan: string, data: any) {
+    const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
+
+    // Kiểm tra xem sân có thuộc về owner này không
+    const court = await prisma.san.findFirst({
+      where: {
+        ma_san: maSan,
+        diadiem: { ma_nguoi_dung: userId }
+      }
+    });
+
+    if (!court) {
+      throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền chỉnh sửa.");
+    }
+
+    return prisma.san.update({
+      where: { ma_san: maSan },
+      data: {
+        ten_san,
+        loai_the_thao,
+        gia_thue_30p: parseFloat(gia_thue_30p),
+        trang_thai_san
+      }
+    });
+  }
 }
 
 export const ownerService = new OwnerService();

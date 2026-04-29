@@ -72,7 +72,13 @@ export default function AuthClient() {
       }
       
       login(data.token, data.user);
-      router.push("/");
+      
+      // Điều hướng dựa trên vai trò
+      if (data.user.vai_tro === "Chủ sân") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       if (error instanceof Error) {
         setErrorMsg(error.message);
