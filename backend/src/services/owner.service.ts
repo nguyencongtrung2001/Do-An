@@ -163,13 +163,59 @@ export class OwnerService {
     }
 
     return prisma.san.update({
-      where: { ma_san: maSan },
+      where: { ma_san: ma_san },
       data: {
         ten_san,
         loai_the_thao,
         gia_thue_30p: parseFloat(gia_thue_30p),
         trang_thai_san
       }
+    });
+  }
+
+  async getMyBookings(userId: string) {
+    return prisma.datsanchitiet.findMany({
+      where: {
+        san: {
+          diadiem: {
+            ma_nguoi_dung: userId
+          }
+        }
+      },
+      include: {
+        san: true,
+        datsan: {
+          include: {
+            nguoidung: true
+          }
+        }
+      },
+      orderBy: {
+        ngay_dat: 'desc'
+      }
+    });
+  }
+
+  async updateBookingStatus(userId: string, bookingDetailId: string, status: string) {
+    // Kiểm tra xem booking này có thuộc về owner này không
+    const booking = await prisma.datsanchitiet.findFirst({
+      where: {
+        ma_dat_san_chi_tiet: bookingDetailId,
+        san: {
+          diadiem: {
+            ma_nguoi_dung: userId
+          }
+        }
+      }
+    });
+
+    if (!booking) {
+      throw new ApiError(404, "Không tìm thấy lịch đặt hoặc bạn không có quyền.");
+    }
+
+    return prisma.datsanchitiet.update({
+      where: { ma_dat_san_chi_tiet: bookingDetailId },
+      data: { trang_thai_dat: status }
     });
   }
 }

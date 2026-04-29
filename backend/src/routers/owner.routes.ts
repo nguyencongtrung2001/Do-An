@@ -79,4 +79,27 @@ router.put('/update-court/:ma_san', authenticate, async (req: AuthRequest, res, 
   }
 });
 
+router.get('/my-bookings', authenticate, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user.id;
+    const bookings = await ownerService.getMyBookings(userId);
+    res.json({ success: true, bookings });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/update-booking-status/:id', authenticate, async (req: AuthRequest, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const booking = await ownerService.updateBookingStatus(userId, id, status);
+    res.json({ success: true, message: `Đã ${status.toLowerCase()} lịch đặt`, booking });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
