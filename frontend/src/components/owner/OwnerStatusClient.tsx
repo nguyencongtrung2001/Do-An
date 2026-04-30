@@ -23,11 +23,6 @@ export default function OwnerStatusClient() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
-  
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [isSelectModalOpen, setIsSelectModalOpen] = useState(false);
-  const [selectedCourtsToLock, setSelectedCourtsToLock] = useState<Set<string>>(new Set());
 
   const fetchCourts = useCallback(async () => {
     if (!token) return;
@@ -47,7 +42,10 @@ export default function OwnerStatusClient() {
   }, [token]);
 
   useEffect(() => {
-    fetchCourts();
+    const load = async () => {
+      await fetchCourts();
+    };
+    load();
   }, [fetchCourts]);
 
   // Derived counts
@@ -82,48 +80,6 @@ export default function OwnerStatusClient() {
     } catch (error) {
       console.error("Error updating status:", error);
     }
-  };
-
-  const handleLockAll = () => {
-    if (!dateFrom || !dateTo) {
-      alert("Vui lòng chọn khoảng ngày trước khi khóa sân!");
-      return;
-    }
-    alert(`Tính năng khóa sân hàng loạt đang được phát triển.`);
-  };
-
-  const handleOpenSelectModal = () => {
-    if (!dateFrom || !dateTo) {
-      alert("Vui lòng chọn khoảng ngày trước khi chọn sân!");
-      return;
-    }
-    setIsSelectModalOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const handleCloseSelectModal = () => {
-    setIsSelectModalOpen(false);
-    setSelectedCourtsToLock(new Set());
-    document.body.style.overflow = "";
-  };
-
-  const handleToggleCourtSelection = (courtId: string) => {
-    const newSelection = new Set(selectedCourtsToLock);
-    if (newSelection.has(courtId)) {
-      newSelection.delete(courtId);
-    } else {
-      newSelection.add(courtId);
-    }
-    setSelectedCourtsToLock(newSelection);
-  };
-
-  const handleConfirmLockSelected = () => {
-    if (selectedCourtsToLock.size === 0) {
-      alert("Vui lòng chọn ít nhất 1 sân để khóa.");
-      return;
-    }
-    alert(`Đã khóa ${selectedCourtsToLock.size} sân đã chọn! (Demo)`);
-    handleCloseSelectModal();
   };
 
   return (
@@ -228,7 +184,6 @@ export default function OwnerStatusClient() {
             {loading ? (
               <div className="p-10 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
             ) : courts.map((court) => {
-              const isMaintenance = court.trang_thai_san === "Đang bảo trì";
               const isActive = court.trang_thai_san === "Đang hoạt động";
 
               return (
@@ -273,59 +228,6 @@ export default function OwnerStatusClient() {
           </div>
         </div>
       </div>
-
-      {/* Select Courts Modal */}
-      {isSelectModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 flex items-center justify-center p-4 transition-opacity"
-          onClick={handleCloseSelectModal}
-        >
-          <div
-            className="bg-white rounded-2xl w-full max-w-md shadow-2xl transition-transform transform scale-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-slate-900">Chọn sân để khóa</h3>
-              <button
-                onClick={handleCloseSelectModal}
-                className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-              >
-                <span className="material-symbols-outlined text-slate-500 text-xl">close</span>
-              </button>
-            </div>
-            <div className="p-6 space-y-3 max-h-[50vh] overflow-y-auto">
-              {courts.map((court) => (
-                <label
-                  key={court.ma_san}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCourtsToLock.has(court.ma_san)}
-                    onChange={() => handleToggleCourtSelection(court.ma_san)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm font-medium text-slate-700">{court.ten_san}</span>
-                </label>
-              ))}
-            </div>
-            <div className="p-6 border-t border-gray-100 flex items-center gap-3">
-              <button
-                onClick={handleCloseSelectModal}
-                className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleConfirmLockSelected}
-                className="flex-1 py-3 bg-primary hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-primary/30"
-              >
-                Khóa các sân đã chọn
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

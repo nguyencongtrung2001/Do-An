@@ -144,9 +144,8 @@ export default function OwnerCourtsClient() {
       
       const method = modalMode === "edit" ? "PUT" : "POST";
 
-      // Nếu là edit, có thể gửi JSON cho nhẹ nếu không thay đổi ảnh
-      let body: any = formData;
-      let headers: any = { Authorization: `Bearer ${token}` };
+      const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+      let body: BodyInit = formData;
 
       if (modalMode === "edit" && (!newCourtImages || newCourtImages.length === 0)) {
         headers["Content-Type"] = "application/json";

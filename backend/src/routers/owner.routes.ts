@@ -69,8 +69,12 @@ router.post('/add-court', authenticate, uploadCourt, async (req: AuthRequest, re
 router.put('/update-court/:ma_san', authenticate, async (req: AuthRequest, res, next) => {
   try {
     const userId = req.user.id;
-    const { ma_san } = req.params;
+    const ma_san = req.params.ma_san as string;
     const data = req.body;
+
+    if (!ma_san) {
+      return res.status(400).json({ success: false, message: "Thiếu mã sân" });
+    }
 
     const court = await ownerService.updateCourt(userId, ma_san, data);
     res.json({ success: true, message: "Cập nhật sân thành công", court });
@@ -92,8 +96,12 @@ router.get('/my-bookings', authenticate, async (req: AuthRequest, res, next) => 
 router.patch('/update-booking-status/:id', authenticate, async (req: AuthRequest, res, next) => {
   try {
     const userId = req.user.id;
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status } = req.body;
+
+    if (!id || !status) {
+      return res.status(400).json({ success: false, message: "Thiếu thông tin cập nhật" });
+    }
 
     const booking = await ownerService.updateBookingStatus(userId, id, status);
     res.json({ success: true, message: `Đã ${status.toLowerCase()} lịch đặt`, booking });

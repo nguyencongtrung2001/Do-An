@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Types
-type BookingStatus = "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Đã hủy" | "Đã đặt cọc";
+// type BookingStatus = "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Đã hủy" | "Đã đặt cọc";
 
 interface BookingDetail {
   ma_dat_san_chi_tiet: string;
@@ -48,25 +48,23 @@ export default function OwnerBookingsClient() {
   const [courts, setCourts] = useState<{ma_san: string, ten_san: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkinData, setCheckinData] = useState<BookingDetail | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer">("cash");
   const [showToast, setShowToast] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
+      const headers: HeadersInit = { Authorization: `Bearer ${token}` };
       const res = await fetch("http://localhost:3000/owner/my-bookings", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers
       });
       const data = await res.json();
       if (data.success) {
         setBookings(data.bookings);
         // Extract unique courts for the timeline
-        const uniqueCourts = Array.from(new Set(data.bookings.map((b: any) => JSON.stringify({ ma_san: b.san.ma_san, ten_san: b.san.ten_san }))))
-          .map((s: any) => JSON.parse(s));
+        const uniqueCourts = Array.from(new Set(data.bookings.map((b: BookingDetail) => JSON.stringify({ ma_san: b.san.ma_san, ten_san: b.san.ten_san }))))
+          .map((s: unknown) => JSON.parse(s as string));
         
-        // If no bookings, we might still want to show all courts of this owner
-        // For now, just use courts from bookings or a separate API if needed
         setCourts(uniqueCourts);
       }
     } catch (error) {
@@ -77,7 +75,10 @@ export default function OwnerBookingsClient() {
   }, [token]);
 
   useEffect(() => {
-    fetchBookings();
+    const load = async () => {
+      await fetchBookings();
+    };
+    load();
   }, [fetchBookings]);
 
   const prevDay = () => {
@@ -94,7 +95,6 @@ export default function OwnerBookingsClient() {
 
   const handleOpenCheckin = (booking: BookingDetail) => {
     setCheckinData(booking);
-    setPaymentMethod("cash");
   };
 
   const handleCloseCheckin = () => {
@@ -208,7 +208,11 @@ export default function OwnerBookingsClient() {
             </div>
 
             {/* Rows for each court */}
-            {courts.length === 0 ? (
+            {loading ? (
+                <div className="timeline-grid min-w-[1200px] p-10 flex justify-center col-span-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+            ) : courts.length === 0 ? (
                 <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
             ) : courts.map(court => (
                 <div key={court.ma_san} className="timeline-grid hover:bg-gray-50/30 transition-colors min-w-[1200px]">
