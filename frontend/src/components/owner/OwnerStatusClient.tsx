@@ -1,60 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image"; // Import Image từ Next.js
+import { useState } from "react";
+import Image from "next/image";
+import { useOwnerCourts } from "@/hooks/useOwnerCourts";
 import { useAuth } from "@/contexts/AuthContext";
+import { courtService } from "@/services/court.service";
 import { Loader2, AlertCircle, CheckCircle2, Wrench } from "lucide-react";
 import { toast } from "react-hot-toast";
 
-interface Court {
-  ma_san: string;
-  ten_san: string;
-  loai_the_thao: string;
-  trang_thai_san: string;
-  gia_thue_30p: number;
-  anhsan?: { duong_dan_anh: string }[];
-}
-
-// const SPORT_LABELS: Record<string, string> = {
-//   "Bóng đá": "⚽ Bóng đá",
-//   "Cầu lông": "🏸 Cầu lông",
-//   "Pickleball": "🏓 Pickleball",
-//   "Bóng rổ": "🏀 Bóng rổ"
-// };
-
 export default function OwnerStatusClient() {
-  const [courts, setCourts] = useState<Court[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const { courts, loading, fetchCourts } = useOwnerCourts();
   const { token } = useAuth();
-
-  const fetchCourts = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await fetch("http://localhost:3000/owner/my-courts", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setCourts(data.courts);
-      }
-    } catch (error) {
-      console.error("Error fetching courts:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    // Gọi fetchCourts một cách gián tiếp để tránh cascading render trực tiếp
-    const initData = async () => {
-      await fetchCourts();
-    };
-    initData();
-  }, [fetchCourts]);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const toggleStatus = async (courtId: string) => {
-    if (!token || updatingId) return;
+    if (updatingId) return;
 
     const court = courts.find(c => c.ma_san === courtId);
     if (!court || court.trang_thai_san === "Đã khóa") {
@@ -66,23 +26,12 @@ export default function OwnerStatusClient() {
     setUpdatingId(courtId);
 
     try {
-      const res = await fetch(`http://localhost:3000/owner/update-court-status/${courtId}`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ trang_thai_san: newStatus })
-      });
-
-      const data = await res.json();
+      const data = await courtService.updateCourtStatus(token!, courtId, newStatus);
       if (data.success) {
-        setCourts(prev => prev.map(c => 
-          c.ma_san === courtId ? { ...c, trang_thai_san: newStatus } : c
-        ));
+        await fetchCourts();
         toast.success(`Đã cập nhật ${court.ten_san}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Lỗi cập nhật Database");
     } finally {
       setUpdatingId(null);
@@ -107,7 +56,6 @@ export default function OwnerStatusClient() {
               return (
                 <div key={court.ma_san} className="flex items-center gap-6 px-6 py-5">
                   <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0">
-                    {/* Sử dụng Image thay cho img */}
                     <Image 
                       src={court.anhsan?.[0]?.duong_dan_anh || '/hero-stadium.png'} 
                       alt={court.ten_san}
@@ -135,7 +83,7 @@ export default function OwnerStatusClient() {
   );
 }
 
-// Định nghĩa types rõ ràng cho Icon và Style
+// Types for badge config
 interface BadgeConfig {
   style: string;
   icon: React.ReactNode;

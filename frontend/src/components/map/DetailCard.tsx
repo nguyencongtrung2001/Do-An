@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { CourtMapData } from "./MapClient";
+import type { CourtMapData } from "@/types/court.types";
 
 interface DetailCardProps {
   court: CourtMapData;

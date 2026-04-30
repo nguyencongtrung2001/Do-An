@@ -4,6 +4,8 @@
 import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { authService } from "@/services/auth.service";
+import type { UserData } from "@/types/auth.types";
 
 type AuthTab = "login" | "signup";
 type Role = "player" | "owner";
@@ -56,24 +58,14 @@ export default function AuthClient() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: loginContact,
-          so_dien_thoai: loginContact, 
-          mat_khau: loginPassword 
-        }),
+      const data = await authService.loginUser({
+        contact: loginContact,
+        mat_khau: loginPassword,
       });
-      const data = await res.json();
       
-      if (!res.ok) {
-        throw new Error(data.message || "Đăng nhập thất bại");
-      }
+      login(data.token, data.user as UserData);
       
-      login(data.token, data.user);
-      
-      // Điều hướng dựa trên vai trò
+      // Navigate based on role
       if (data.user.vai_tro === "Chủ sân") {
         router.push("/dashboard");
       } else {
@@ -101,45 +93,29 @@ export default function AuthClient() {
     
     setLoading(true);
     try {
-      let url = "http://localhost:3000/user/register";
-      let body: BodyInit;
-      let headers: HeadersInit = {};
+      let data;
 
       if (role === "owner") {
-        url = "http://localhost:3000/owner/register";
-        const formData = new FormData();
-        formData.append("ho_ten", signupName);
-        formData.append("email", signupEmail);
-        formData.append("so_dien_thoai", signupPhone);
-        formData.append("mat_khau", signupPassword);
-        formData.append("ten_dia_diem", signupLocationName);
-        formData.append("dia_chi", signupAddress);
-        if (cccdTruoc) formData.append("anh_cccd_truoc", cccdTruoc);
-        if (cccdSau) formData.append("anh_cccd_sau", cccdSau);
-        body = formData;
-      } else {
-        url = "http://localhost:3000/user/register";
-        headers = { "Content-Type": "application/json" };
-        body = JSON.stringify({
+        data = await authService.registerOwner({
           ho_ten: signupName,
           email: signupEmail,
           so_dien_thoai: signupPhone,
-          mat_khau: signupPassword
+          mat_khau: signupPassword,
+          ten_dia_diem: signupLocationName,
+          dia_chi: signupAddress,
+          anh_cccd_truoc: cccdTruoc,
+          anh_cccd_sau: cccdSau,
+        });
+      } else {
+        data = await authService.registerUser({
+          ho_ten: signupName,
+          email: signupEmail,
+          so_dien_thoai: signupPhone,
+          mat_khau: signupPassword,
         });
       }
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers,
-        body,
-      });
-      const data = await res.json();
       
-      if (!res.ok) {
-        throw new Error(data.message || "Đăng ký thất bại");
-      }
-      
-      login(data.token, data.user);
+      login(data.token, data.user as UserData);
       if (role === "owner") {
         router.push("/dashboard");
       } else {
@@ -235,7 +211,7 @@ export default function AuthClient() {
 
       {/* ========== RIGHT PANE — Auth Form ========== */}
       <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-16 bg-white overflow-y-auto">
-        <div className="w-full max-w-[440px] auth-fade-in">
+        <div className="w-full max-w-110 auth-fade-in">
           {/* Mobile logo (only shows on small screens) */}
           <button onClick={() => router.push("/")} className="lg:hidden flex items-center gap-3 mb-8 justify-center w-full">
             <span className="material-symbols-outlined text-primary text-3xl! font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>

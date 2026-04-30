@@ -1,34 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-
-// Types
-// type BookingStatus = "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Đã hủy" | "Đã đặt cọc";
-
-interface BookingDetail {
-  ma_dat_san_chi_tiet: string;
-  ma_dat_san: string;
-  ma_san: string;
-  ngay_dat: string;
-  gio_bat_dau: string;
-  gio_ket_thuc: string;
-  tien_coc: number;
-  tien_con_lai: number;
-  trang_thai_dat: string;
-  san: {
-    ten_san: string;
-    ma_san: string;
-  };
-  datsan: {
-    tong_tien: number;
-    nguoidung: {
-      ho_ten: string;
-      so_dien_thoai: string;
-    };
-    ngay_tao: string;
-  };
-}
+import { useState } from "react";
+import { useOwnerBookings } from "@/hooks/useOwnerBookings";
+import type { BookingDetail } from "@/types/booking.types";
 
 const SPORT_COLORS: Record<string, string> = {
   "Đã xác nhận": "confirmed",
@@ -39,47 +13,13 @@ const SPORT_COLORS: Record<string, string> = {
 };
 
 export default function OwnerBookingsClient() {
-  const { token } = useAuth();
+  const { bookings, courts, loading, updateBookingStatus } = useOwnerBookings();
   const [dateStr, setDateStr] = useState<string>(() => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   });
-  const [bookings, setBookings] = useState<BookingDetail[]>([]);
-  const [courts, setCourts] = useState<{ma_san: string, ten_san: string}[]>([]);
-  const [loading, setLoading] = useState(true);
   const [checkinData, setCheckinData] = useState<BookingDetail | null>(null);
   const [showToast, setShowToast] = useState(false);
-
-  const fetchBookings = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const headers: HeadersInit = { Authorization: `Bearer ${token}` };
-      const res = await fetch("http://localhost:3000/owner/my-bookings", {
-        headers
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBookings(data.bookings);
-        // Extract unique courts for the timeline
-        const uniqueCourts = Array.from(new Set(data.bookings.map((b: BookingDetail) => JSON.stringify({ ma_san: b.san.ma_san, ten_san: b.san.ten_san }))))
-          .map((s: unknown) => JSON.parse(s as string));
-        
-        setCourts(uniqueCourts);
-      }
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    const load = async () => {
-      await fetchBookings();
-    };
-    load();
-  }, [fetchBookings]);
 
   const prevDay = () => {
     const d = new Date(dateStr);
@@ -102,27 +42,11 @@ export default function OwnerBookingsClient() {
   };
 
   const handleConfirmStatus = async (id: string, status: string) => {
-    if (!token) return;
-    try {
-      const res = await fetch(`http://localhost:3000/owner/update-booking-status/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ status })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBookings(prev => prev.map(b => b.ma_dat_san_chi_tiet === id ? { ...b, trang_thai_dat: status } : b));
-        if (status === "Đã nhận sân") {
-          handleCloseCheckin();
-          setShowToast(true);
-          setTimeout(() => setShowToast(false), 3000);
-        }
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
+    const success = await updateBookingStatus(id, status);
+    if (success && status === "Đã nhận sân") {
+      handleCloseCheckin();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
@@ -131,7 +55,6 @@ export default function OwnerBookingsClient() {
   };
 
   const getTimelineColumn = (timeStr: string) => {
-    // ISO string or HH:mm:ss
     const date = new Date(timeStr);
     const hour = date.getHours();
     const minute = date.getMinutes();
@@ -192,7 +115,7 @@ export default function OwnerBookingsClient() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
             {/* Header row */}
-            <div className="timeline-grid bg-gray-50 border-b border-gray-200 min-w-[1200px]">
+            <div className="timeline-grid bg-gray-50 border-b border-gray-200 min-w-300">
               <div className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 bg-gray-50 z-10 border-r border-gray-200 w-40">
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
@@ -209,13 +132,13 @@ export default function OwnerBookingsClient() {
 
             {/* Rows for each court */}
             {loading ? (
-                <div className="timeline-grid min-w-[1200px] p-10 flex justify-center col-span-full">
+                <div className="timeline-grid min-w-300 p-10 flex justify-center col-span-full">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
             ) : courts.length === 0 ? (
                 <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
             ) : courts.map(court => (
-                <div key={court.ma_san} className="timeline-grid hover:bg-gray-50/30 transition-colors min-w-[1200px]">
+                <div key={court.ma_san} className="timeline-grid hover:bg-gray-50/30 transition-colors min-w-300">
                     <div className="px-4 py-3 flex items-center gap-2 border-r border-gray-100 bg-gray-50/50 sticky left-0 z-10 w-40">
                         <span className="w-2 h-2 rounded-full bg-green-500"></span>
                         <span className="text-sm font-bold text-slate-700 truncate">{court.ten_san}</span>
@@ -233,7 +156,7 @@ export default function OwnerBookingsClient() {
                                 style={{ gridColumn: `${startCol} / span ${span}` }}
                             >
                                 <span>{booking.datsan.nguoidung.ho_ten}</span>
-                                <div className="tooltip-content absolute top-full left-0 mt-2 bg-slate-900 text-white p-3 rounded-xl shadow-xl z-50 min-w-[200px]">
+                                <div className="tooltip-content absolute top-full left-0 mt-2 bg-slate-900 text-white p-3 rounded-xl shadow-xl z-50 min-w-50">
                                     <p className="font-bold text-sm mb-1">{booking.datsan.nguoidung.ho_ten}</p>
                                     <p className="text-xs text-slate-300">📞 {booking.datsan.nguoidung.so_dien_thoai}</p>
                                     <p className="text-xs text-slate-300 mt-1">⏰ {new Date(booking.gio_bat_dau).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(booking.gio_ket_thuc).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
@@ -313,7 +236,7 @@ export default function OwnerBookingsClient() {
       {/* CHECK-IN MODAL */}
       {checkinData && (
         <div className="fixed inset-0 bg-black/50 z-100 flex items-center justify-center p-4 backdrop-blur-sm" onClick={handleCloseCheckin}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-[480px] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-120 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-slate-900">Xác nhận nhận sân</h3>
               <button onClick={handleCloseCheckin} className="material-symbols-outlined text-slate-400">close</button>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CourtMapData } from "./MapClient";
+import type { CourtMapData } from "@/types/court.types";
 
 interface SidebarProps {
   isOpen: boolean;

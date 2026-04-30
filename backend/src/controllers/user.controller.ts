@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type * as User from '../typescript/user.type.js';
+import type * as User from '../types/user.type.js';
 import { userService } from '../services/user.service.js';
 
 

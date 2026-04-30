@@ -1,17 +1,8 @@
-import prisma from "../config/prisma.js"
+import { courtRepository } from "../repositories/court.repository.js";
+
 export class FieldService {
   async getFields() {
-    const sans = await prisma.san.findMany({
-      include: {
-        anhsan: true,
-        diadiem: true, 
-        datsanchitiet: {
-          include: {
-            danhgia: true 
-          }
-        }
-      }
-    });
+    const sans = await courtRepository.findAllWithDetails();
 
     const result = sans.map(san => {
       let totalStars = 0;
@@ -32,7 +23,7 @@ export class FieldService {
       return {
         ma_san: san.ma_san,
         ten_san: san.ten_san,
-        so_sao: Number(avgSao.toFixed(1)), 
+        so_sao: Number(avgSao.toFixed(1)),
         loai_the_thao: san.loai_the_thao,
         ten_dia_diem: san.diadiem?.ten_dia_diem || "",
         dia_chi: san.diadiem?.dia_chi || "",

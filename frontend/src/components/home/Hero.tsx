@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[560px] flex flex-col items-center justify-center px-4 overflow-hidden">
+    <section className="relative w-full min-h-140 flex flex-col items-center justify-center px-4 overflow-hidden">
       {/* Background Image Optimization */}
       <Image
         src="/hero-stadium.png"

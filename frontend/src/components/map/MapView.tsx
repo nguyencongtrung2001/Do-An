@@ -14,7 +14,7 @@ function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   return null;
 }
 
-import { CourtMapData } from "./MapClient";
+import type { CourtMapData } from "@/types/court.types";
 
 interface MapViewProps {
   courts: CourtMapData[];

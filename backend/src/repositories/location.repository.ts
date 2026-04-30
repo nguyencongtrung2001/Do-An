@@ -1,0 +1,50 @@
+import prisma from '../config/prisma.js';
+
+export class LocationRepository {
+  async findByOwnerId(userId: string) {
+    return prisma.diadiem.findMany({
+      where: { ma_nguoi_dung: userId },
+      include: {
+        san: {
+          include: {
+            anhsan: true
+          }
+        }
+      }
+    });
+  }
+
+  async findFirstByOwnerId(userId: string) {
+    return prisma.diadiem.findFirst({
+      where: { ma_nguoi_dung: userId }
+    });
+  }
+
+  async create(data: {
+    ma_dia_diem: string;
+    ten_dia_diem: string;
+    dia_chi: string;
+    kinh_do: number;
+    vi_do: number;
+    ma_nguoi_dung: string;
+  }) {
+    return prisma.diadiem.create({ data });
+  }
+
+  async generateNextLocationId(): Promise<string> {
+    const lastLocation = await prisma.diadiem.findFirst({
+      orderBy: { ma_dia_diem: 'desc' }
+    });
+
+    let newLocationId = "DD001";
+    if (lastLocation && lastLocation.ma_dia_diem.startsWith("DD")) {
+      const lastLocNumber = parseInt(lastLocation.ma_dia_diem.replace("DD", ""), 10);
+      if (!isNaN(lastLocNumber)) {
+        newLocationId = `DD${String(lastLocNumber + 1).padStart(3, '0')}`;
+      }
+    }
+    return newLocationId;
+  }
+}
+
+export const locationRepository = new LocationRepository();

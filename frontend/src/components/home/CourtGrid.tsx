@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CourtCard from "../shared/CourtCard";
+import { useFields } from "@/hooks/useFields";
 
 const SPORT_FILTERS = [
   { id: "all", label: "Tất cả", icon: <span className="material-symbols-outlined text-[18px]!">grid_view</span> },
@@ -15,63 +16,7 @@ const SPORT_FILTERS = [
 
 export default function CourtGrid() {
   const [filter, setFilter] = useState("all");
-
-  interface CourtItem {
-    id: string | number;
-    name: string;
-    sport: string;
-    rating: number;
-    location: string;
-    address: string;
-    imageUrl: string;
-    slug: string;
-  }
-  
-  const [courts, setCourts] = useState<CourtItem[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3000/field")
-      .then(res => res.json())
-      .then(data => {
-        interface ApiCourt {
-          ma_san: string | number;
-          ten_san: string;
-          loai_the_thao: string;
-          so_sao: number;
-          ten_dia_diem: string;
-          dia_chi: string;
-          anh_dai_dien?: string;
-        }
-        
-        const mappedCourts = data.map((item: ApiCourt) => {
-          const normalizeSport = (sport: string) => {
-            const normalized = sport?.toLowerCase() || "";
-            if (normalized.includes("đá")) return "bong-da";
-            if (normalized.includes("lông")) return "cau-long";
-            if (normalized.includes("rổ")) return "bong-ro";
-            if (normalized.includes("tennis")) return "tennis";
-            if (normalized.includes("pickleball")) return "pickleball";
-            if (normalized.includes("bida")) return "bida";
-            return normalized;
-          };
-
-          return {
-            id: item.ma_san,
-            name: item.ten_san,
-            sport: normalizeSport(item.loai_the_thao),
-            rating: item.so_sao,
-            location: item.ten_dia_diem || "Chưa có tên địa điểm", 
-            address: item.dia_chi || "Chưa có địa chỉ",
-            imageUrl: item.anh_dai_dien || "/images/categories/soccer.png", 
-            slug: String(item.ma_san),
-          };
-        });
-        setCourts(mappedCourts);
-      })
-      .catch(err => {
-        console.error("Lỗi khi tải danh sách sân:", err);
-      });
-  }, []);
+  const { gridItems: courts, loading } = useFields();
 
   const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -80,6 +25,16 @@ export default function CourtGrid() {
   const filteredCourts = filter === "all" 
     ? courts 
     : courts.filter(court => court.sport === filter);
+
+  if (loading) {
+    return (
+      <section className="w-full flex flex-col gap-10">
+        <div className="flex justify-center py-10">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full flex flex-col gap-10">

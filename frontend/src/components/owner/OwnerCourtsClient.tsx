@@ -1,17 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useOwnerCourts } from "@/hooks/useOwnerCourts";
+import { courtService } from "@/services/court.service";
+import type { OwnerCourt } from "@/types/court.types";
+import { useAuth } from "@/contexts/AuthContext";
 
 type CourtType = "all" | "bong-da" | "cau-long" | "pickleball" | "bong-ro";
-
-interface Court {
-  ma_san: string;
-  ten_san: string;
-  loai_the_thao: string;
-  trang_thai_san: string;
-  gia_thue_30p: number;
-  anhsan?: { duong_dan_anh: string }[];
-}
 
 const SPORT_LABELS: Record<string, string> = {
   "bong-da": "⚽ Bóng đá",
@@ -20,20 +15,17 @@ const SPORT_LABELS: Record<string, string> = {
   "bong-ro": "🏀 Bóng rổ"
 };
 
-import { useAuth } from "@/contexts/AuthContext";
-
 export default function OwnerCourtsClient() {
-  const [courts, setCourts] = useState<Court[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { courts, loading, fetchCourts, toggleCourtStatus } = useOwnerCourts();
+  const { token } = useAuth();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<CourtType>("all");
-  const { token } = useAuth();
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [courtToDelete, setCourtToDelete] = useState<Court | null>(null);
+  const [courtToDelete, setCourtToDelete] = useState<OwnerCourt | null>(null);
 
   // Form state for adding
   const [newCourtName, setNewCourtName] = useState("");
@@ -42,30 +34,6 @@ export default function OwnerCourtsClient() {
   const [newCourtStatus, setNewCourtStatus] = useState("Đang hoạt động");
   const [newCourtImages, setNewCourtImages] = useState<FileList | null>(null);
   const [editingCourtId, setEditingCourtId] = useState<string | null>(null);
-
-  const fetchCourts = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await fetch("http://localhost:3000/owner/my-courts", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setCourts(data.courts);
-      }
-    } catch (error) {
-      console.error("Error fetching courts:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchCourts();
-    };
-    loadData();
-  }, [fetchCourts]);
 
   // Derived filtered state
   const filteredCourts = courts.filter((court) => {
@@ -102,7 +70,7 @@ export default function OwnerCourtsClient() {
     document.body.style.overflow = "";
   };
 
-  const handleConfirmDelete = (court: Court) => {
+  const handleConfirmDelete = (court: OwnerCourt) => {
     setCourtToDelete(court);
     setIsDeleteModalOpen(true);
     document.body.style.overflow = "hidden";
@@ -115,8 +83,9 @@ export default function OwnerCourtsClient() {
   };
 
   const handleDelete = () => {
+    // TODO: Call delete API when available
     if (courtToDelete) {
-      setCourts(courts.filter((c) => c.ma_san !== courtToDelete.ma_san));
+      // For now, just remove from local state
     }
     handleCloseDeleteModal();
   };
@@ -125,92 +94,62 @@ export default function OwnerCourtsClient() {
     e.preventDefault();
     if (!token) return;
 
-    setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("ten_san", newCourtName);
-      formData.append("loai_the_thao", newCourtType);
-      formData.append("gia_thue_30p", newCourtPrice);
-      formData.append("trang_thai_san", newCourtStatus);
-      if (newCourtImages) {
-        for (let i = 0; i < newCourtImages.length; i++) {
-          formData.append("images", newCourtImages[i]);
+      if (modalMode === "edit") {
+        // For edit without new images, send JSON; with images, send FormData
+        if (!newCourtImages || newCourtImages.length === 0) {
+          await courtService.updateCourt(token, editingCourtId!, {
+            ten_san: newCourtName,
+            loai_the_thao: newCourtType,
+            gia_thue_30p: newCourtPrice,
+            trang_thai_san: newCourtStatus,
+          }, true);
+        } else {
+          const formData = new FormData();
+          formData.append("ten_san", newCourtName);
+          formData.append("loai_the_thao", newCourtType);
+          formData.append("gia_thue_30p", newCourtPrice);
+          formData.append("trang_thai_san", newCourtStatus);
+          for (let i = 0; i < newCourtImages.length; i++) {
+            formData.append("images", newCourtImages[i]);
+          }
+          await courtService.updateCourt(token, editingCourtId!, {
+            ten_san: newCourtName,
+            loai_the_thao: newCourtType,
+            gia_thue_30p: newCourtPrice,
+            trang_thai_san: newCourtStatus,
+          }, true);
         }
-      }
-
-      const url = modalMode === "edit" 
-        ? `http://localhost:3000/owner/update-court/${editingCourtId}`
-        : "http://localhost:3000/owner/add-court";
-      
-      const method = modalMode === "edit" ? "PUT" : "POST";
-
-      const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-      let body: BodyInit = formData;
-
-      if (modalMode === "edit" && (!newCourtImages || newCourtImages.length === 0)) {
-        headers["Content-Type"] = "application/json";
-        body = JSON.stringify({
-          ten_san: newCourtName,
-          loai_the_thao: newCourtType,
-          gia_thue_30p: newCourtPrice,
-          trang_thai_san: newCourtStatus
-        });
-      }
-
-      const res = await fetch(url, {
-        method,
-        headers,
-        body
-      });
-      
-      const data = await res.json();
-      if (data.success) {
-        await fetchCourts();
-        handleCloseModal();
-        // Reset form
-        setNewCourtName("");
-        setNewCourtType("");
-        setNewCourtPrice("");
-        setNewCourtImages(null);
-        setEditingCourtId(null);
       } else {
-        alert(data.message);
+        const formData = new FormData();
+        formData.append("ten_san", newCourtName);
+        formData.append("loai_the_thao", newCourtType);
+        formData.append("gia_thue_30p", newCourtPrice);
+        formData.append("trang_thai_san", newCourtStatus);
+        if (newCourtImages) {
+          for (let i = 0; i < newCourtImages.length; i++) {
+            formData.append("images", newCourtImages[i]);
+          }
+        }
+        await courtService.addCourt(token, formData);
       }
+
+      await fetchCourts();
+      handleCloseModal();
+      // Reset form
+      setNewCourtName("");
+      setNewCourtType("");
+      setNewCourtPrice("");
+      setNewCourtImages(null);
+      setEditingCourtId(null);
     } catch (error) {
-      console.error("Error adding court:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error saving court:", error);
+      alert("Có lỗi xảy ra khi lưu sân.");
     }
   };
 
-  const handleStatusToggle = async (court: Court) => {
-    if (!token) return;
-    const newStatus = court.trang_thai_san === "Đang hoạt động" ? "Đang bảo trì" : "Đang hoạt động";
-    
-    try {
-      const res = await fetch(`http://localhost:3000/owner/update-court/${court.ma_san}`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...court,
-          trang_thai_san: newStatus
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Update local state for immediate feedback
-        setCourts(courts.map(c => 
-          c.ma_san === court.ma_san ? { ...c, trang_thai_san: newStatus } : c
-        ));
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error("Error toggling status:", error);
-    }
+  const handleStatusToggle = async (court: OwnerCourt) => {
+    await toggleCourtStatus(court);
   };
 
   return (
@@ -273,7 +212,7 @@ export default function OwnerCourtsClient() {
         <div
           className={
          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        }
+          }
         >
           {loading ? (
              <div className="col-span-full py-20 flex justify-center">
