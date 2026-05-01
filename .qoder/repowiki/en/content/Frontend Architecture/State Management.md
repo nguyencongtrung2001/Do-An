@@ -16,7 +16,17 @@
 - [auth.types.ts](file://frontend/src/types/auth.types.ts)
 - [court.types.ts](file://frontend/src/types/court.types.ts)
 - [booking.types.ts](file://frontend/src/types/booking.types.ts)
+- [api.types.ts](file://frontend/src/types/api.types.ts)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for new custom hooks: useFields, useOwnerBookings, and useOwnerCourts
+- Enhanced service layer documentation covering auth.service.ts, booking.service.ts, and court.service.ts
+- Updated type system documentation with new types directory structure
+- Expanded architecture diagrams to reflect the complete state management flow
+- Added detailed analysis of authentication state management and session handling
+- Included comprehensive coverage of role-based state management patterns
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -92,8 +102,8 @@ HOC --> CourtSvc --> API
 - AuthClient: Manages local UI state for login/signup tabs, role selection, and form inputs. Uses AuthContext to persist session and redirects based on role.
 - Custom hooks:
   - useFields: Fetches and normalizes public field lists for grid and map views.
-  - useOwnerBookings: Loads owner’s bookings, extracts unique courts, and updates booking statuses.
-  - useOwnerCourts: Loads owner’s courts, toggles status, adds, and updates courts.
+  - useOwnerBookings: Loads owner's bookings, extracts unique courts, and updates booking statuses.
+  - useOwnerCourts: Loads owner's courts, toggles status, adds, and updates courts.
 
 Key patterns:
 - Global state via Context for authentication.
@@ -390,5 +400,6 @@ The application employs a clean separation of global and local state. AuthContex
   - Authentication: [auth.types.ts:1-40](file://frontend/src/types/auth.types.ts#L1-L40)
   - Courts: [court.types.ts:1-82](file://frontend/src/types/court.types.ts#L1-L82)
   - Bookings: [booking.types.ts:1-37](file://frontend/src/types/booking.types.ts#L1-L37)
+  - API Base Types: [api.types.ts:1-6](file://frontend/src/types/api.types.ts#L1-L6)
 - Utilities:
   - Sport normalization: [sport.utils.ts:5-14](file://frontend/src/utils/sport.utils.ts#L5-L14)

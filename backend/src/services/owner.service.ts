@@ -7,6 +7,7 @@ import { locationRepository } from '../repositories/location.repository.js';
 import { courtRepository } from '../repositories/court.repository.js';
 import { bookingRepository } from '../repositories/booking.repository.js';
 import prisma from '../config/prisma.js';
+import cloudinary from '../config/cloudinary.config.js';
 
 export class OwnerService {
   async registerOwner(data: CreateOwner) {
@@ -96,9 +97,17 @@ export class OwnerService {
       });
 
       if (images && images.length > 0) {
+        // Generate sequential IDs (IMG001, IMG002, ...)
+        const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
+        let nextNum = 1;
+        if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
+          const parsed = parseInt(lastImg.ma_anh_san.replace("IMG", ""), 10);
+          if (!isNaN(parsed)) nextNum = parsed + 1;
+        }
+
         await tx.anhsan.createMany({
-          data: images.map(img => ({
-            ma_anh_san: `IMG_${Math.random().toString(36).substr(2, 9)}`,
+          data: images.map((img, idx) => ({
+            ma_anh_san: `IMG${String(nextNum + idx).padStart(3, '0')}`,
             ma_san: newSanId,
             duong_dan_anh: img.url,
             ma_cloudinary: img.public_id || "manual_upload"
@@ -110,7 +119,7 @@ export class OwnerService {
     });
   }
 
-  async updateCourt(userId: string, maSan: string, data: any) {
+  async updateCourt(userId: string, maSan: string, data: any, images?: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
     // Check if court belongs to this owner
@@ -120,12 +129,59 @@ export class OwnerService {
       throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền chỉnh sửa.");
     }
 
-    return courtRepository.update(maSan, {
-      ten_san,
-      loai_the_thao,
-      gia_thue_30p: parseFloat(gia_thue_30p),
-      trang_thai_san
+    // If new images uploaded, fetch old ones so we can delete them from Cloudinary
+    let oldImages: { ma_cloudinary: string }[] = [];
+    if (images && images.length > 0) {
+      oldImages = await courtRepository.findImagesByCourtId(maSan);
+    }
+
+    // Update court fields + replace images in a single transaction
+    const updatedCourt = await prisma.$transaction(async (tx) => {
+      const updated = await tx.san.update({
+        where: { ma_san: maSan },
+        data: {
+          ten_san,
+          loai_the_thao,
+          gia_thue_30p: gia_thue_30p !== undefined ? parseFloat(gia_thue_30p) : undefined,
+          trang_thai_san
+        }
+      });
+
+      if (images && images.length > 0) {
+        // Remove old image rows
+        await tx.anhsan.deleteMany({ where: { ma_san: maSan } });
+
+        // Generate next sequential IDs
+        const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
+        let nextNum = 1;
+        if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
+          const parsed = parseInt(lastImg.ma_anh_san.replace("IMG", ""), 10);
+          if (!isNaN(parsed)) nextNum = parsed + 1;
+        }
+
+        await tx.anhsan.createMany({
+          data: images.map((img, idx) => ({
+            ma_anh_san: `IMG${String(nextNum + idx).padStart(3, '0')}`,
+            ma_san: maSan,
+            duong_dan_anh: img.url,
+            ma_cloudinary: img.public_id || "manual_upload"
+          }))
+        });
+      }
+
+      return updated;
     });
+
+    // Delete old images from Cloudinary (best-effort, outside transaction)
+    if (oldImages.length > 0) {
+      await Promise.all(
+        oldImages
+          .filter(img => img.ma_cloudinary && img.ma_cloudinary !== "manual_upload")
+          .map(img => cloudinary.uploader.destroy(img.ma_cloudinary).catch(() => null))
+      );
+    }
+
+    return updatedCourt;
   }
 
   async getMyBookings(userId: string) {

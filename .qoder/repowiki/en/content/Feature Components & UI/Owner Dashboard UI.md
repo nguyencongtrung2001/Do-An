@@ -21,22 +21,33 @@
 - [status/page.tsx](file://frontend/src/app/(owner)/status/page.tsx)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced hook-based data fetching architecture with centralized service layer integration
+- Improved form handling with better FormData support and conditional JSON/multipart payloads
+- Updated component state management with useCallback optimization and better error handling
+- Strengthened authentication context integration with token-based service calls
+- Enhanced toast notification system with improved user feedback
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
+6. [Enhanced Hook-Based Data Fetching](#enhanced-hook-based-data-fetching)
+7. [Improved Form Handling](#improved-form-handling)
+8. [Centralized Service Layer Integration](#centralized-service-layer-integration)
+9. [Dependency Analysis](#dependency-analysis)
+10. [Performance Considerations](#performance-considerations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
 
 ## Introduction
-This document provides comprehensive documentation for the owner dashboard user interface components. It covers the main dashboard, booking management, facility administration, and facility status control. It also explains the sidebar navigation, topbar components, and owner-specific data visualization. The guide details booking status management, facility CRUD operations, revenue tracking, analytics display, component state management, form handling for facility updates, and real-time booking notifications. Examples of owner workflow implementations and administrative task automation are included to help developers and administrators implement and maintain the system effectively.
+This document provides comprehensive documentation for the owner dashboard user interface components. It covers the main dashboard, booking management, facility administration, and facility status control. The system has been enhanced with new hook-based data fetching, improved form handling, and better integration with the centralized service layer. The guide details booking status management, facility CRUD operations, revenue tracking, analytics display, component state management, form handling for facility updates, and real-time booking notifications. Examples of owner workflow implementations and administrative task automation are included to help developers and administrators implement and maintain the system effectively.
 
 ## Project Structure
-The owner dashboard is organized as a Next.js application with route-based pages and shared UI components. The owner-facing routes are grouped under the (owner) app directory, each page rendering a dedicated client component. Shared UI components reside under the owner folder, while reusable hooks and services encapsulate data fetching and state logic.
+The owner dashboard is organized as a Next.js application with route-based pages and shared UI components. The owner-facing routes are grouped under the (owner) app directory, each page rendering a dedicated client component. Shared UI components reside under the owner folder, while reusable hooks and services encapsulate data fetching and state logic with enhanced authentication and error handling.
 
 ```mermaid
 graph TB
@@ -54,11 +65,14 @@ OBC["OwnerBookingsClient.tsx"]
 OCC["OwnerCourtsClient.tsx"]
 OSC["OwnerStatusClient.tsx"]
 end
-subgraph "Hooks & Services"
+subgraph "Enhanced Hooks & Services"
 UOB["useOwnerBookings.ts"]
 UOC["useOwnerCourts.ts"]
 BS["booking.service.ts"]
 CS["court.service.ts"]
+end
+subgraph "Authentication Context"
+AC["AuthContext.tsx"]
 end
 L["layout.tsx"]
 L --> SB
@@ -75,6 +89,8 @@ OCC --> UOC
 OSC --> UOC
 UOB --> BS
 UOC --> CS
+BS --> AC
+CS --> AC
 ```
 
 **Diagram sources**
@@ -99,19 +115,23 @@ UOC --> CS
 - [OwnerSidebar.tsx:1-90](file://frontend/src/components/owner/OwnerSidebar.tsx#L1-L90)
 
 ## Core Components
-This section introduces the primary owner dashboard components and their responsibilities:
-- OwnerDashboardClient: Renders owner overview statistics, recent bookings, and performance metrics.
-- OwnerBookingsClient: Manages booking timelines, status updates, and check-in flows.
-- OwnerCourtsClient: Handles facility CRUD operations, filtering, and bulk status toggles.
-- OwnerStatusClient: Provides a quick overview and toggle for facility operational statuses.
-- OwnerSidebar: Implements owner navigation and branding.
-- OwnerTopbar: Displays contextual date and notification indicators.
+This section introduces the primary owner dashboard components and their responsibilities with enhanced hook-based architecture:
+
+- **OwnerDashboardClient**: Renders owner overview statistics, recent bookings, and performance metrics with improved hydration handling.
+- **OwnerBookingsClient**: Manages booking timelines, status updates, and check-in flows using optimized useCallback hooks.
+- **OwnerCourtsClient**: Handles facility CRUD operations with enhanced form validation and conditional payload handling.
+- **OwnerStatusClient**: Provides a quick overview and toggle for facility operational statuses with improved toast notifications.
+- **OwnerSidebar**: Implements owner navigation and branding with active route highlighting.
+- **OwnerTopbar**: Displays contextual date and notification indicators with enhanced user experience.
+
+**Updated** Enhanced with useCallback optimization, improved error handling, and better integration with authentication context.
 
 Key capabilities:
-- Real-time booking notifications and status transitions.
-- Facility CRUD with image uploads and optional JSON or multipart payloads.
-- Revenue tracking and analytics visualization.
-- Responsive layout with Tailwind-based styling and interactive modals.
+- Real-time booking notifications and status transitions with optimized state updates.
+- Facility CRUD with intelligent FormData detection and optional JSON payloads.
+- Revenue tracking and analytics visualization with improved data structures.
+- Responsive layout with Tailwind-based styling and enhanced interactive modals.
+- Centralized service layer integration with proper authentication context management.
 
 **Section sources**
 - [OwnerDashboardClient.tsx:30-176](file://frontend/src/components/owner/OwnerDashboardClient.tsx#L30-L176)
@@ -122,31 +142,30 @@ Key capabilities:
 - [OwnerTopbar.tsx:5-37](file://frontend/src/components/owner/OwnerTopbar.tsx#L5-L37)
 
 ## Architecture Overview
-The owner dashboard follows a layered architecture:
-- Page routes render dedicated client components.
-- Client components use custom hooks to manage state and call service functions.
-- Services encapsulate API interactions via a shared HTTP utility.
-- Types define the shape of API responses and domain entities.
+The owner dashboard follows an enhanced layered architecture with improved hook-based data fetching and centralized service integration:
 
 ```mermaid
 sequenceDiagram
 participant Page as "Owner Page"
 participant Comp as "Owner Component"
-participant Hook as "Custom Hook"
-participant Service as "Service"
+participant Hook as "Enhanced Custom Hook"
+participant Service as "Centralized Service"
 participant API as "HTTP API"
+participant Auth as "Auth Context"
 Page->>Comp : Render component
-Comp->>Hook : Initialize and subscribe to state
-Hook->>Service : Fetch data (GET)
-Service->>API : apiGet(...)
+Comp->>Hook : Initialize with useCallback
+Hook->>Auth : Get token
+Auth-->>Hook : Token
+Hook->>Service : Fetch data with token
+Service->>API : apiGet/apiPost/apiPatch...
 API-->>Service : Response payload
-Service-->>Hook : Parsed data
-Hook-->>Comp : Updated state
-Comp->>Service : Update operation (PATCH/PUT/POST)
-Service->>API : apiPatch/apiPut/apiPost(...)
+Service-->>Hook : Parsed data with error handling
+Hook-->>Comp : Optimized state update
+Comp->>Service : Update operation with validation
+Service->>API : apiPatch/apiPut/apiPost...
 API-->>Service : Update result
-Service-->>Hook : Success/failure
-Hook-->>Comp : Re-render with updated state
+Service-->>Hook : Success/failure with toast
+Hook-->>Comp : Re-render with improved state
 ```
 
 **Diagram sources**
@@ -169,7 +188,9 @@ Responsibilities:
 - Renders owner overview cards (wallet balance, total bookings, monthly revenue, active courts).
 - Displays a recent bookings table with status badges.
 - Shows a performance leaderboard for high-performing facilities.
-- Provides a “Create new court” action.
+- Provides a "Create new court" action with improved hydration handling.
+
+**Updated** Enhanced with better hydration guards and improved component structure.
 
 State and rendering:
 - Uses client-side hydration guard to avoid SSR mismatches.
@@ -204,9 +225,12 @@ Responsibilities:
 - Shows a summary panel of booking counts per status.
 - Provides a modal for check-in confirmation with payment breakdown.
 
+**Updated** Enhanced with useCallback optimization, improved toast notifications, and better error handling.
+
 State management:
 - Tracks selected date, check-in modal data, and toast notifications.
 - Uses hook-provided data and mutation functions for bookings and courts.
+- Implements useCallback for performance optimization.
 
 Booking status management:
 - Transitions pending to confirmed or cancelled.
@@ -224,14 +248,14 @@ Comp->>Hook : Read bookings/courts/loading
 Hook->>Service : getOwnerBookings(token)
 Service->>API : GET /owner/my-bookings
 API-->>Service : { success, bookings }
-Service-->>Hook : Data
-Hook-->>Comp : Render timeline and recent list
+Service-->>Hook : Data with error handling
+Hook-->>Comp : Optimized render with useCallback
 Owner->>Comp : Click "Confirm" or "Cancel"
 Comp->>Hook : updateBookingStatus(id, status)
 Hook->>Service : updateBookingStatus(token, id, status)
 Service->>API : PATCH /owner/update-booking-status/{id}
 API-->>Service : { success }
-Service-->>Hook : Result
+Service-->>Hook : Result with toast
 Hook-->>Comp : Update local state and re-render
 Owner->>Comp : Click "Receive Court"
 Comp->>Comp : Open Check-in Modal
@@ -251,28 +275,36 @@ Comp->>Hook : updateBookingStatus(id, "Đã nhận sân")
 
 ### OwnerCourtsClient
 Responsibilities:
-- Lists owner’s courts with filtering by sport type and search term.
-- Supports add/edit forms with image upload handling.
+- Lists owner's courts with filtering by sport type and search term.
+- Supports add/edit forms with intelligent image upload handling.
 - Enables status toggling per court and deletion confirmation.
 - Integrates with owner-specific court APIs.
 
+**Updated** Enhanced with improved form validation, conditional payload handling, and better error management.
+
 Form handling:
 - Adds new courts via multipart/form-data.
-- Updates existing courts with optional image replacement.
+- Updates existing courts with automatic JSON or FormData detection.
 - Resets form state after successful save.
+- Implements intelligent payload selection based on image presence.
 
 ```mermaid
 flowchart TD
-Start(["Open Courts Page"]) --> Load["Fetch Courts via useOwnerCourts"]
+Start(["Open Courts Page"]) --> Load["Fetch Courts via useOwnerCourts<br/>with useCallback optimization"]
 Load --> List["Render Court Cards<br/>Filter + Search"]
 List --> Action{"Action Selected"}
 Action --> |Add/Edit| OpenModal["Open Add/Edit Modal"]
-OpenModal --> Submit["Submit Form"]
+OpenModal --> Submit["Submit Form with Validation"]
 Submit --> Mode{"Edit or Add?"}
-Mode --> |Add| Post["POST /owner/add-court (FormData)"]
-Mode --> |Edit| Put["PUT /owner/update-court/{id}<br/>JSON or FormData"]
+Mode --> |Add| Detect["Detect FormData Presence"]
+Detect --> Post["POST /owner/add-court (Auto FormData)"]
+Mode --> |Edit| DetectEdit["Detect Edit Payload Type"]
+DetectEdit --> CheckImages{"Images Present?"}
+CheckImages --> |Yes| PostEdit["PUT /owner/update-court/{id}<br/>Auto FormData"]
+CheckImages --> |No| PutEdit["PUT /owner/update-court/{id}<br/>JSON Payload"]
 Post --> Refresh["Refresh Courts List"]
-Put --> Refresh
+PostEdit --> Refresh
+PutEdit --> Refresh
 Action --> |Toggle Status| Toggle["Toggle Status via Service"]
 Toggle --> Refresh
 Action --> |Delete| Confirm["Open Delete Confirmation"]
@@ -298,6 +330,8 @@ Responsibilities:
 - Prevents updates if a court is locked.
 - Uses toast feedback for success/error states.
 
+**Updated** Enhanced with improved toast notifications, better error handling, and optimized state management.
+
 ```mermaid
 sequenceDiagram
 participant Owner as "Owner"
@@ -310,7 +344,7 @@ Comp->>Comp : Validate not locked
 Comp->>Service : updateCourtStatus(token, id, newStatus)
 Service->>API : PATCH /owner/update-court-status/{id}
 API-->>Service : { success }
-Service-->>Comp : Result
+Service-->>Comp : Result with toast
 Comp->>Hook : fetchCourts()
 Hook-->>Comp : Re-render with updated status
 ```
@@ -368,8 +402,75 @@ Topbar --> Notify["Notification Bell with Badge"]
 **Section sources**
 - [OwnerTopbar.tsx:5-37](file://frontend/src/components/owner/OwnerTopbar.tsx#L5-L37)
 
+## Enhanced Hook-Based Data Fetching
+The system now utilizes enhanced hooks with useCallback optimization and improved error handling:
+
+**useOwnerBookings Hook Features:**
+- Token-based authentication with AuthContext integration
+- useCallback-optimized fetch functions to prevent unnecessary re-renders
+- Automatic unique court extraction for timeline rendering
+- Optimized state updates with proper error boundaries
+- Toast notification integration for user feedback
+
+**useOwnerCourts Hook Features:**
+- Intelligent payload detection for add/edit operations
+- Conditional JSON/Form submission based on image presence
+- Optimized state management with useCallback
+- Centralized error handling and loading states
+- Enhanced authentication context integration
+
+**Updated** Both hooks now implement useCallback for performance optimization and improved error handling patterns.
+
+**Section sources**
+- [useOwnerBookings.ts:8-66](file://frontend/src/hooks/useOwnerBookings.ts#L8-L66)
+- [useOwnerCourts.ts:8-94](file://frontend/src/hooks/useOwnerCourts.ts#L8-L94)
+
+## Improved Form Handling
+The form handling system has been significantly enhanced:
+
+**Intelligent Payload Detection:**
+- Automatic FormData vs JSON detection based on image presence
+- Conditional API calls for different payload types
+- Better error handling and validation
+
+**Enhanced User Experience:**
+- Improved modal animations and transitions
+- Better form validation and error messaging
+- Enhanced loading states and user feedback
+- Optimized image upload handling with drag-and-drop support
+
+**Updated** Forms now intelligently detect payload types and provide better user feedback throughout the process.
+
+**Section sources**
+- [OwnerCourtsClient.tsx:93-149](file://frontend/src/components/owner/OwnerCourtsClient.tsx#L93-L149)
+- [OwnerBookingsClient.tsx:44-51](file://frontend/src/components/owner/OwnerBookingsClient.tsx#L44-L51)
+
+## Centralized Service Layer Integration
+The service layer provides a unified interface for API communication:
+
+**Booking Service Enhancements:**
+- Token-based authentication for all operations
+- Proper error handling and response validation
+- Optimized API endpoint calls with structured responses
+
+**Court Service Improvements:**
+- Support for both JSON and FormData submissions
+- Intelligent payload routing based on operation type
+- Enhanced error handling and user feedback
+
+**Authentication Integration:**
+- Seamless token management through AuthContext
+- Automatic token inclusion in all service calls
+- Improved error handling for authentication failures
+
+**Updated** Services now provide better error handling, token management, and response validation.
+
+**Section sources**
+- [booking.service.ts:4-12](file://frontend/src/services/booking.service.ts#L4-L12)
+- [court.service.ts:4-25](file://frontend/src/services/court.service.ts#L4-L25)
+
 ## Dependency Analysis
-The components rely on shared hooks and services to manage state and API interactions. The hooks encapsulate data fetching and mutations, while services abstract HTTP requests. Types define the contract for API responses.
+The components rely on enhanced shared hooks and services with improved state management and API interactions. The hooks now utilize useCallback for performance optimization, while services provide better error handling and authentication integration.
 
 ```mermaid
 graph LR
@@ -380,6 +481,10 @@ UOB --> BS["booking.service.ts"]
 UOC --> CS["court.service.ts"]
 BS --> BT["booking.types.ts"]
 CS --> CT["court.types.ts"]
+UOB --> AC["AuthContext.tsx"]
+UOC --> AC
+BS --> AC
+CS --> AC
 ```
 
 **Diagram sources**
@@ -402,19 +507,33 @@ CS --> CT["court.types.ts"]
 - [court.types.ts:1-82](file://frontend/src/types/court.types.ts#L1-L82)
 
 ## Performance Considerations
-- Minimize re-renders by leveraging memoized callbacks in hooks and avoiding unnecessary state updates.
-- Defer heavy computations (e.g., timeline column calculations) to pure functions and cache results where appropriate.
-- Use skeleton loaders during initial fetches to improve perceived performance.
-- Optimize image assets for court listings and ensure lazy loading where applicable.
-- Debounce search inputs to reduce frequent re-fetches.
+- **Enhanced Optimization**: Leverage useCallback in hooks to minimize re-renders and optimize expensive computations.
+- **Deferred Loading**: Use skeleton loaders during initial fetches with improved loading state management.
+- **Smart Caching**: Implement intelligent caching strategies for frequently accessed data like court lists and booking timelines.
+- **Optimized Images**: Ensure lazy loading and proper image optimization for court listings.
+- **Debounced Inputs**: Use debounced search inputs to reduce frequent re-fetches with improved performance.
+- **Token Management**: Efficient token handling through AuthContext to avoid unnecessary authentication checks.
+
+**Updated** Performance improvements include useCallback optimization, better loading states, and enhanced token management.
 
 ## Troubleshooting Guide
-Common issues and resolutions:
-- Hydration mismatch on dashboard: Ensure client-side guards are in place when rendering date-dependent content.
-- Toast notifications not appearing: Verify toast provider is initialized globally and network requests succeed.
-- Timeline not rendering: Confirm that fetched bookings include valid start/end timestamps and that the selected date matches booking dates.
-- Form submission errors: Validate required fields and ensure FormData is constructed correctly for multipart uploads.
-- Status toggle failures: Check that the selected court is not locked and that the token is present.
+Common issues and resolutions with enhanced error handling:
+
+**Hydration Issues**: Ensure client-side guards are in place when rendering date-dependent content with improved hydration checking.
+
+**Toast Notifications**: Verify toast provider is initialized globally and network requests succeed with enhanced error handling.
+
+**Timeline Rendering**: Confirm that fetched bookings include valid start/end timestamps and that the selected date matches booking dates with improved validation.
+
+**Form Submission Errors**: Validate required fields and ensure FormData is constructed correctly for multipart uploads with intelligent payload detection.
+
+**Status Toggle Failures**: Check that the selected court is not locked and that the token is present with enhanced authentication context integration.
+
+**Hook Performance Issues**: Verify useCallback implementation and proper dependency arrays to prevent unnecessary re-renders.
+
+**Service Integration Problems**: Ensure AuthContext provides valid tokens and services handle authentication errors gracefully.
+
+**Updated** Enhanced error handling and debugging capabilities for better troubleshooting experience.
 
 **Section sources**
 - [OwnerDashboardClient.tsx:34-49](file://frontend/src/components/owner/OwnerDashboardClient.tsx#L34-L49)
@@ -423,4 +542,4 @@ Common issues and resolutions:
 - [OwnerStatusClient.tsx:16-39](file://frontend/src/components/owner/OwnerStatusClient.tsx#L16-L39)
 
 ## Conclusion
-The owner dashboard UI provides a comprehensive set of tools for managing bookings, facilities, and operational statuses. By leveraging custom hooks, typed services, and modular components, the system supports efficient workflows, real-time updates, and a scalable foundation for future enhancements. The documented patterns enable consistent development practices and reliable maintenance across the owner-facing features.
+The owner dashboard UI provides a comprehensive and enhanced set of tools for managing bookings, facilities, and operational statuses. Through the implementation of hook-based data fetching, improved form handling, and better integration with the centralized service layer, the system now offers superior performance, reliability, and user experience. The enhanced authentication context integration ensures secure operations, while the improved error handling and toast notifications provide better user feedback. The documented patterns enable consistent development practices and reliable maintenance across the owner-facing features, supporting efficient workflows, real-time updates, and a scalable foundation for future enhancements.

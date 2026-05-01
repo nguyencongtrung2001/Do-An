@@ -22,6 +22,18 @@ export class CourtRepository {
     });
   }
 
+  async findImagesByCourtId(courtId: string) {
+    return prisma.anhsan.findMany({
+      where: { ma_san: courtId }
+    });
+  }
+
+  async deleteImagesByCourtId(courtId: string) {
+    return prisma.anhsan.deleteMany({
+      where: { ma_san: courtId }
+    });
+  }
+
   async create(data: {
     ma_san: string;
     ma_dia_diem: string;
@@ -76,6 +88,21 @@ export class CourtRepository {
       }
     }
     return newSanId;
+  }
+
+  async generateNextImageId(): Promise<string> {
+    const lastImg = await prisma.anhsan.findFirst({
+      orderBy: { ma_anh_san: 'desc' }
+    });
+
+    let newImgId = "IMG001";
+    if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
+      const lastNumber = parseInt(lastImg.ma_anh_san.replace("IMG", ""), 10);
+      if (!isNaN(lastNumber)) {
+        newImgId = `IMG${String(lastNumber + 1).padStart(3, '0')}`;
+      }
+    }
+    return newImgId;
   }
 }
 

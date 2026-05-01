@@ -74,7 +74,13 @@ export const updateCourt = async (req: AuthRequest, res: Response, next: NextFun
       throw new ApiError(400, "Thiếu mã sân");
     }
 
-    const court = await ownerService.updateCourt(userId, ma_san, data);
+    // Extract uploaded images (if any). Undefined if no files uploaded.
+    const files = req.files as Express.Multer.File[] | undefined;
+    const images = files && files.length > 0
+      ? files.map(f => ({ url: (f as any).path, public_id: (f as any).filename }))
+      : undefined;
+
+    const court = await ownerService.updateCourt(userId, ma_san, data, images);
     res.json({ success: true, message: "Cập nhật sân thành công", court });
   } catch (error) {
     next(error);

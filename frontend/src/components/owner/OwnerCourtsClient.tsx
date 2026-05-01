@@ -9,10 +9,10 @@ import { useAuth } from "@/contexts/AuthContext";
 type CourtType = "all" | "bong-da" | "cau-long" | "pickleball" | "bong-ro";
 
 const SPORT_LABELS: Record<string, string> = {
-  "bong-da": "⚽ Bóng đá",
-  "cau-long": "🏸 Cầu lông",
-  "pickleball": "🏓 Pickleball",
-  "bong-ro": "🏀 Bóng rổ"
+  "bong-da": " Bóng đá",
+  "cau-long": "Cầu lông",
+  "pickleball": "Pickleball",
+  "bong-ro": " Bóng rổ"
 };
 
 export default function OwnerCourtsClient() {
@@ -31,7 +31,6 @@ export default function OwnerCourtsClient() {
   const [newCourtName, setNewCourtName] = useState("");
   const [newCourtType, setNewCourtType] = useState("");
   const [newCourtPrice, setNewCourtPrice] = useState("");
-  const [newCourtStatus, setNewCourtStatus] = useState("Đang hoạt động");
   const [newCourtImages, setNewCourtImages] = useState<FileList | null>(null);
   const [editingCourtId, setEditingCourtId] = useState<string | null>(null);
 
@@ -50,14 +49,12 @@ export default function OwnerCourtsClient() {
         setNewCourtName(court.ten_san);
         setNewCourtType(court.loai_the_thao);
         setNewCourtPrice(court.gia_thue_30p.toString());
-        setNewCourtStatus(court.trang_thai_san);
         setEditingCourtId(id);
       }
     } else {
       setNewCourtName("");
       setNewCourtType("");
       setNewCourtPrice("");
-      setNewCourtStatus("Đang hoạt động");
       setNewCourtImages(null);
       setEditingCourtId(null);
     }
@@ -96,36 +93,24 @@ export default function OwnerCourtsClient() {
 
     try {
       if (modalMode === "edit") {
-        // For edit without new images, send JSON; with images, send FormData
-        if (!newCourtImages || newCourtImages.length === 0) {
-          await courtService.updateCourt(token, editingCourtId!, {
-            ten_san: newCourtName,
-            loai_the_thao: newCourtType,
-            gia_thue_30p: newCourtPrice,
-            trang_thai_san: newCourtStatus,
-          }, true);
-        } else {
-          const formData = new FormData();
-          formData.append("ten_san", newCourtName);
-          formData.append("loai_the_thao", newCourtType);
-          formData.append("gia_thue_30p", newCourtPrice);
-          formData.append("trang_thai_san", newCourtStatus);
-          for (let i = 0; i < newCourtImages.length; i++) {
-            formData.append("images", newCourtImages[i]);
-          }
-          await courtService.updateCourt(token, editingCourtId!, {
-            ten_san: newCourtName,
-            loai_the_thao: newCourtType,
-            gia_thue_30p: newCourtPrice,
-            trang_thai_san: newCourtStatus,
-          }, true);
+        // Guard: must have a valid court id when editing
+        if (!editingCourtId) {
+          alert("Không xác định được sân cần chỉnh sửa.");
+          return;
         }
+        // Backend PUT /owner/update-court/:ma_san accepts JSON only
+        // (no upload middleware), so always send JSON on edit.
+        await courtService.updateCourt(token, editingCourtId, {
+          ten_san: newCourtName,
+          loai_the_thao: newCourtType,
+          gia_thue_30p: newCourtPrice,
+        }, true);
       } else {
         const formData = new FormData();
         formData.append("ten_san", newCourtName);
         formData.append("loai_the_thao", newCourtType);
         formData.append("gia_thue_30p", newCourtPrice);
-        formData.append("trang_thai_san", newCourtStatus);
+        // Default status "Đang hoạt động" is applied by backend
         if (newCourtImages) {
           for (let i = 0; i < newCourtImages.length; i++) {
             formData.append("images", newCourtImages[i]);
@@ -366,20 +351,6 @@ export default function OwnerCourtsClient() {
                   />
                   <span className="text-xs font-semibold text-slate-400 ml-2">VNĐ</span>
                 </div>
-              </div>
-
-              {/* Trạng thái sân */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Trạng thái sân *</label>
-                <select
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer"
-                  required
-                  value={newCourtStatus}
-                  onChange={(e) => setNewCourtStatus(e.target.value)}
-                >
-                  <option value="Đang hoạt động">🟢 Đang hoạt động</option>
-                  <option value="Đang bảo trì">🟠 Đang bảo trì</option>
-                </select>
               </div>
 
               {/* Hình ảnh */}

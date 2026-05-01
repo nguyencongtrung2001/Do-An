@@ -19,6 +19,14 @@
 - [admin.routes.ts](file://backend/src/routers/admin.routes.ts)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated repository pattern implementation documentation to reflect the new comprehensive repository classes
+- Added detailed analysis of UserRepository, LocationRepository, CourtRepository, and BookingRepository
+- Enhanced transaction handling and complex query implementation coverage
+- Updated architecture diagrams to show the complete repository ecosystem
+- Expanded service integration examples with concrete repository usage patterns
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -32,73 +40,61 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the data access layer of the backend, focusing on the repository pattern and database interaction strategies implemented with Prisma ORM. It covers CRUD operations, query optimization, data mapping, the abstraction layer between services and Prisma, transaction handling and connection management, query building, pagination, filtering, error handling, retry mechanisms, and performance monitoring. It also provides examples for extending repositories and implementing complex queries.
+This document explains the data access layer of the backend, focusing on the comprehensive repository pattern implementation with dedicated repositories for each domain entity. The system implements UserRepository, LocationRepository, CourtRepository, and BookingRepository classes, providing robust data access patterns with enhanced transaction handling and complex query implementations. It covers CRUD operations, query optimization, data mapping, the abstraction layer between services and Prisma ORM, transaction handling and connection management, query building, pagination, filtering, error handling, retry mechanisms, and performance monitoring.
 
 ## Project Structure
-The data access layer is organized around:
-- Prisma configuration and schema
-- Repositories (one per domain entity)
-- Services that orchestrate use cases and delegate persistence to repositories
-- Controllers and routes that expose endpoints
-- Middleware for global error handling and custom error types
+The data access layer is organized around specialized repositories, each handling domain-specific persistence logic:
 
 ```mermaid
 graph TB
-subgraph "Config"
-PRISMA["prisma.ts"]
-SCHEMA["schema.prisma"]
+subgraph "Configuration"
+PRISMA["prisma.ts<br/>Prisma Client Setup"]
+SCHEMA["schema.prisma<br/>Database Schema"]
 end
-subgraph "Repositories"
-URepo["user.repository.ts"]
-BRepo["booking.repository.ts"]
-CRepo["court.repository.ts"]
-LRepo["location.repository.ts"]
+subgraph "Repository Layer"
+USER_REPO["UserRepository<br/>User Management"]
+LOC_REPO["LocationRepository<br/>Location Operations"]
+COURT_REPO["CourtRepository<br/>Court Management"]
+BOOK_REPO["BookingRepository<br/>Booking Operations"]
 end
-subgraph "Services"
-USvc["user.service.ts"]
-ASvc["admin.service.ts"]
+subgraph "Service Layer"
+USER_SVC["UserService<br/>User Business Logic"]
+ADMIN_SVC["AdminService<br/>Administrative Functions"]
 end
-subgraph "Controllers & Routes"
-UCtrl["user.controller.ts"]
-ACtrl["admin.controller.ts"]
-URoutes["user.routes.ts"]
-ARoutes["admin.routes.ts"]
+subgraph "Presentation Layer"
+USER_CTRL["UserController<br/>User Endpoints"]
+ADMIN_CTRL["AdminController<br/>Admin Endpoints"]
 end
-subgraph "Middleware & Utils"
-Err["errorHandler.ts"]
-AErr["ApiError.ts"]
-JWT["jwt.ts"]
+subgraph "Infrastructure"
+ERROR_MW["ErrorHandler<br/>Global Error Handling"]
+API_ERROR["ApiError<br/>Custom Error Type"]
+JWT_UTIL["jwt.ts<br/>Authentication Utilities"]
 end
-SCHEMA --> PRISMA
-PRISMA --> URepo
-PRISMA --> BRepo
-PRISMA --> CRepo
-PRISMA --> LRepo
-USvc --> URepo
-ASvc --> URepo
-UCtrl --> USvc
-ACtrl --> ASvc
-URoutes --> UCtrl
-ARoutes --> ACtrl
-Err --> UCtrl
-Err --> ACtrl
-AErr --> Err
-JWT --> USvc
+PRISMA --> USER_REPO
+PRISMA --> LOC_REPO
+PRISMA --> COURT_REPO
+PRISMA --> BOOK_REPO
+USER_SVC --> USER_REPO
+ADMIN_SVC --> USER_REPO
+USER_CTRL --> USER_SVC
+ADMIN_CTRL --> ADMIN_SVC
+ERROR_MW --> USER_CTRL
+ERROR_MW --> ADMIN_CTRL
+API_ERROR --> ERROR_MW
+JWT_UTIL --> USER_SVC
 ```
 
 **Diagram sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 - [schema.prisma:1-126](file://backend/prisma/schema.prisma#L1-L126)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
 - [admin.controller.ts:1-13](file://backend/src/controllers/admin.controller.ts#L1-L13)
-- [user.routes.ts:1-10](file://backend/src/routers/user.routes.ts#L1-L10)
-- [admin.routes.ts:1-6](file://backend/src/routers/admin.routes.ts#L1-L6)
 - [errorHandler.ts:1-38](file://backend/src/middlewares/errorHandler.ts#L1-L38)
 - [ApiError.ts:1-13](file://backend/src/utils/ApiError.ts#L1-L13)
 - [jwt.ts:1-13](file://backend/src/utils/jwt.ts#L1-L13)
@@ -107,9 +103,9 @@ JWT --> USvc
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 - [schema.prisma:1-126](file://backend/prisma/schema.prisma#L1-L126)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
@@ -121,68 +117,71 @@ JWT --> USvc
 - [jwt.ts:1-13](file://backend/src/utils/jwt.ts#L1-L13)
 
 ## Core Components
-- Prisma client configured with a PostgreSQL adapter and connection pooling
-- Domain-specific repositories encapsulating CRUD and query logic
-- Services orchestrating business logic and delegating persistence to repositories
-- Controllers exposing endpoints and routes
-- Global error handling middleware and custom error type
-- JWT utilities for authentication tokens
 
-Key responsibilities:
-- Prisma configuration: connection pooling, adapter selection, client initialization
-- Repositories: encapsulate model-specific queries, data mapping, and ID generation helpers
-- Services: coordinate use cases, validation, hashing, and token generation
-- Controllers and routes: HTTP entry points
-- Error handling: translate domain and Prisma errors into consistent JSON responses
-- JWT: sign and verify tokens for authenticated sessions
+### Prisma Configuration and Connection Management
+The system uses a centralized Prisma client configured with PostgreSQL adapter and connection pooling:
+
+- **Connection Pool**: Created from DATABASE_URL environment variable
+- **Adapter**: PrismaPg adapter for PostgreSQL compatibility
+- **Client Instance**: Single PrismaClient instance shared across all repositories
+- **Environment Integration**: dotenv configuration for environment variables
+
+### Repository Pattern Implementation
+Each domain entity has a dedicated repository class with comprehensive CRUD operations:
+
+- **UserRepository**: Manages user registration, authentication, and profile operations
+- **LocationRepository**: Handles location creation, retrieval, and owner verification
+- **CourtRepository**: Manages court lifecycle, image uploads, and detailed queries
+- **BookingRepository**: Processes booking requests, status updates, and owner verification
+
+### Service Layer Integration
+Services depend on repositories through dependency injection, maintaining clean separation of concerns:
+
+- **UserService**: Orchestrates user registration and authentication flows
+- **AdminService**: Handles administrative user management operations
+- **Business Logic**: Encapsulated in services, persistence logic in repositories
+
+### Error Handling and Validation
+Comprehensive error handling with custom error types and global middleware:
+
+- **ApiError Class**: Custom exception with status code support
+- **Global ErrorHandler**: Translates domain and Prisma errors to consistent responses
+- **Validation**: Input validation and business rule enforcement
 
 **Section sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
-- [schema.prisma:1-126](file://backend/prisma/schema.prisma#L1-L126)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
-- [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
-- [admin.controller.ts:1-13](file://backend/src/controllers/admin.controller.ts#L1-L13)
-- [user.routes.ts:1-10](file://backend/src/routers/user.routes.ts#L1-L10)
-- [admin.routes.ts:1-6](file://backend/src/routers/admin.routes.ts#L1-L6)
 - [errorHandler.ts:1-38](file://backend/src/middlewares/errorHandler.ts#L1-L38)
 - [ApiError.ts:1-13](file://backend/src/utils/ApiError.ts#L1-L13)
-- [jwt.ts:1-13](file://backend/src/utils/jwt.ts#L1-L13)
 
 ## Architecture Overview
-The data access layer follows a layered architecture:
-- Presentation: Express routes and controllers
-- Application: Services implementing use cases
-- Domain/Data: Repositories encapsulating Prisma operations
-- Infrastructure: Prisma client with PostgreSQL adapter and connection pooling
+The data access layer follows a clean architecture pattern with clear separation between presentation, application, domain, and infrastructure layers:
 
 ```mermaid
 sequenceDiagram
-participant Client as "Client"
-participant Router as "user.routes.ts"
-participant Ctrl as "user.controller.ts"
-participant Svc as "user.service.ts"
-participant Repo as "user.repository.ts"
-participant DB as "Prisma Client"
-Client->>Router : "POST /register"
-Router->>Ctrl : "postUserClient()"
-Ctrl->>Svc : "createUser(userData)"
-Svc->>Repo : "findByEmailOrPhone(email, phone)"
-Repo->>DB : "nguoidung.findFirst(where)"
-DB-->>Repo : "User | null"
-Repo-->>Svc : "Existing user or null"
-Svc->>Repo : "generateNextUserId()"
-Svc->>Repo : "create({ id, ... })"
-Repo->>DB : "nguoidung.create(data)"
-DB-->>Repo : "User"
-Repo-->>Svc : "User"
-Svc->>Svc : "hash password, generate token"
-Svc-->>Ctrl : "{ user, token }"
-Ctrl-->>Client : "201 JSON"
+participant Client as "Client Application"
+participant Router as "Express Router"
+participant Controller as "Controller Layer"
+participant Service as "Service Layer"
+participant Repository as "Repository Layer"
+participant Prisma as "Prisma Client"
+participant Database as "PostgreSQL Database"
+Client->>Router : "HTTP Request"
+Router->>Controller : "Route Handler"
+Controller->>Service : "Business Method Call"
+Service->>Repository : "Data Operation"
+Repository->>Prisma : "Database Query"
+Prisma->>Database : "SQL Execution"
+Database-->>Prisma : "Query Results"
+Prisma-->>Repository : "Mapped Results"
+Repository-->>Service : "Domain Objects"
+Service-->>Controller : "Processed Data"
+Controller-->>Client : "HTTP Response"
 ```
 
 **Diagram sources**
@@ -202,16 +201,16 @@ Ctrl-->>Client : "201 JSON"
 ## Detailed Component Analysis
 
 ### Prisma Configuration and Connection Management
-- Uses the Prisma PostgreSQL adapter with a connection pool initialized from DATABASE_URL
-- Creates a single PrismaClient instance injected into repositories
-- Provides a clean separation between infrastructure concerns and domain logic
+The Prisma client is configured with PostgreSQL adapter and connection pooling:
 
 ```mermaid
 flowchart TD
-Start(["Load Environment"]) --> Pool["Create PG Pool from DATABASE_URL"]
-Pool --> Adapter["Create PrismaPg Adapter"]
-Adapter --> Client["Instantiate PrismaClient(adapter)"]
-Client --> Export["Export prisma client"]
+Start(["Application Start"]) --> LoadEnv["Load Environment Variables"]
+LoadEnv --> CreatePool["Create PostgreSQL Pool"]
+CreatePool --> CreateAdapter["Initialize PrismaPg Adapter"]
+CreateAdapter --> CreateClient["Instantiate PrismaClient"]
+CreateClient --> ExportClient["Export Singleton Client"]
+ExportClient --> Repositories["Inject into Repositories"]
 ```
 
 **Diagram sources**
@@ -220,10 +219,8 @@ Client --> Export["Export prisma client"]
 **Section sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 
-### Schema Overview and Data Mapping
-- Models represent domain entities with explicit primary keys, relations, and constraints
-- Relations are defined with foreign keys and optional onDelete/onUpdate actions
-- Data types align with Prisma’s PostgreSQL provider (e.g., Decimal, DateTime, Date)
+### Schema Overview and Data Relationships
+The database schema defines comprehensive relationships between entities:
 
 ```mermaid
 erDiagram
@@ -232,14 +229,7 @@ string ma_nguoi_dung PK
 string ho_ten
 string email UK
 string so_dien_thoai UK
-string mat_khau
-string ma_google UK
-string anh_dai_dien
-string anh_cloudinary
 string vai_tro
-decimal so_vi_du
-string anh_cccd_truoc
-string anh_cccd_sau
 boolean trang_thai
 timestamp ngay_tao
 }
@@ -247,8 +237,6 @@ DIADIEM {
 string ma_dia_diem PK
 string ma_nguoi_dung FK
 string ten_dia_diem
-string dia_chi
-string mo_ta
 decimal kinh_do
 decimal vi_do
 boolean trang_thai_duyet
@@ -277,24 +265,9 @@ string ma_san FK
 date ngay_dat
 time gio_bat_dau
 time gio_ket_thuc
+string trang_thai_dat
 decimal tien_coc
 decimal tien_con_lai
-string trang_thai_dat
-}
-GIAODICH {
-string ma_giao_dich PK
-string ma_dat_san FK
-string ma_nguoi_dung FK
-string duong_dan_thanh_toan
-decimal so_tien_tt
-string ma_tham_chieu
-string ma_gd_vnpay UK
-string ma_phan_hoi
-string ma_ngan_hang
-string thoi_gian_tt_vnpay
-string trang_thai_giao_dich
-string noi_dung_thanh_toan
-timestamp ngay_tao
 }
 ANHSAN {
 string ma_anh_san PK
@@ -310,16 +283,23 @@ string ma_dat_san_chi_tiet FK
 int so_sao
 timestamp ngay_danh_gia
 }
-NGUOIDUNG ||--o{ DIADIEM : "owns"
+GIAODICH {
+string ma_giao_dich PK
+string ma_dat_san FK
+string ma_nguoi_dung FK
+decimal so_tien_tt
+string ma_gd_vnpay UK
+string trang_thai_giao_dich
+timestamp ngay_tao
+}
+NGUOIDUNG ||--o{ DIADIEM : "creates"
 DIADIEM ||--o{ SAN : "contains"
-NGUOIDUNG ||--o{ DATSAN : "creates"
-DATSAN ||--o{ DATSANCHITIET : "has details"
-SAN ||--o{ DATSANCHITIET : "booked in"
-NGUOIDUNG ||--o{ GIAODICH : "participates"
-DATSAN ||--o{ GIAODICH : "generates"
-SAN ||--o{ ANHSAN : "has images"
+NGUOIDUNG ||--o{ DATSAN : "books"
+SAN ||--o{ DATSANCHITIET : "booked_in"
+SAN ||--o{ ANHSAN : "has_images"
 NGUOIDUNG ||--o{ DANHGIA : "writes"
-DATSANCHITIET ||--o{ DANHGIA : "rated"
+DANHGIA ||--|| DATSANCHITIET : "rates"
+DANHGIA ||--|| NGUOIDUNG : "written_by"
 ```
 
 **Diagram sources**
@@ -331,17 +311,28 @@ DATSANCHITIET ||--o{ DANHGIA : "rated"
 ### Repository Pattern Implementation
 
 #### User Repository
-- CRUD operations: findById, findByEmailOrPhone, findAll, create
-- Utility: generateNextUserId for deterministic ID generation
-- Data mapping: returns Prisma model types directly
+The UserRepository provides comprehensive user management capabilities:
+
+**Core Operations:**
+- **findById**: Retrieves user by unique identifier
+- **findByEmailOrPhone**: Searches users by email or phone number
+- **findAll**: Returns all users in the system
+- **create**: Inserts new user records with hashed passwords
+- **generateNextUserId**: Generates sequential user IDs (U001, U002, etc.)
+
+**Advanced Features:**
+- Sequential ID generation with proper numbering
+- Email and phone uniqueness validation
+- Password hashing integration
+- Role-based access control
 
 ```mermaid
 classDiagram
 class UserRepository {
-+findById(id) Promise<User>
-+findByEmailOrPhone(email, phone) Promise<User|null>
++findById(id : string) Promise<User>
++findByEmailOrPhone(email : string, phone : string) Promise<User|null>
 +findAll() Promise<User[]>
-+create(data) Promise<User>
++create(data : UserInput) Promise<User>
 +generateNextUserId() Promise<string>
 }
 class PrismaClient {
@@ -352,23 +343,89 @@ UserRepository --> PrismaClient : "uses"
 
 **Diagram sources**
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 
 **Section sources**
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
 
+#### Location Repository
+The LocationRepository manages location-based operations:
+
+**Core Operations:**
+- **findByOwnerId**: Retrieves all locations owned by a specific user
+- **findFirstByOwnerId**: Gets first location for owner verification
+- **create**: Inserts new location records
+- **generateNextLocationId**: Creates sequential location IDs (DD001, DD002, etc.)
+
+**Advanced Features:**
+- Nested includes for court and image relationships
+- Owner verification through nested queries
+- Geographic coordinate storage
+- Status tracking for location approval
+
+```mermaid
+flowchart TD
+A["findByOwnerId(userId)"] --> B["diadiem.findMany()"]
+B --> C["where: ma_nguoi_dung = userId"]
+C --> D["include: san.anhsan"]
+D --> E["Return locations with courts and images"]
+```
+
+**Diagram sources**
+- [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+
+**Section sources**
+- [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+
+#### Court Repository
+The CourtRepository provides comprehensive court management:
+
+**Core Operations:**
+- **findByLocationId**: Retrieves all courts for a specific location
+- **findByIdAndOwnerId**: Verifies ownership before accessing court details
+- **findById**: Direct court lookup by ID
+- **create**: Inserts new court records
+- **update**: Modifies existing court information
+- **generateNextCourtId**: Creates sequential court IDs (S001, S002, etc.)
+
+**Advanced Features:**
+- **Bulk Operations**: createCourtImages for multiple image uploads
+- **Complex Queries**: findAllWithDetails with nested includes
+- **Image Management**: Dedicated image creation and retrieval
+- **Rating Integration**: Includes review data in detailed queries
+
+```mermaid
+flowchart TD
+A["findAllWithDetails()"] --> B["san.findMany()"]
+B --> C["include: anhsan, diadiem"]
+C --> D["datsanchitiet.include: danhgia"]
+D --> E["Return comprehensive court data"]
+```
+
+**Diagram sources**
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+
+**Section sources**
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+
 #### Booking Repository
-- Query: findByOwnerId with nested include for related entities
-- Query: findByIdAndOwnerId with owner verification
-- Mutation: updateStatus for booking detail status
+The BookingRepository handles reservation management:
+
+**Core Operations:**
+- **findByOwnerId**: Retrieves all bookings for owner's courts
+- **findByIdAndOwnerId**: Verifies booking belongs to owner
+- **updateStatus**: Changes booking status (approval/rejection)
+
+**Advanced Features:**
+- **Nested Ownership Verification**: Ensures bookings belong to requesting owner
+- **Complex Includes**: Fetches related court, user, and booking details
+- **Status Management**: Centralized booking state updates
 
 ```mermaid
 flowchart TD
 A["findByOwnerId(userId)"] --> B["datsanchitiet.findMany()"]
-B --> C["include: san, datsan.nguoidung"]
+B --> C["Nested include: san, datsan.nguoidung"]
 C --> D["orderBy: ngay_dat desc"]
-E["findByIdAndOwnerId(id, userId)"] --> F["findFirst(where: id AND owner)"]
-G["updateStatus(id, status)"] --> H["datsanchitiet.update()"]
+D --> E["Return sorted bookings"]
 ```
 
 **Diagram sources**
@@ -376,108 +433,67 @@ G["updateStatus(id, status)"] --> H["datsanchitiet.update()"]
 
 **Section sources**
 - [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-
-#### Court Repository
-- Query: findByLocationId
-- Query: findByIdAndOwnerId with owner verification
-- CRUD: findById, create, update
-- Bulk: createCourtImages
-- Query: findAllWithDetails with nested includes
-- Utility: generateNextCourtId
-
-```mermaid
-flowchart TD
-A["findByLocationId(locId)"] --> B["san.findMany(where: ma_dia_diem)"]
-C["findByIdAndOwnerId(courtId, userId)"] --> D["findFirst(where: ma_san AND owner)"]
-E["create(data)"] --> F["san.create(data)"]
-G["update(courtId, data)"] --> H["san.update(where: ma_san)"]
-I["createCourtImages(images)"] --> J["anhsan.createMany(data[])"]
-K["findAllWithDetails()"] --> L["san.findMany(include: anhsan, diadiem, datsanchitiet.danhgia])"]
-```
-
-**Diagram sources**
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
-
-**Section sources**
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
-
-#### Location Repository
-- Query: findByOwnerId with nested includes for courts and images
-- Query: findFirstByOwnerId
-- CRUD: create
-- Utility: generateNextLocationId
-
-```mermaid
-flowchart TD
-A["findByOwnerId(userId)"] --> B["diadiem.findMany(where: ma_nguoi_dung)"]
-B --> C["include: san.anhsan"]
-D["findFirstByOwnerId(userId)"] --> E["diadiem.findFirst(where: ma_nguoi_dung)"]
-F["create(data)"] --> G["diadiem.create(data)"]
-```
-
-**Diagram sources**
-- [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
-
-**Section sources**
-- [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
 
 ### Abstraction Between Services and Prisma ORM
-- Services depend on repository interfaces, not on Prisma directly
-- Repositories encapsulate Prisma client usage and expose domain-focused methods
-- This design allows swapping adapters or changing ORM without affecting services
+The service-layer repositories maintain clean abstraction:
 
 ```mermaid
 graph LR
-Svc["Services"] --> Repo["Repositories"]
-Repo --> Prisma["Prisma Client"]
+UserService --> UserRepository
+AdminService --> UserRepository
+UserService --> LocationRepository
+UserService --> CourtRepository
+UserService --> BookingRepository
+UserRepository --> PrismaClient
+LocationRepository --> PrismaClient
+CourtRepository --> PrismaClient
+BookingRepository --> PrismaClient
 ```
 
 **Diagram sources**
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 
 **Section sources**
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 
 ### Transaction Handling and Connection Management
+**Current State:**
 - Single PrismaClient instance is exported and reused across repositories
-- Connection pooling is managed by the PostgreSQL adapter and underlying pool
-- No explicit transaction boundaries are defined in the current repositories; use transactions when multiple writes must succeed or fail together
+- Connection pooling managed by PostgreSQL adapter
+- No explicit transaction boundaries defined
 
-Recommendations:
-- Wrap multi-step writes in a transaction using Prisma’s transaction API
-- Keep transactions short-lived and avoid long-running operations inside them
+**Enhancement Opportunities:**
+- Multi-step operations should be wrapped in transactions
+- Batch operations benefit from transactional consistency
+- Complex business rules require atomic operations
 
 **Section sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 
 ### Query Building, Pagination, and Filtering Strategies
-Current repositories implement:
-- Basic filtering via where conditions
-- Includes for related entities
-- Ordering via orderBy
-- No explicit pagination (skip/take) or advanced filters
+**Current Implementation:**
+- Basic filtering using where conditions
+- Nested includes for related entity relationships
+- Ordering via orderBy clauses
+- No pagination (skip/take) or advanced filtering
 
-Recommended enhancements:
-- Add pagination parameters (skip, take) to findMany methods
-- Support dynamic filters (status, date range, location)
-- Use select projections to limit returned fields for read-heavy endpoints
-
-Examples to implement:
-- Paginated listings: extend findMany with skip/take
-- Advanced filters: add filter objects to repository methods
-- Sorting: support multiple sort fields and directions
+**Recommended Enhancements:**
+- Add pagination parameters to all findMany methods
+- Implement dynamic filter objects for flexible querying
+- Support sorting by multiple fields and directions
+- Add select projections for optimized queries
 
 **Section sources**
 - [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
@@ -485,25 +501,32 @@ Examples to implement:
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
 
-### Data Mapping
+### Data Mapping and Transformation
+**Current Approach:**
 - Repositories return Prisma model instances directly
-- Services transform domain data (e.g., hashed passwords, tokens) before responding
-- Consider mapping to DTOs for controllers to reduce exposure of internal models
+- Services handle domain transformations (password hashing, token generation)
+- Controllers receive processed data for response formatting
+
+**Best Practices:**
+- Consider DTO (Data Transfer Object) mapping for controller responses
+- Implement projection queries to limit returned fields
+- Add validation layers between repositories and services
 
 **Section sources**
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 
 ### Extending Repositories and Complex Queries
-Examples of extending repositories:
-- Add a method to fetch booking details with complex joins and filters
-- Implement bulk operations (e.g., createMany for images)
-- Add computed aggregations (e.g., average rating) via raw queries or include-based counts
+**Extension Examples:**
+- **Pagination Support**: Add skip/take parameters to all findMany methods
+- **Advanced Filtering**: Implement filter objects supporting multiple criteria
+- **Aggregation Queries**: Add computed fields (average ratings, booking counts)
+- **Bulk Operations**: Extend createCourtImages for batch processing
 
-Implementation tips:
-- Keep repository methods focused on a single responsibility
-- Use include to fetch related data efficiently
-- Prefer composition over deeply nested queries
+**Implementation Guidelines:**
+- Maintain single responsibility principle per repository method
+- Use nested includes for efficient relationship fetching
+- Prefer composition over deeply nested subqueries
 
 **Section sources**
 - [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
@@ -511,31 +534,57 @@ Implementation tips:
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
 
 ## Dependency Analysis
-Repositories depend on the Prisma client; services depend on repositories; controllers depend on services; routes depend on controllers; error handling middleware depends on controllers and services.
+The dependency graph shows clear separation of concerns:
 
 ```mermaid
 graph TB
-PRISMA["prisma.ts"] --> URepo["user.repository.ts"]
-PRISMA --> BRepo["booking.repository.ts"]
-PRISMA --> CRepo["court.repository.ts"]
-PRISMA --> LRepo["location.repository.ts"]
-URepo --> USvc["user.service.ts"]
-URepo --> ASvc["admin.service.ts"]
-USvc --> UCtrl["user.controller.ts"]
-ASvc --> ACtrl["admin.controller.ts"]
-UCtrl --> URoutes["user.routes.ts"]
-ACtrl --> ARoutes["admin.routes.ts"]
-UCtrl --> Err["errorHandler.ts"]
-ACtrl --> Err
-Err --> AErr["ApiError.ts"]
+subgraph "Configuration Layer"
+PRISMA["prisma.ts"]
+SCHEMA["schema.prisma"]
+end
+subgraph "Repository Layer"
+USER_REPO["user.repository.ts"]
+LOC_REPO["location.repository.ts"]
+COURT_REPO["court.repository.ts"]
+BOOK_REPO["booking.repository.ts"]
+end
+subgraph "Service Layer"
+USER_SVC["user.service.ts"]
+ADMIN_SVC["admin.service.ts"]
+end
+subgraph "Presentation Layer"
+CTRL_USER["user.controller.ts"]
+CTRL_ADMIN["admin.controller.ts"]
+ROUTE_USER["user.routes.ts"]
+ROUTE_ADMIN["admin.routes.ts"]
+end
+subgraph "Infrastructure Layer"
+ERROR_HANDLER["errorHandler.ts"]
+API_ERROR["ApiError.ts"]
+JWT_UTIL["jwt.ts"]
+end
+PRISMA --> USER_REPO
+PRISMA --> LOC_REPO
+PRISMA --> COURT_REPO
+PRISMA --> BOOK_REPO
+USER_SVC --> USER_REPO
+ADMIN_SVC --> USER_REPO
+CTRL_USER --> USER_SVC
+CTRL_ADMIN --> ADMIN_SVC
+ROUTE_USER --> CTRL_USER
+ROUTE_ADMIN --> CTRL_ADMIN
+ERROR_HANDLER --> CTRL_USER
+ERROR_HANDLER --> CTRL_ADMIN
+API_ERROR --> ERROR_HANDLER
+JWT_UTIL --> USER_SVC
 ```
 
 **Diagram sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
@@ -544,13 +593,14 @@ Err --> AErr["ApiError.ts"]
 - [admin.routes.ts:1-6](file://backend/src/routers/admin.routes.ts#L1-L6)
 - [errorHandler.ts:1-38](file://backend/src/middlewares/errorHandler.ts#L1-L38)
 - [ApiError.ts:1-13](file://backend/src/utils/ApiError.ts#L1-L13)
+- [jwt.ts:1-13](file://backend/src/utils/jwt.ts#L1-L13)
 
 **Section sources**
 - [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)
 - [user.repository.ts:1-53](file://backend/src/repositories/user.repository.ts#L1-L53)
-- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
-- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+- [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
+- [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [user.service.ts:1-69](file://backend/src/services/user.service.ts#L1-L69)
 - [admin.service.ts:1-57](file://backend/src/services/admin.service.ts#L1-L57)
 - [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
@@ -559,43 +609,67 @@ Err --> AErr["ApiError.ts"]
 - [admin.routes.ts:1-6](file://backend/src/routers/admin.routes.ts#L1-L6)
 - [errorHandler.ts:1-38](file://backend/src/middlewares/errorHandler.ts#L1-L38)
 - [ApiError.ts:1-13](file://backend/src/utils/ApiError.ts#L1-L13)
+- [jwt.ts:1-13](file://backend/src/utils/jwt.ts#L1-L13)
 
 ## Performance Considerations
-- Connection pooling: leverage the existing PostgreSQL adapter and pool
-- Selectivity: use where conditions and includes judiciously; avoid N+1 queries
-- Projections: use select to limit fields for read-heavy endpoints
-- Pagination: implement skip/take to avoid large result sets
-- Indexes: ensure frequently filtered columns (IDs, emails, phones) are indexed
-- Transactions: wrap multi-step writes to minimize partial updates
-- Caching: cache read-mostly data (e.g., static lists) with invalidation strategies
+**Optimization Strategies:**
+- **Connection Pooling**: Leverage existing PostgreSQL adapter and pool configuration
+- **Query Optimization**: Use selective includes and where conditions to prevent N+1 queries
+- **Projection Queries**: Implement select projections to limit returned fields
+- **Pagination**: Add skip/take parameters to handle large datasets efficiently
+- **Indexing**: Ensure frequently queried columns (IDs, emails, phones) are indexed
+- **Batch Operations**: Use createMany for bulk inserts where possible
+- **Caching Strategy**: Implement caching for read-heavy operations with proper invalidation
 
-[No sources needed since this section provides general guidance]
+**Monitoring Recommendations:**
+- Track query execution times and error rates
+- Monitor connection pool utilization
+- Implement circuit breakers for external dependencies
+- Add structured logging for debugging and performance analysis
 
 ## Troubleshooting Guide
-Common issues and resolutions:
-- Duplicate key errors: handled by the global error handler translating Prisma errors into user-friendly messages
-- Validation errors: thrown as ApiError with appropriate status codes
-- Authentication failures: password comparison errors raise ApiError
-- Unexpected errors: logged and responded with generic error payload
+
+### Common Error Scenarios and Solutions
+
+**Duplicate Key Errors:**
+- **Cause**: Email or phone number already exists
+- **Solution**: Global error handler translates PrismaClientKnownRequestError to user-friendly messages
+- **Prevention**: Check for existing records before insert operations
+
+**Authentication Failures:**
+- **Cause**: Invalid credentials or unhashed passwords
+- **Solution**: Password comparison with bcrypt, proper error handling
+- **Security**: Never store plaintext passwords
+
+**Authorization Issues:**
+- **Cause**: Users accessing resources belonging to other owners
+- **Solution**: Nested queries verify ownership before data access
+- **Pattern**: Always include owner verification in repository methods
 
 ```mermaid
 sequenceDiagram
 participant Client as "Client"
-participant Ctrl as "user.controller.ts"
-participant Svc as "user.service.ts"
-participant Repo as "user.repository.ts"
-participant Err as "errorHandler.ts"
-participant AErr as "ApiError.ts"
-Client->>Ctrl : "POST /login"
-Ctrl->>Svc : "loginUser(credentials)"
-Svc->>Repo : "findByEmailOrPhone(email, phone)"
-Repo-->>Svc : "User | null"
-Svc->>Svc : "compare password"
-alt "not found or wrong password"
-Svc-->>Ctrl : "throws ApiError"
+participant Controller as "Controller"
+participant Service as "Service"
+participant Repository as "Repository"
+participant ErrorHandler as "Error Handler"
+participant ApiError as "ApiError"
+Client->>Controller : "Registration Request"
+Controller->>Service : "createUser(userData)"
+Service->>Repository : "findByEmailOrPhone(email, phone)"
+Repository-->>Service : "Existing user or null"
+alt "User exists"
+Service->>ApiError : "Throw ApiError(400, 'Email already exists')"
+Service-->>Controller : "Error"
+Controller->>ErrorHandler : "next(error)"
+ErrorHandler-->>Client : "JSON Error Response"
+else "User doesn't exist"
+Service->>Repository : "generateNextUserId()"
+Service->>Repository : "create({id, ...})"
+Repository-->>Service : "New user created"
+Service-->>Controller : "{user, token}"
+Controller-->>Client : "201 Created"
 end
-Ctrl->>Err : "next(error)"
-Err-->>Client : "{ status : 'error', statusCode, message }"
 ```
 
 **Diagram sources**
@@ -612,27 +686,84 @@ Err-->>Client : "{ status : 'error', statusCode, message }"
 - [user.controller.ts:1-14](file://backend/src/controllers/user.controller.ts#L1-L14)
 
 ## Conclusion
-The data access layer cleanly separates concerns using the repository pattern with Prisma ORM. Repositories encapsulate persistence logic, services orchestrate use cases, and middleware ensures consistent error handling. Current implementations focus on essential CRUD and relation fetching; future enhancements should emphasize pagination, advanced filtering, and transactional safety for complex workflows.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The data access layer successfully implements a comprehensive repository pattern with four specialized repositories handling distinct domain concerns. The system provides clean separation of concerns, robust error handling, and scalable architecture. Current implementations demonstrate solid foundational patterns with clear room for enhancement in pagination, advanced filtering, and transactional operations. The modular design enables easy extension and maintenance while preserving the clean architecture principles established.
 
 ## Appendices
 
-### Example: Extending a Repository with Pagination
-- Add parameters to findMany methods (skip, take)
-- Apply orderBy consistently
-- Return paginated results alongside total count
+### Example: Repository Extension Patterns
+**Pagination Implementation:**
+```typescript
+// Add to existing repository methods
+async findManyPaginated(skip: number, take: number) {
+  return prisma.model.findMany({
+    skip,
+    take,
+    include: { related: true }
+  });
+}
+```
+
+**Advanced Filtering:**
+```typescript
+// Dynamic filter object pattern
+async findByFilters(filters: FilterObject) {
+  const whereClause = this.buildWhereClause(filters);
+  return prisma.model.findMany({ where: whereClause });
+}
+```
 
 **Section sources**
 - [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
 
-### Example: Implementing a Complex Query with Includes
-- Use nested include to fetch related entities
-- Apply where conditions to filter by owner or status
-- Order results by date or relevance
+### Example: Complex Query Implementation
+**Multi-level Nested Includes:**
+```typescript
+// Repository method for comprehensive data retrieval
+async getCompleteBookingData(ownerId: string) {
+  return prisma.booking.findMany({
+    where: { 
+      court: { location: { ownerId } }
+    },
+    include: {
+      court: {
+        include: {
+          location: {
+            include: {
+              images: true
+            }
+          },
+          reviews: true
+        }
+      },
+      user: true
+    },
+    orderBy: { date: 'desc' }
+  });
+}
+```
 
 **Section sources**
 - [booking.repository.ts:1-49](file://backend/src/repositories/booking.repository.ts#L1-L49)
 - [court.repository.ts:1-83](file://backend/src/repositories/court.repository.ts#L1-L83)
 - [location.repository.ts:1-51](file://backend/src/repositories/location.repository.ts#L1-L51)
+
+### Transaction Implementation Examples
+**Multi-step Operation:**
+```typescript
+async createBookingWithTransaction(bookingData) {
+  return prisma.$transaction(async (tx) => {
+    const booking = await tx.booking.create({ data: bookingData });
+    await tx.payment.create({ 
+      data: { 
+        bookingId: booking.id,
+        amount: booking.total
+      }
+    });
+    return booking;
+  });
+}
+```
+
+**Section sources**
+- [prisma.ts:1-10](file://backend/src/config/prisma.ts#L1-L10)

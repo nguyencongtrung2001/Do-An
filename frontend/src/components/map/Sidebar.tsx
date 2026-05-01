@@ -14,7 +14,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, courts, onClose, onSelect, activeId }: SidebarProps) {
   return (
     <aside
-      className={`absolute top-0 left-0 bottom-0 w-[380px] max-w-[85vw] bg-white dark:bg-[#2a1d1d] z-1001 shadow-2xl border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`absolute top-0 left-0 bottom-0 w-95 max-w-[85vw] bg-white dark:bg-[#2a1d1d] z-1001 shadow-2xl border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
