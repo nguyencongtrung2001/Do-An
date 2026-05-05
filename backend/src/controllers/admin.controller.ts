@@ -62,3 +62,10 @@ export const approveLocation = async (req: Request<{ id: string }>, res: Respons
     res.status(200).json({ success: true, message: 'Đã duyệt địa điểm thành công', location });
   } catch (err) { next(err); }
 };
+
+export const rejectLocation = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  try {
+    const location = await adminService.rejectLocation(req.params.id);
+    res.status(200).json({ success: true, message: 'Đã từ chối địa điểm', location });
+  } catch (err) { next(err); }
+};

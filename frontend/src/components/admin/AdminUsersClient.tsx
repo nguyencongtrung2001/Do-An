@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin.service";
 
@@ -13,6 +14,8 @@ interface DbUser {
   trang_thai: boolean;
   ngay_tao: string;
   anh_dai_dien: string | null;
+  anh_cccd_truoc: string | null;
+  anh_cccd_sau: string | null;
 }
 
 export default function AdminUsersClient() {
@@ -24,6 +27,9 @@ export default function AdminUsersClient() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<DbUser | null>(null);
+
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   const fetchUsers = useCallback(async () => {
     if (!token) return;
@@ -59,6 +65,12 @@ export default function AdminUsersClient() {
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, searchQuery, roleFilter, statusFilter]);
+
+  // Reset page when filter changes
+  useEffect(() => setPage(1), [searchQuery, roleFilter, statusFilter]);
+
+  const pagedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
 
   // Stats
   const totalUsers = users.length;
@@ -231,8 +243,8 @@ export default function AdminUsersClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {filteredUsers.length > 0 ? (
-                    filteredUsers.map((user) => (
+                  {pagedUsers.length > 0 ? (
+                    pagedUsers.map((user) => (
                       <tr key={user.ma_nguoi_dung} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -287,6 +299,31 @@ export default function AdminUsersClient() {
               </table>
             </div>
           )}
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <p className="text-sm text-slate-500">
+                Trang <span className="font-semibold text-slate-900">{page}</span> / <span className="font-semibold text-slate-900">{totalPages}</span>
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Trước
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Sau
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -331,6 +368,30 @@ export default function AdminUsersClient() {
                   <p className="text-sm font-bold text-slate-900 mt-1">{formatDate(selectedUser.ngay_tao)}</p>
                 </div>
               </div>
+              
+              {selectedUser.vai_tro === "Chủ sân" && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs text-slate-400">Ảnh CCCD</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedUser.anh_cccd_truoc && (
+                      <a href={selectedUser.anh_cccd_truoc} target="_blank" rel="noreferrer" className="block hover:opacity-80 transition-opacity">
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100">
+                          <Image src={selectedUser.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
+                        </div>
+                        <p className="text-xs text-center text-slate-400 mt-1">Mặt trước</p>
+                      </a>
+                    )}
+                    {selectedUser.anh_cccd_sau && (
+                      <a href={selectedUser.anh_cccd_sau} target="_blank" rel="noreferrer" className="block hover:opacity-80 transition-opacity">
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100">
+                          <Image src={selectedUser.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
+                        </div>
+                        <p className="text-xs text-center text-slate-400 mt-1">Mặt sau</p>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end shrink-0">
               <button onClick={closeModal} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-gray-100 rounded-xl">

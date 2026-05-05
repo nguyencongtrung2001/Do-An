@@ -8,6 +8,7 @@ import {
   getAllLocations,
   getPendingLocations,
   approveLocation,
+  rejectLocation,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -25,5 +26,6 @@ router.put('/owners/:id/approve', approveOwner);
 router.get('/locations', getAllLocations);
 router.get('/locations/pending', getPendingLocations);
 router.put('/locations/:id/approve', approveLocation);
+router.put('/locations/:id/reject', rejectLocation);
 
 export default router;

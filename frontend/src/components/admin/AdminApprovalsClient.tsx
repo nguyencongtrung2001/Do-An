@@ -48,7 +48,8 @@ export default function AdminApprovalsClient() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [approvingLocationId, setApprovingLocationId] = useState<string | null>(null);
-  const [locationFilter, setLocationFilter] = useState<"all" | "pending" | "approved">("all");
+  const [rejectingLocationId, setRejectingLocationId] = useState<string | null>(null);
+  const [locationFilter, setLocationFilter] = useState<"all" | "pending" | "approved">("pending");
 
   // ── Fetch ─────────────────────────────────────────────
 
@@ -115,6 +116,23 @@ export default function AdminApprovalsClient() {
       console.error("Error approving location:", err);
     } finally {
       setApprovingLocationId(null);
+    }
+  };
+
+  const handleRejectLocation = async (id: string) => {
+    if (!token || rejectingLocationId) return;
+    setRejectingLocationId(id);
+    try {
+      const res = await adminService.rejectLocation(token, id);
+      if (res.success) {
+        setLocations((prev) =>
+          prev.map((l) => (l.ma_dia_diem === id ? { ...l, trang_thai_duyet: false } : l))
+        );
+      }
+    } catch (err) {
+      console.error("Error rejecting location:", err);
+    } finally {
+      setRejectingLocationId(null);
     }
   };
 
@@ -376,20 +394,36 @@ export default function AdminApprovalsClient() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           {!loc.trang_thai_duyet ? (
-                            <button
-                              onClick={() => handleApproveLocation(loc.ma_dia_diem)}
-                              disabled={approvingLocationId === loc.ma_dia_diem}
-                              className={`px-4 py-2 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors inline-flex items-center gap-1 ${
-                                approvingLocationId === loc.ma_dia_diem ? "opacity-50 cursor-wait" : ""
-                              }`}
-                            >
-                              {approvingLocationId === loc.ma_dia_diem ? (
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                              ) : (
-                                <span className="material-symbols-outlined text-sm">check</span>
-                              )}
-                              Duyệt
-                            </button>
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleApproveLocation(loc.ma_dia_diem)}
+                                disabled={approvingLocationId === loc.ma_dia_diem}
+                                className={`px-4 py-2 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors inline-flex items-center gap-1 ${
+                                  approvingLocationId === loc.ma_dia_diem ? "opacity-50 cursor-wait" : ""
+                                }`}
+                              >
+                                {approvingLocationId === loc.ma_dia_diem ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                                ) : (
+                                  <span className="material-symbols-outlined text-sm">check</span>
+                                )}
+                                Duyệt
+                              </button>
+                              <button
+                                onClick={() => handleRejectLocation(loc.ma_dia_diem)}
+                                disabled={rejectingLocationId === loc.ma_dia_diem}
+                                className={`px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors inline-flex items-center gap-1 ${
+                                  rejectingLocationId === loc.ma_dia_diem ? "opacity-50 cursor-wait" : ""
+                                }`}
+                              >
+                                {rejectingLocationId === loc.ma_dia_diem ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                                ) : (
+                                  <span className="material-symbols-outlined text-sm">close</span>
+                                )}
+                                Từ chối
+                              </button>
+                            </div>
                           ) : (
                             <span className="text-xs text-slate-400">—</span>
                           )}

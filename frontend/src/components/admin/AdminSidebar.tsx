@@ -17,8 +17,7 @@ export default function AdminSidebar() {
       label: "Quản lý hệ thống",
       items: [
         { href: "/admin/users", icon: "group", label: "Quản lý người dùng", exact: false },
-        { href: "/admin/approvals", icon: "verified", label: "Kiểm duyệt chủ sân", exact: false },
-        { href: "/admin/approvals", icon: "verified", label: "Kiểm duyệt địa điểm ", exact: false },
+        { href: "/admin/approvals", icon: "rule", label: "Kiểm duyệt", exact: false },
       ],
     },
   ];
