@@ -143,7 +143,7 @@ export class OwnerService {
           ten_san,
           loai_the_thao,
           gia_thue_30p: gia_thue_30p !== undefined ? parseFloat(gia_thue_30p) : undefined,
-          trang_thai_san
+          trang_thai_san: trang_thai_san ? trang_thai_san.trim() : undefined
         }
       });
 

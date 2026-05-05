@@ -66,7 +66,9 @@ export default function AuthClient() {
       login(data.token, data.user as UserData);
       
       // Navigate based on role
-      if (data.user.vai_tro === "Chủ sân") {
+      if (data.user.vai_tro === "Quản trị viên") {
+        router.push("/users");
+      } else if (data.user.vai_tro === "Chủ sân") {
         router.push("/dashboard");
       } else {
         router.push("/");
@@ -116,7 +118,9 @@ export default function AuthClient() {
       }
       
       login(data.token, data.user as UserData);
-      if (role === "owner") {
+      if (data.user.vai_tro === "Quản trị viên") {
+        router.push("/admin/users");
+      } else if (role === "owner") {
         router.push("/dashboard");
       } else {
         router.push("/");

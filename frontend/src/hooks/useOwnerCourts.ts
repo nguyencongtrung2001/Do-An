@@ -25,61 +25,31 @@ export function useOwnerCourts() {
   }, [token]);
 
   useEffect(() => {
-    const loadData = async () => {
-      await fetchCourts();
-    };
-    loadData();
+    (async () => { await fetchCourts(); })();
   }, [fetchCourts]);
 
-  const toggleCourtStatus = async (court: OwnerCourt) => {
-    if (!token) return;
-    const newStatus = court.trang_thai_san === "Đang hoạt động" ? "Đang bảo trì" : "Đang hoạt động";
-
+  /** Change court status to any of 3 values. Sends JSON (no image). */
+  const changeCourtStatus = async (court: OwnerCourt, newStatus: string) => {
+    if (!token) return false;
     try {
       const data = await courtService.updateCourt(token, court.ma_san, {
-        ...court,
+        ten_san: court.ten_san,
+        loai_the_thao: court.loai_the_thao,
+        gia_thue_30p: court.gia_thue_30p,
         trang_thai_san: newStatus,
       });
       if (data.success) {
-        setCourts(prev => prev.map(c =>
-          c.ma_san === court.ma_san ? { ...c, trang_thai_san: newStatus } : c
-        ));
+        setCourts((prev) =>
+          prev.map((c) =>
+            c.ma_san === court.ma_san ? { ...c, trang_thai_san: newStatus } : c
+          )
+        );
         return true;
       }
       return false;
     } catch (error) {
-      console.error("Error toggling status:", error);
+      console.error("Error changing status:", error);
       return false;
-    }
-  };
-
-  const addCourt = async (formData: FormData) => {
-    if (!token) return null;
-    try {
-      const data = await courtService.addCourt(token, formData);
-      if (data.success) {
-        await fetchCourts();
-        return data;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error adding court:", error);
-      return null;
-    }
-  };
-
-  const updateCourt = async (ma_san: string, courtData: Record<string, unknown>, isJSON: boolean = true) => {
-    if (!token) return null;
-    try {
-      const data = await courtService.updateCourt(token, ma_san, courtData, isJSON);
-      if (data.success) {
-        await fetchCourts();
-        return data;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error updating court:", error);
-      return null;
     }
   };
 
@@ -87,8 +57,6 @@ export function useOwnerCourts() {
     courts,
     loading,
     fetchCourts,
-    toggleCourtStatus,
-    addCourt,
-    updateCourt,
+    changeCourtStatus,
   };
 }

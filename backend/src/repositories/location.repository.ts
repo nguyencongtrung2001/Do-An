@@ -45,6 +45,45 @@ export class LocationRepository {
     }
     return newLocationId;
   }
+
+  async findAll() {
+    return prisma.diadiem.findMany({
+      include: {
+        nguoidung: {
+          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true }
+        },
+        san: true
+      },
+      orderBy: { ngay_tao: 'desc' }
+    });
+  }
+
+  async findPending() {
+    return prisma.diadiem.findMany({
+      where: { trang_thai_duyet: false },
+      include: {
+        nguoidung: {
+          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true }
+        },
+        san: true
+      },
+      orderBy: { ngay_tao: 'desc' }
+    });
+  }
+
+  async approve(id: string) {
+    return prisma.diadiem.update({
+      where: { ma_dia_diem: id },
+      data: { trang_thai_duyet: true }
+    });
+  }
+
+  async reject(id: string) {
+    return prisma.diadiem.update({
+      where: { ma_dia_diem: id },
+      data: { trang_thai_duyet: false }
+    });
+  }
 }
 
 export const locationRepository = new LocationRepository();

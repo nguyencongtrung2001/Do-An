@@ -3,113 +3,202 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useOwnerCourts } from "@/hooks/useOwnerCourts";
-import { useAuth } from "@/contexts/AuthContext";
-import { courtService } from "@/services/court.service";
-import { Loader2, AlertCircle, CheckCircle2, Wrench } from "lucide-react";
-import { toast } from "react-hot-toast";
+
+const STATUS_OPTIONS = [
+  {
+    value: "Đang hoạt động",
+    label: "Hoạt động",
+    icon: "check_circle",
+    bg: "bg-green-100 text-green-700 border-green-300",
+    activeBg: "bg-green-500 text-white border-green-500 shadow-green-500/30 shadow-md",
+    dot: "bg-green-500",
+  },
+  {
+    value: "Đang bảo trì",
+    label: "Bảo trì",
+    icon: "build",
+    bg: "bg-amber-100 text-amber-700 border-amber-300",
+    activeBg: "bg-amber-500 text-white border-amber-500 shadow-amber-500/30 shadow-md",
+    dot: "bg-amber-500",
+  },
+  {
+    value: "Đã khóa",
+    label: "Đã khóa",
+    icon: "lock",
+    bg: "bg-red-100 text-red-600 border-red-300",
+    activeBg: "bg-red-500 text-white border-red-500 shadow-red-500/30 shadow-md",
+    dot: "bg-red-500",
+  },
+];
 
 export default function OwnerStatusClient() {
-  const { courts, loading, fetchCourts } = useOwnerCourts();
-  const { token } = useAuth();
+  const { courts, loading, changeCourtStatus } = useOwnerCourts();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState("all");
 
-  const toggleStatus = async (courtId: string) => {
+  const filteredCourts = filterStatus === "all"
+    ? courts
+    : courts.filter((c) => c.trang_thai_san === filterStatus);
+
+  const handleStatusChange = async (courtId: string, newStatus: string) => {
     if (updatingId) return;
+    const court = courts.find((c) => c.ma_san === courtId);
+    if (!court || court.trang_thai_san === newStatus) return;
 
-    const court = courts.find(c => c.ma_san === courtId);
-    if (!court || court.trang_thai_san === "Đã khóa") {
-      toast.error("Sân đã bị khóa bởi hệ thống!");
-      return;
-    }
-
-    const newStatus = court.trang_thai_san === "Đang hoạt động" ? "Đang bảo trì" : "Đang hoạt động";
     setUpdatingId(courtId);
-
     try {
-      const data = await courtService.updateCourtStatus(token!, courtId, newStatus);
-      if (data.success) {
-        await fetchCourts();
-        toast.success(`Đã cập nhật ${court.ten_san}`);
-      }
-    } catch {
-      toast.error("Lỗi cập nhật Database");
+      await changeCourtStatus(court, newStatus);
     } finally {
       setUpdatingId(null);
     }
   };
 
+  // Stats
+  const totalActive = courts.filter((c) => c.trang_thai_san === "Đang hoạt động").length;
+  const totalMaintenance = courts.filter((c) => c.trang_thai_san === "Đang bảo trì").length;
+  const totalLocked = courts.filter((c) => c.trang_thai_san === "Đã khóa").length;
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50">
-      <header className="bg-white border-b border-slate-200 px-8 py-5 shadow-sm">
-        <h2 className="text-xl font-bold">Trạng thái sân</h2>
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4">
+        <h2 className="text-xl font-bold text-slate-900">Trạng thái sân</h2>
+        <p className="text-sm text-slate-400">Quản lý trạng thái hoạt động của tất cả các sân</p>
       </header>
 
-      <div className="p-8 max-w-5xl mx-auto w-full">
-        <div className="divide-y divide-slate-100 bg-white rounded-2xl border">
-          {loading ? (
-            <div className="p-12 flex flex-col items-center gap-3">
-              <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
-            </div>
-          ) : (
-            courts.map((court) => {
-              const isActive = court.trang_thai_san === "Đang hoạt động";
-              return (
-                <div key={court.ma_san} className="flex items-center gap-6 px-6 py-5">
-                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0">
-                    <Image 
-                      src={court.anhsan?.[0]?.duong_dan_anh || '/hero-stadium.png'} 
-                      alt={court.ten_san}
-                      fill
-                      className={`object-cover ${!isActive ? "grayscale opacity-50" : ""}`}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold">{court.ten_san}</h4>
-                    <StatusBadge status={court.trang_thai_san} />
-                  </div>
-                  <div
-                    className={`w-12 h-6 rounded-full cursor-pointer transition-all ${isActive ? "bg-green-500" : "bg-slate-300"}`}
-                    onClick={() => toggleStatus(court.ma_san)}
-                  >
-                    <div className={`w-4 h-4 m-1 bg-white rounded-full transition-all ${isActive ? "translate-x-6" : ""}`} />
-                  </div>
-                </div>
-              );
-            })
-          )}
+      {/* Stats cards */}
+      <div className="px-8 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+            <span className="material-symbols-outlined text-green-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{totalActive}</p>
+            <p className="text-xs text-slate-400">Đang hoạt động</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+            <span className="material-symbols-outlined text-amber-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>build</span>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{totalMaintenance}</p>
+            <p className="text-xs text-slate-400">Đang bảo trì</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+            <span className="material-symbols-outlined text-red-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{totalLocked}</p>
+            <p className="text-xs text-slate-400">Đã khóa</p>
+          </div>
         </div>
       </div>
+
+      {/* Filter */}
+      <div className="px-8 pt-5 pb-2 flex items-center gap-2">
+        {[
+          { value: "all", label: "Tất cả", count: courts.length },
+          { value: "Đang hoạt động", label: "Hoạt động", count: totalActive },
+          { value: "Đang bảo trì", label: "Bảo trì", count: totalMaintenance },
+          { value: "Đã khóa", label: "Đã khóa", count: totalLocked },
+        ].map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setFilterStatus(f.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+              filterStatus === f.value
+                ? "bg-slate-900 text-white border-slate-900"
+                : "bg-white text-slate-600 border-gray-200 hover:border-slate-400"
+            }`}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Court list */}
+      <div className="px-8 pb-8 pt-2">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+          </div>
+        ) : filteredCourts.length === 0 ? (
+          <div className="py-16 text-center">
+            <span className="material-symbols-outlined text-slate-300 text-5xl">sports_score</span>
+            <p className="text-slate-400 mt-2">Không có sân nào.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredCourts.map((court) => {
+              const isUpdating = updatingId === court.ma_san;
+              const currentOpt = STATUS_OPTIONS.find((o) => o.value === court.trang_thai_san) || STATUS_OPTIONS[0];
+
+              return (
+                <div
+                  key={court.ma_san}
+                  className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all ${
+                    isUpdating ? "opacity-60 pointer-events-none" : ""
+                  }`}
+                >
+                  {/* Thumbnail */}
+                  <div className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 ${court.trang_thai_san !== "Đang hoạt động" ? "grayscale-[0.5]" : ""}`}>
+                    <Image
+                      src={court.anhsan?.[0]?.duong_dan_anh || "/hero-stadium.png"}
+                      alt={court.ten_san}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold text-slate-900 truncate">{court.ten_san}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${currentOpt.bg}`}>
+                        <span className="material-symbols-outlined text-[10px]">{currentOpt.icon}</span>
+                        {court.trang_thai_san}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {court.loai_the_thao}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 3 status buttons */}
+                  <div className="flex gap-1.5 shrink-0">
+                    {STATUS_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() => handleStatusChange(court.ma_san, opt.value)}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                          court.trang_thai_san === opt.value ? opt.activeBg : opt.bg
+                        } ${isUpdating ? "cursor-wait" : "cursor-pointer hover:scale-105 active:scale-95"}`}
+                      >
+                        <span className="material-symbols-outlined text-xs mr-0.5 align-middle" style={{ fontVariationSettings: "'FILL' 1" }}>
+                          {opt.icon}
+                        </span>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Loading indicator */}
+                  {isUpdating && (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary shrink-0" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
-  );
-}
-
-// Types for badge config
-interface BadgeConfig {
-  style: string;
-  icon: React.ReactNode;
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const badgeMap: Record<string, BadgeConfig> = {
-    "Đang hoạt động": {
-      style: "bg-green-100 text-green-700",
-      icon: <CheckCircle2 className="w-3 h-3" />
-    },
-    "Đang bảo trì": {
-      style: "bg-amber-100 text-amber-700",
-      icon: <Wrench className="w-3 h-3" />
-    },
-    "Đã khóa": {
-      style: "bg-red-100 text-red-700",
-      icon: <AlertCircle className="w-3 h-3" />
-    }
-  };
-  
-  const config = badgeMap[status] || badgeMap["Đang bảo trì"];
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold ${config.style}`}>
-      {config.icon} {status.toUpperCase()}
-    </span>
   );
 }

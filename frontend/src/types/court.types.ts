@@ -57,7 +57,11 @@ export interface OwnerCourt {
   loai_the_thao: string;
   trang_thai_san: string;
   gia_thue_30p: number;
-  anhsan?: { duong_dan_anh: string }[];
+  anhsan?: {
+    ma_anh_san: string;
+    duong_dan_anh: string;
+    ma_cloudinary: string;
+  }[];
 }
 
 // API response types

@@ -47,6 +47,29 @@ export class UserRepository {
     }
     return newId;
   }
+
+  async updateStatus(id: string, trang_thai: boolean) {
+    return prisma.nguoidung.update({
+      where: { ma_nguoi_dung: id },
+      data: { trang_thai }
+    });
+  }
+
+  async findOwnersPending() {
+    return prisma.nguoidung.findMany({
+      where: {
+        vai_tro: 'Chủ sân',
+        trang_thai: false
+      }
+    });
+  }
+
+  async approveOwner(id: string) {
+    return prisma.nguoidung.update({
+      where: { ma_nguoi_dung: id },
+      data: { trang_thai: true }
+    });
+  }
 }
 
 export const userRepository = new UserRepository();
