@@ -29,6 +29,7 @@ export const authService = {
     formData.append("dia_chi", data.dia_chi);
     if (data.anh_cccd_truoc) formData.append("anh_cccd_truoc", data.anh_cccd_truoc);
     if (data.anh_cccd_sau) formData.append("anh_cccd_sau", data.anh_cccd_sau);
+    if (data.anh_dai_dien) formData.append("anh_dai_dien", data.anh_dai_dien);
 
     return apiPost<AuthResponse>("/owner/register", formData, null, false);
   },

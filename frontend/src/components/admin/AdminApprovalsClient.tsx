@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin.service";
 
@@ -14,6 +15,7 @@ interface PendingOwner {
   vai_tro: string;
   trang_thai: boolean;
   ngay_tao: string;
+  anh_dai_dien: string | null;
   anh_cccd_truoc: string | null;
   anh_cccd_sau: string | null;
 }
@@ -31,6 +33,7 @@ interface Location {
     ho_ten: string;
     email: string;
     so_dien_thoai: string | null;
+    trang_thai: boolean;
   };
   san: { ma_san: string }[];
 }
@@ -236,49 +239,86 @@ export default function AdminApprovalsClient() {
               <div className="space-y-4">
                 {pendingOwners.map((owner) => (
                   <div key={owner.ma_nguoi_dung} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      {/* Avatar + Info */}
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold shrink-0">
-                          {getInitials(owner.ho_ten)}
+                    <div className="flex flex-col gap-4">
+                      {/* Top: Avatar + Info + Button */}
+                      <div className="flex items-start gap-4">
+                        {/* Avatar */}
+                        <div className="w-16 h-16 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                          {owner.anh_dai_dien ? (
+                            <Image
+                              src={owner.anh_dai_dien}
+                              alt={owner.ho_ten}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">
+                              {getInitials(owner.ho_ten)}
+                            </div>
+                          )}
                         </div>
-                        <div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
                           <h4 className="text-base font-bold text-slate-900">{owner.ho_ten}</h4>
-                          <p className="text-sm text-slate-400">{owner.email} • {owner.so_dien_thoai || "—"}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">Đăng ký: {formatDate(owner.ngay_tao)}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm">
+                            <p className="text-slate-500 flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm text-slate-400">mail</span>
+                              {owner.email}
+                            </p>
+                            <p className="text-slate-500 flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm text-slate-400">call</span>
+                              {owner.so_dien_thoai || "—"}
+                            </p>
+                            <p className="text-slate-500 flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm text-slate-400">calendar_today</span>
+                              Đăng ký: {formatDate(owner.ngay_tao)}
+                            </p>
+                          </div>
                         </div>
+
+                        {/* Action */}
+                        <button
+                          onClick={() => handleApproveOwner(owner.ma_nguoi_dung)}
+                          disabled={approvingOwnerId === owner.ma_nguoi_dung}
+                          className={`px-5 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-colors flex items-center gap-2 shadow-sm shrink-0 ${
+                            approvingOwnerId === owner.ma_nguoi_dung ? "opacity-50 cursor-wait" : ""
+                          }`}
+                        >
+                          {approvingOwnerId === owner.ma_nguoi_dung ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                          ) : (
+                            <span className="material-symbols-outlined text-lg">check</span>
+                          )}
+                          Duyệt
+                        </button>
                       </div>
 
-                      {/* CCCD info */}
-                      <div className="flex items-center gap-2">
-                        {owner.anh_cccd_truoc ? (
-                          <span className="flex items-center gap-1 text-xs font-medium text-green-600">
-                            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                            Có CCCD
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
-                            <span className="material-symbols-outlined text-sm">warning</span>
-                            Chưa có CCCD
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Action */}
-                      <button
-                        onClick={() => handleApproveOwner(owner.ma_nguoi_dung)}
-                        disabled={approvingOwnerId === owner.ma_nguoi_dung}
-                        className={`px-5 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-colors flex items-center gap-2 shadow-sm shrink-0 ${
-                          approvingOwnerId === owner.ma_nguoi_dung ? "opacity-50 cursor-wait" : ""
-                        }`}
-                      >
-                        {approvingOwnerId === owner.ma_nguoi_dung ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                        ) : (
-                          <span className="material-symbols-outlined text-lg">check</span>
-                        )}
-                        Duyệt
-                      </button>
+                      {/* CCCD Images */}
+                      {(owner.anh_cccd_truoc || owner.anh_cccd_sau) && (
+                        <div className="border-t border-gray-100 pt-4">
+                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Ảnh CCCD</p>
+                          <div className="grid grid-cols-2 gap-4">
+                            {owner.anh_cccd_truoc && (
+                              <a href={owner.anh_cccd_truoc} target="_blank" rel="noreferrer" className="block group">
+                                <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 group-hover:border-blue-300 transition-colors">
+                                  <Image src={owner.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="(max-width: 768px) 50vw, 400px" className="object-contain" />
+                                </div>
+                                <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt trước</p>
+                              </a>
+                            )}
+                            {owner.anh_cccd_sau && (
+                              <a href={owner.anh_cccd_sau} target="_blank" rel="noreferrer" className="block group">
+                                <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 group-hover:border-blue-300 transition-colors">
+                                  <Image src={owner.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="(max-width: 768px) 50vw, 400px" className="object-contain" />
+                                </div>
+                                <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt sau</p>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -394,7 +434,13 @@ export default function AdminApprovalsClient() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           {!loc.trang_thai_duyet ? (
-                            <div className="flex items-center justify-center gap-2">
+                            !loc.nguoidung.trang_thai ? (
+                              <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-slate-500 inline-flex items-center gap-1" title="Chủ sân chưa được duyệt">
+                                <span className="material-symbols-outlined text-sm">block</span>
+                                Chờ duyệt chủ sân
+                              </span>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => handleApproveLocation(loc.ma_dia_diem)}
                                 disabled={approvingLocationId === loc.ma_dia_diem}
@@ -423,7 +469,8 @@ export default function AdminApprovalsClient() {
                                 )}
                                 Từ chối
                               </button>
-                            </div>
+                              </div>
+                            )
                           ) : (
                             <span className="text-xs text-slate-400">—</span>
                           )}

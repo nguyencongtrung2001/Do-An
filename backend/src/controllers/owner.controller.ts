@@ -2,18 +2,33 @@ import type { Request, Response, NextFunction } from 'express';
 import { ownerService } from '../services/owner.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
+import cloudinary from '../config/cloudinary.config.js';
 
 export const registerOwner = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi } = req.body;
 
-    // Extract CCCD image URLs from Cloudinary via Multer
+    // Extract files from Multer
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const anh_cccd_truoc = files?.['anh_cccd_truoc']?.[0]?.path || '';
-    const anh_cccd_sau = files?.['anh_cccd_sau']?.[0]?.path || '';
+    const cccdTruocFile = files?.['anh_cccd_truoc']?.[0];
+    const cccdSauFile = files?.['anh_cccd_sau']?.[0];
+    const avatarFile = files?.['anh_dai_dien']?.[0];
 
-    if (!anh_cccd_truoc || !anh_cccd_sau) {
+    if (!cccdTruocFile || !cccdSauFile) {
       throw new ApiError(400, "Thiếu ảnh CCCD");
+    }
+
+    // Upload CCCD images to Cloudinary
+    const [cccdTruocResult, cccdSauResult] = await Promise.all([
+      cloudinary.uploader.upload(cccdTruocFile.path, { folder: 'bookingsport/cccd' }),
+      cloudinary.uploader.upload(cccdSauFile.path, { folder: 'bookingsport/cccd' }),
+    ]);
+
+    // Upload avatar if provided
+    let anh_dai_dien: string | undefined;
+    if (avatarFile) {
+      const avatarResult = await cloudinary.uploader.upload(avatarFile.path, { folder: 'bookingsport/avatars' });
+      anh_dai_dien = avatarResult.secure_url;
     }
 
     const result = await ownerService.registerOwner({
@@ -23,8 +38,9 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
       mat_khau,
       ten_dia_diem,
       dia_chi,
-      anh_cccd_truoc,
-      anh_cccd_sau
+      anh_cccd_truoc: cccdTruocResult.secure_url,
+      anh_cccd_sau: cccdSauResult.secure_url,
+      anh_dai_dien,
     });
 
     res.status(201).json({

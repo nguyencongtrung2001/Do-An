@@ -11,6 +11,15 @@ const cccdStorage = new CloudinaryStorage({
   } as any,
 });
 
+// Storage for avatar images
+const avatarStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'bookingsport/avatars',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  } as any,
+});
+
 // Storage for court images
 const courtStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -21,6 +30,14 @@ const courtStorage = new CloudinaryStorage({
 });
 
 export const uploadCCCD = multer({ storage: cccdStorage }).fields([
+  { name: 'anh_cccd_truoc', maxCount: 1 },
+  { name: 'anh_cccd_sau', maxCount: 1 }
+]);
+
+export const uploadOwnerFiles = multer({
+  storage: multer.diskStorage({}),
+}).fields([
+  { name: 'anh_dai_dien', maxCount: 1 },
   { name: 'anh_cccd_truoc', maxCount: 1 },
   { name: 'anh_cccd_sau', maxCount: 1 }
 ]);

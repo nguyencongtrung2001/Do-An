@@ -7,6 +7,7 @@ export interface CreateOwner {
     anh_cccd_sau:string;
     ten_dia_diem:string;
     dia_chi:string;
+    anh_dai_dien?:string;
 }
 
 export interface LoginOwner {

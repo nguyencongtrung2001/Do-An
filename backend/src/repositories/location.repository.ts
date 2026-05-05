@@ -50,7 +50,7 @@ export class LocationRepository {
     return prisma.diadiem.findMany({
       include: {
         nguoidung: {
-          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true }
+          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true, trang_thai: true }
         },
         san: true
       },
@@ -63,7 +63,7 @@ export class LocationRepository {
       where: { trang_thai_duyet: false },
       include: {
         nguoidung: {
-          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true }
+          select: { ma_nguoi_dung: true, ho_ten: true, email: true, so_dien_thoai: true, trang_thai: true }
         },
         san: true
       },
@@ -82,6 +82,13 @@ export class LocationRepository {
     return prisma.diadiem.update({
       where: { ma_dia_diem: id },
       data: { trang_thai_duyet: false }
+    });
+  }
+
+  async updateStatusByOwnerId(userId: string, status: boolean) {
+    return prisma.diadiem.updateMany({
+      where: { ma_nguoi_dung: userId },
+      data: { trang_thai_duyet: status }
     });
   }
 }

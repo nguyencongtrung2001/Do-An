@@ -278,8 +278,12 @@ export default function AdminUsersClient() {
                       <tr key={user.ma_nguoi_dung} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-full ${getAvatarColor(user.vai_tro)} flex items-center justify-center text-xs font-bold`}>
-                              {getInitials(user.ho_ten)}
+                            <div className={`w-9 h-9 rounded-full ${getAvatarColor(user.vai_tro)} flex items-center justify-center text-xs font-bold overflow-hidden shrink-0`}>
+                              {user.anh_dai_dien ? (
+                                <Image src={user.anh_dai_dien} alt={user.ho_ten} width={36} height={36} className="w-full h-full object-cover" />
+                              ) : (
+                                getInitials(user.ho_ten)
+                              )}
                             </div>
                             <div>
                               <p className="font-semibold text-slate-900">{user.ho_ten}</p>
@@ -375,8 +379,12 @@ export default function AdminUsersClient() {
             </div>
             <div className="p-6 overflow-y-auto flex-1">
               <div className="flex items-center gap-4 mb-6">
-                <div className={`w-16 h-16 rounded-2xl ${getAvatarColor(selectedUser.vai_tro)} flex items-center justify-center text-xl font-bold`}>
-                  {getInitials(selectedUser.ho_ten)}
+                <div className={`w-16 h-16 rounded-2xl ${getAvatarColor(selectedUser.vai_tro)} flex items-center justify-center text-xl font-bold overflow-hidden shrink-0`}>
+                  {selectedUser.anh_dai_dien ? (
+                    <Image src={selectedUser.anh_dai_dien} alt={selectedUser.ho_ten} width={64} height={64} className="w-full h-full object-cover" />
+                  ) : (
+                    getInitials(selectedUser.ho_ten)
+                  )}
                 </div>
                 <div>
                   <h4 className="text-lg font-bold text-slate-900">{selectedUser.ho_ten}</h4>
@@ -405,18 +413,18 @@ export default function AdminUsersClient() {
                   <div className="grid grid-cols-2 gap-3">
                     {selectedUser.anh_cccd_truoc && (
                       <a href={selectedUser.anh_cccd_truoc} target="_blank" rel="noreferrer" className="block hover:opacity-80 transition-opacity">
-                        <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100">
-                          <Image src={selectedUser.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
+                        <div className="relative w-full h-40 rounded-lg overflow-hidden bg-slate-900 border border-gray-200">
+                          <Image src={selectedUser.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="(max-width: 768px) 50vw, 300px" className="object-contain" />
                         </div>
-                        <p className="text-xs text-center text-slate-400 mt-1">Mặt trước</p>
+                        <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt trước</p>
                       </a>
                     )}
                     {selectedUser.anh_cccd_sau && (
                       <a href={selectedUser.anh_cccd_sau} target="_blank" rel="noreferrer" className="block hover:opacity-80 transition-opacity">
-                        <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100">
-                          <Image src={selectedUser.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
+                        <div className="relative w-full h-40 rounded-lg overflow-hidden bg-slate-900 border border-gray-200">
+                          <Image src={selectedUser.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="(max-width: 768px) 50vw, 300px" className="object-contain" />
                         </div>
-                        <p className="text-xs text-center text-slate-400 mt-1">Mặt sau</p>
+                        <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt sau</p>
                       </a>
                     )}
                   </div>

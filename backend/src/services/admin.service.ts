@@ -25,7 +25,15 @@ export class AdminService {
             throw new ApiError(404, "Không tìm thấy người dùng");
         }
         const newStatus = !user.trang_thai;
-        return userRepository.updateStatus(id, newStatus);
+        
+        const updatedUser = await userRepository.updateStatus(id, newStatus);
+
+        // Nếu tài khoản bị khóa (false) và là Chủ sân, thì khóa luôn tất cả địa điểm của họ
+        if (!newStatus && user.vai_tro === 'Chủ sân') {
+            await locationRepository.updateStatusByOwnerId(id, false);
+        }
+
+        return updatedUser;
     }
 
     // ── Owner Approval ────────────────────────────────────

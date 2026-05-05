@@ -36,6 +36,8 @@ export default function AuthClient() {
   const [signupAddress, setSignupAddress] = useState("");
   const [cccdTruoc, setCccdTruoc] = useState<File | null>(null);
   const [cccdSau, setCccdSau] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -107,6 +109,7 @@ export default function AuthClient() {
           dia_chi: signupAddress,
           anh_cccd_truoc: cccdTruoc,
           anh_cccd_sau: cccdSau,
+          anh_dai_dien: avatarFile,
         });
       } else {
         data = await authService.registerUser({
@@ -381,6 +384,37 @@ export default function AuthClient() {
               {/* Owner Specific Fields */}
               {role === "owner" && (
                 <div className="flex flex-col gap-4 auth-fade-in">
+                  {/* Avatar Upload */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh đại diện</label>
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
+                        {avatarPreview ? (
+                          <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="material-symbols-outlined text-3xl text-slate-300">person</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          className="bg-transparent outline-none text-sm text-slate-900 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setAvatarFile(file);
+                            if (file) {
+                              setAvatarPreview(URL.createObjectURL(file));
+                            } else {
+                              setAvatarPreview(null);
+                            }
+                          }}
+                        />
+                        <p className="text-xs text-slate-400 mt-1">JPG, PNG tối đa 5MB</p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Location Name */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Tên địa điểm / Cơ sở</label>

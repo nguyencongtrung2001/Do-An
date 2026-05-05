@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { uploadCCCD, uploadCourt } from '../middlewares/upload.middleware.js';
+import { uploadOwnerFiles, uploadCourt } from '../middlewares/upload.middleware.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import {
   registerOwner,
@@ -12,7 +12,7 @@ import {
 
 const router = Router();
 
-router.post('/register', uploadCCCD, registerOwner);
+router.post('/register', uploadOwnerFiles, registerOwner);
 router.get('/my-courts', authenticate, getMyCourts);
 router.post('/add-court', authenticate, uploadCourt, addCourt);
 router.put('/update-court/:ma_san', authenticate, uploadCourt, updateCourt);
