@@ -67,7 +67,7 @@ export default function AuthClient() {
       
       // Navigate based on role
       if (data.user.vai_tro === "Quản trị viên") {
-        router.push("/users");
+        router.push("/admin/users");
       } else if (data.user.vai_tro === "Chủ sân") {
         router.push("/dashboard");
       } else {

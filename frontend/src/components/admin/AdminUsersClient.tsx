@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin.service";
 
@@ -19,17 +20,49 @@ interface DbUser {
 }
 
 export default function AdminUsersClient() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const { token } = useAuth();
   const [users, setUsers] = useState<DbUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<DbUser | null>(null);
 
   const PAGE_SIZE = 10;
-  const [page, setPage] = useState(1);
+  const searchQuery = searchParams.get("search") || "";
+  const roleFilter = searchParams.get("role") || "all";
+  const statusFilter = searchParams.get("status") || "all";
+  const page = parseInt(searchParams.get("page") || "1", 10);
+
+  const updateQueryParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === "") params.delete(key);
+        else params.set(key, value);
+      });
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router]
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateQueryParams({ search: e.target.value, page: "1" });
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateQueryParams({ role: e.target.value !== "all" ? e.target.value : null, page: "1" });
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateQueryParams({ status: e.target.value !== "all" ? e.target.value : null, page: "1" });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateQueryParams({ page: newPage > 1 ? newPage.toString() : null });
+  };
 
   const fetchUsers = useCallback(async () => {
     if (!token) return;
@@ -65,9 +98,6 @@ export default function AdminUsersClient() {
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, searchQuery, roleFilter, statusFilter]);
-
-  // Reset page when filter changes
-  useEffect(() => setPage(1), [searchQuery, roleFilter, statusFilter]);
 
   const pagedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
@@ -184,14 +214,14 @@ export default function AdminUsersClient() {
                 type="text"
                 placeholder="Tìm kiếm theo tên hoặc email..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearch}
                 className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
               />
             </div>
             <div className="relative">
               <select
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
+                onChange={handleRoleChange}
                 className="appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
               >
                 <option value="all">Tất cả vai trò</option>
@@ -204,7 +234,7 @@ export default function AdminUsersClient() {
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={handleStatusChange}
                 className="appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
               >
                 <option value="all">Tất cả trạng thái</option>
@@ -308,14 +338,14 @@ export default function AdminUsersClient() {
               </p>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
                   disabled={page === 1}
                   className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Trước
                 </button>
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                   className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
