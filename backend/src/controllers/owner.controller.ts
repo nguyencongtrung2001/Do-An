@@ -6,7 +6,7 @@ import cloudinary from '../config/cloudinary.config.js';
 
 export const registerOwner = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi } = req.body;
+    const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi, kinh_do, vi_do } = req.body;
 
     // Extract files from Multer
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -38,6 +38,8 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
       mat_khau,
       ten_dia_diem,
       dia_chi,
+      kinh_do: parseFloat(kinh_do),
+      vi_do: parseFloat(vi_do),
       anh_cccd_truoc: cccdTruocResult.secure_url,
       anh_cccd_sau: cccdSauResult.secure_url,
       anh_dai_dien,

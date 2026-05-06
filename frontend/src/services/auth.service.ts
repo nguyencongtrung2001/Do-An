@@ -27,6 +27,8 @@ export const authService = {
     formData.append("mat_khau", data.mat_khau);
     formData.append("ten_dia_diem", data.ten_dia_diem);
     formData.append("dia_chi", data.dia_chi);
+    if (data.kinh_do !== null) formData.append("kinh_do", data.kinh_do.toString());
+    if (data.vi_do !== null) formData.append("vi_do", data.vi_do.toString());
     if (data.anh_cccd_truoc) formData.append("anh_cccd_truoc", data.anh_cccd_truoc);
     if (data.anh_cccd_sau) formData.append("anh_cccd_sau", data.anh_cccd_sau);
     if (data.anh_dai_dien) formData.append("anh_dai_dien", data.anh_dai_dien);

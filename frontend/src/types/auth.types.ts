@@ -26,6 +26,8 @@ export interface OwnerRegisterRequest {
   mat_khau: string;
   ten_dia_diem: string;
   dia_chi: string;
+  kinh_do: number | null;
+  vi_do: number | null;
   anh_cccd_truoc: File | null;
   anh_cccd_sau: File | null;
   anh_dai_dien: File | null;

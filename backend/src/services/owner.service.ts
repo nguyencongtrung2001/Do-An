@@ -11,7 +11,7 @@ import cloudinary from '../config/cloudinary.config.js';
 
 export class OwnerService {
   async registerOwner(data: CreateOwner) {
-    const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau, ten_dia_diem, dia_chi } = data;
+    const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau, ten_dia_diem, dia_chi, kinh_do, vi_do, anh_dai_dien } = data;
 
     // 1. Check if email or phone already exists
     const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
@@ -41,7 +41,8 @@ export class OwnerService {
           vai_tro: "Chủ sân",
           trang_thai: false, // Wait for admin approval
           anh_cccd_truoc,
-          anh_cccd_sau
+          anh_cccd_sau,
+          anh_dai_dien: anh_dai_dien || null
         }
       });
 
@@ -50,8 +51,8 @@ export class OwnerService {
           ma_dia_diem: newLocationId,
           ten_dia_diem,
           dia_chi,
-          kinh_do: 108.2022,
-          vi_do: 16.0544,
+          kinh_do,
+          vi_do,
           ma_nguoi_dung: newUserId
         }
       });

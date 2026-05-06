@@ -6,6 +6,12 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import type { UserData } from "@/types/auth.types";
+import dynamic from "next/dynamic";
+
+const VenueMapSelector = dynamic(
+  () => import("@/components/map/VenueMapSelector"),
+  { ssr: false }
+);
 
 type AuthTab = "login" | "signup";
 type Role = "player" | "owner";
@@ -38,6 +44,10 @@ export default function AuthClient() {
   const [cccdSau, setCccdSau] = useState<File | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  
+  // Coordinates
+  const [kinhDo, setKinhDo] = useState<number | null>(null);
+  const [viDo, setViDo] = useState<number | null>(null);
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -107,6 +117,8 @@ export default function AuthClient() {
           mat_khau: signupPassword,
           ten_dia_diem: signupLocationName,
           dia_chi: signupAddress,
+          kinh_do: kinhDo,
+          vi_do: viDo,
           anh_cccd_truoc: cccdTruoc,
           anh_cccd_sau: cccdSau,
           anh_dai_dien: avatarFile,
@@ -445,6 +457,20 @@ export default function AuthClient() {
                         onChange={(e) => setSignupAddress(e.target.value)}
                       />
                     </div>
+                  </div>
+
+                  {/* Map Selector */}
+                  <div className="flex flex-col gap-1.5 mt-2">
+                    <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Vị trí trên bản đồ</label>
+                    <VenueMapSelector
+                      onLocationSelect={(lat, lng) => {
+                        setViDo(lat);
+                        setKinhDo(lng);
+                      }}
+                    />
+                    {(!kinhDo || !viDo) && (
+                      <p className="text-xs text-red-500 mt-1">Vui lòng chọn vị trí trên bản đồ để khách hàng dễ dàng tìm kiếm.</p>
+                    )}
                   </div>
 
                   {/* CCCD Front */}
