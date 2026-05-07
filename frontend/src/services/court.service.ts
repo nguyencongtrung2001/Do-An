@@ -11,6 +11,10 @@ export const courtService = {
     return apiGet<FieldListResponse>('/field');
   },
 
+  async getMapLocations(sportType: string): Promise<any> {
+    return apiGet<any>(`/field/map-locations?sport=${encodeURIComponent(sportType)}`);
+  },
+
   async getOwnerCourts(token: string): Promise<OwnerCourtsResponse> {
     return apiGet<OwnerCourtsResponse>('/owner/my-courts', token);
   },

@@ -1,4 +1,5 @@
 import { courtRepository } from "../repositories/court.repository.js";
+import prisma from '../config/prisma.js';
 
 export class FieldService {
   async getFields() {
@@ -35,6 +36,70 @@ export class FieldService {
     });
 
     return result;
+  }
+
+  async getMapLocations(sportType: string) {
+    const whereClause: any = {
+      trang_thai_duyet: true,
+    };
+
+    if (sportType !== 'all') {
+      const sportMap: Record<string, string> = {
+        'bong-da': 'Bóng đá',
+        'cau-long': 'Cầu lông',
+        'pickleball': 'Pickleball',
+        'bong-ro': 'Bóng rổ',
+        'tennis': 'Tennis',
+        'bida': 'Bida'
+      };
+      const dbSportName = sportMap[sportType] || sportType;
+
+      whereClause.san = {
+        some: {
+          loai_the_thao: {
+            contains: dbSportName,
+            mode: 'insensitive'
+          }
+        },
+      };
+    }
+
+    const locations = await prisma.diadiem.findMany({
+      where: whereClause,
+      include: {
+        san: {
+          select: {
+            loai_the_thao: true,
+            anhsan: {
+              take: 1,
+              select: { duong_dan_anh: true }
+            }
+          },
+        },
+      },
+    });
+
+    return locations.map(loc => {
+      const sports = Array.from(new Set(loc.san.map(s => s.loai_the_thao)));
+      // Lấy ảnh đại diện từ sân đầu tiên nếu có
+      let image = "/images/categories/soccer.png";
+      for (const s of loc.san) {
+        if (s.anhsan && s.anhsan.length > 0 && s.anhsan[0]?.duong_dan_anh) {
+          image = s.anhsan[0].duong_dan_anh;
+          break;
+        }
+      }
+
+      return {
+        ma_dia_diem: loc.ma_dia_diem,
+        ten_dia_diem: loc.ten_dia_diem,
+        dia_chi: loc.dia_chi,
+        lat: Number(loc.vi_do),
+        lng: Number(loc.kinh_do),
+        sports: sports,
+        image: image
+      };
+    });
   }
 }
 

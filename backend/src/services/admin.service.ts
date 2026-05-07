@@ -36,6 +36,14 @@ export class AdminService {
         return updatedUser;
     }
 
+    async deleteUser(id: string) {
+        const user = await userRepository.findById(id);
+        if (!user) {
+            throw new ApiError(404, "Không tìm thấy người dùng");
+        }
+        return userRepository.delete(id);
+    }
+
     // ── Owner Approval ────────────────────────────────────
 
     async getPendingOwners() {

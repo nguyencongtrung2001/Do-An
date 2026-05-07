@@ -14,15 +14,16 @@ function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   return null;
 }
 
-import type { CourtMapData } from "@/types/court.types";
+import type { LocationMapData } from "@/types/court.types";
+import { Popup } from "react-leaflet";
 
 interface MapViewProps {
-  courts: CourtMapData[];
-  onMarkerClick: (court: CourtMapData) => void;
-  activeId?: number;
+  locations: LocationMapData[];
+  onMarkerClick: (location: LocationMapData) => void;
+  activeId?: string;
 }
 
-export default function MapView({ courts, onMarkerClick, activeId }: MapViewProps) {
+export default function MapView({ locations, onMarkerClick, activeId }: MapViewProps) {
   const customIcon = (isActive: boolean) => L.divIcon({
     className: 'custom-marker',
     html: `
@@ -42,19 +43,33 @@ export default function MapView({ courts, onMarkerClick, activeId }: MapViewProp
     >
       <TileLayer url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" />
       
-      {courts.map((court: any) => (
+      {locations.map((loc) => (
         <Marker 
-          key={court.id} 
-          position={[court.lat, court.lng]} 
-          icon={customIcon(activeId === court.id)}
-          eventHandlers={{ click: () => onMarkerClick(court) }}
-        />
+          key={loc.ma_dia_diem} 
+          position={[loc.lat, loc.lng]} 
+          icon={customIcon(activeId === loc.ma_dia_diem)}
+          eventHandlers={{ click: () => onMarkerClick(loc) }}
+        >
+          <Popup closeButton={false} offset={[0, -25]}>
+            <div className="w-48 p-1">
+              <h3 className="font-bold text-slate-900 mb-1">{loc.ten_dia_diem}</h3>
+              <p className="text-xs text-slate-500 mb-2 truncate">{loc.dia_chi}</p>
+              <div className="flex flex-wrap gap-1">
+                {loc.sports.map((sport, index) => (
+                  <span key={index} className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold rounded-md">
+                    {sport}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Popup>
+        </Marker>
       ))}
 
-      {activeId !== undefined && courts.find((c) => c.id === activeId) && (
+      {activeId !== undefined && locations.find((c) => c.ma_dia_diem === activeId) && (
         <RecenterMap 
-            lat={courts.find((c) => c.id === activeId)!.lat} 
-            lng={courts.find((c) => c.id === activeId)!.lng} 
+            lat={locations.find((c) => c.ma_dia_diem === activeId)!.lat} 
+            lng={locations.find((c) => c.ma_dia_diem === activeId)!.lng} 
         />
       )}
     </MapContainer>

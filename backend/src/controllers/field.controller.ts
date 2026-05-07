@@ -9,3 +9,13 @@ export const getFields = async (req: Request, res: Response, next: NextFunction)
         next(error);
     }
 }
+
+export const getMapLocations = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const sportType = req.query.sport as string || 'all';
+        const locations = await fieldService.getMapLocations(sportType);
+        res.status(200).json(locations);
+    } catch (error) {
+        next(error);
+    }
+}

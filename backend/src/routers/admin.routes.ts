@@ -9,6 +9,7 @@ import {
   getPendingLocations,
   approveLocation,
   rejectLocation,
+  deleteUser,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -17,6 +18,7 @@ const router = Router();
 router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
 router.put('/users/:id/toggle-status', toggleUserStatus);
+router.delete('/users/:id', deleteUser);
 
 // Owner approval
 router.get('/owners/pending', getPendingOwners);

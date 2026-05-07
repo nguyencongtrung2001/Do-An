@@ -17,6 +17,7 @@ interface DbUser {
   anh_dai_dien: string | null;
   anh_cccd_truoc: string | null;
   anh_cccd_sau: string | null;
+  mat_khau?: string;
 }
 
 export default function AdminUsersClient() {
@@ -127,7 +128,9 @@ export default function AdminUsersClient() {
     }
   };
 
-  const closeModal = () => setSelectedUser(null);
+  const closeModal = () => {
+    setSelectedUser(null);
+  };
 
   const getRoleBadge = (role: string) => {
     if (role === "Chủ sân") return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">Chủ sân</span>;

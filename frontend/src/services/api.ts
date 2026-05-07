@@ -74,4 +74,14 @@ export async function apiPatch<T>(path: string, body: BodyInit, token?: string |
   return handleResponse<T>(res);
 }
 
+export async function apiDelete<T>(path: string, token?: string | null): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "DELETE",
+    headers: {
+      ...getAuthHeaders(token),
+    },
+  });
+  return handleResponse<T>(res);
+}
+
 export { API_BASE_URL };

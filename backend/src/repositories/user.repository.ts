@@ -55,6 +55,12 @@ export class UserRepository {
     });
   }
 
+  async delete(id: string) {
+    return prisma.nguoidung.delete({
+      where: { ma_nguoi_dung: id }
+    });
+  }
+
   async findOwnersPending() {
     return prisma.nguoidung.findMany({
       where: {

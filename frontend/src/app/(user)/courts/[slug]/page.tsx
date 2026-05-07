@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation";
-import { MOCK_COURTS } from "@/lib/mock-courts";
+
 import ImageGallery from "@/components/courts/ImageGallery";
 import BookingSection from "@/components/courts/BookingSection";
 
@@ -9,21 +8,27 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const court = MOCK_COURTS[slug];
-  if (!court) return { title: "Không tìm thấy sân" };
   return {
-    title: court.name,
-    description: `Đặt sân ${court.name} tại ${court.address}. Giá từ ${court.pricePerSlot.toLocaleString("vi-VN")}đ/30 phút.`,
+    title: `Chi tiết địa điểm ${slug}`,
+    description: `Đặt sân tại địa điểm ${slug}.`,
   };
 }
 
 export default async function CourtDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const court = MOCK_COURTS[slug];
-
-  if (!court) {
-    notFound();
-  }
+  
+  // Create a dummy court object based on the slug (which is actually the location ID)
+  // This replaces the MOCK_COURTS dependency and prevents 404 errors when navigating from the map.
+  const court = {
+    name: `Địa điểm ${slug}`,
+    address: "Đang cập nhật địa chỉ...",
+    rating: 4.8,
+    reviewCount: 125,
+    pricePerSlot: 100000,
+    images: ["/images/categories/soccer.png", "/images/categories/tennis.png"],
+    courts: [],
+    bookedSlots: []
+  };
 
   return (
     <div className="flex flex-col">
@@ -64,7 +69,7 @@ export default async function CourtDetailPage({ params }: PageProps) {
       </div>
 
       {/* Booking Section — Full width */}
-      <BookingSection courts={court.courts} bookedSlots={court.bookedSlots} pricePerSlot={court.pricePerSlot} />
+      <BookingSection pricePerSlot={court.pricePerSlot} />
     </div>
   );
 }

@@ -24,6 +24,13 @@ export const toggleUserStatus = async (req: Request<{ id: string }>, res: Respon
   } catch (err) { next(err); }
 };
 
+export const deleteUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  try {
+    await adminService.deleteUser(req.params.id);
+    res.status(200).json({ success: true, message: 'Đã xóa người dùng thành công' });
+  } catch (err) { next(err); }
+};
+
 // ── Owner Approval ────────────────────────────────────
 
 export const getPendingOwners = async (_req: Request, res: Response, next: NextFunction) => {

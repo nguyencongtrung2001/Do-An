@@ -50,6 +50,17 @@ export interface CourtMapData {
   slug: string;
 }
 
+// Data for locations in the map
+export interface LocationMapData {
+  ma_dia_diem: string;
+  ten_dia_diem: string;
+  dia_chi: string;
+  lat: number;
+  lng: number;
+  sports: string[];
+  image: string;
+}
+
 // Owner court type from API
 export interface OwnerCourt {
   ma_san: string;

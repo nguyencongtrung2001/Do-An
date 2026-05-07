@@ -1,4 +1,4 @@
-import { apiGet, apiPut } from './api';
+import { apiGet, apiPut, apiDelete } from './api';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ApiResponse = { success: boolean; [key: string]: any };
@@ -16,6 +16,10 @@ export const adminService = {
 
   async toggleUserStatus(token: string, id: string): Promise<ApiResponse> {
     return apiPut<ApiResponse>(`/admin/users/${id}/toggle-status`, '{}', token);
+  },
+
+  async deleteUser(token: string, id: string): Promise<ApiResponse> {
+    return apiDelete<ApiResponse>(`/admin/users/${id}`, token);
   },
 
   // ── Owner Approval ────────────────────────────────────
