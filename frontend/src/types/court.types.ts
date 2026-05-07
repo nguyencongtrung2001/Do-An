@@ -94,3 +94,36 @@ export interface UpdateCourtResponse {
   message: string;
   court: unknown;
 }
+
+// Detail court within a location
+export interface DetailCourt {
+  ma_san: string;
+  ten_san: string;
+  loai_the_thao: string;
+  gia_thue_30p: number;
+  trang_thai_san: string;
+  so_sao: number;
+  so_danh_gia: number;
+  anhsan: {
+    ma_anh_san: string;
+    duong_dan_anh: string;
+    ma_cloudinary: string;
+  }[];
+}
+
+// Location detail response from GET /field/slug/:slug
+export interface LocationDetail {
+  ma_dia_diem: string;
+  ten_dia_diem: string;
+  dia_chi: string;
+  mo_ta: string | null;
+  kinh_do: number;
+  vi_do: number;
+  so_dien_thoai: string | null;
+  anh_dai_dien: string | null;
+  danh_gia_tb: number;
+  so_danh_gia: number;
+  sports: string[];
+  hinh_anh: string[];
+  sans: DetailCourt[];
+}

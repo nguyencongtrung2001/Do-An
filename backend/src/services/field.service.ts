@@ -101,6 +101,91 @@ export class FieldService {
       };
     });
   }
+
+  async getLocationBySlug(slug: string) {
+    const location = await courtRepository.findLocationBySlug(slug);
+
+    if (!location) return null;
+
+    // Collect all unique images from all courts
+    const allImages: string[] = [];
+    const imageSet = new Set<string>();
+    for (const court of location.san) {
+      for (const img of court.anhsan) {
+        if (!imageSet.has(img.duong_dan_anh)) {
+          imageSet.add(img.duong_dan_anh);
+          allImages.push(img.duong_dan_anh);
+        }
+      }
+    }
+    if (allImages.length === 0) {
+      allImages.push("/images/categories/soccer.png");
+    }
+
+    // Calculate average rating & review count across all courts
+    let totalStars = 0;
+    let reviewCount = 0;
+    for (const court of location.san) {
+      for (const booking of court.datsanchitiet) {
+        for (const review of booking.danhgia) {
+          if (review.so_sao) {
+            totalStars += review.so_sao;
+            reviewCount++;
+          }
+        }
+      }
+    }
+    const avgRating = reviewCount > 0 ? Number((totalStars / reviewCount).toFixed(1)) : 0;
+
+    // Group courts by sport type
+    const sports = Array.from(new Set(location.san.map(s => s.loai_the_thao)));
+
+    // Build court list
+    const courts = location.san.map(san => {
+      let courtStars = 0;
+      let courtReviews = 0;
+      for (const booking of san.datsanchitiet) {
+        for (const review of booking.danhgia) {
+          if (review.so_sao) {
+            courtStars += review.so_sao;
+            courtReviews++;
+          }
+        }
+      }
+      const courtAvg = courtReviews > 0 ? Number((courtStars / courtReviews).toFixed(1)) : 0;
+
+      return {
+        ma_san: san.ma_san,
+        ten_san: san.ten_san,
+        loai_the_thao: san.loai_the_thao,
+        gia_thue_30p: Number(san.gia_thue_30p),
+        trang_thai_san: san.trang_thai_san,
+        so_sao: courtAvg,
+        so_danh_gia: courtReviews,
+        anhsan: san.anhsan.map(img => ({
+          ma_anh_san: img.ma_anh_san,
+          duong_dan_anh: img.duong_dan_anh,
+          ma_cloudinary: img.ma_cloudinary
+        }))
+      };
+    });
+
+    return {
+      ma_dia_diem: location.ma_dia_diem,
+      ten_dia_diem: location.ten_dia_diem,
+      dia_chi: location.dia_chi,
+      mo_ta: location.mo_ta || null,
+      kinh_do: Number(location.kinh_do),
+      vi_do: Number(location.vi_do),
+      so_dien_thoai: location.nguoidung?.so_dien_thoai || null,
+      anh_dai_dien: location.nguoidung?.anh_dai_dien || null,
+      danh_gia_tb: avgRating,
+      so_danh_gia: reviewCount,
+      sports: sports,
+      hinh_anh: allImages,
+      sans: courts
+    };
+  }
 }
 
 export const fieldService = new FieldService();

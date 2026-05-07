@@ -4,6 +4,7 @@ import type {
   OwnerCourtsResponse,
   AddCourtResponse,
   UpdateCourtResponse,
+  LocationDetail,
 } from '@/types/court.types';
 
 export const courtService = {
@@ -66,5 +67,9 @@ export const courtService = {
       JSON.stringify({ trang_thai_san }),
       token,
     );
+  },
+
+  async getLocationBySlug(slug: string): Promise<LocationDetail> {
+    return apiGet<LocationDetail>(`/field/slug/${slug}`);
   },
 };

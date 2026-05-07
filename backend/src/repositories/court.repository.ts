@@ -104,6 +104,39 @@ export class CourtRepository {
     }
     return newImgId;
   }
+
+  async findLocationBySlug(slug: string) {
+    const locations = await prisma.diadiem.findMany({
+      where: { trang_thai_duyet: true },
+      include: {
+        san: {
+          where: { trang_thai_san: "Đang hoạt động" },
+          include: {
+            anhsan: true,
+            datsanchitiet: {
+              include: { danhgia: true }
+            }
+          }
+        },
+        nguoidung: {
+          select: { so_dien_thoai: true, anh_dai_dien: true }
+        }
+      }
+    });
+
+    const slugify = (str: string) =>
+      str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+
+    return locations.find(loc => slugify(loc.ten_dia_diem) === slug) || null;
+  }
 }
 
 export const courtRepository = new CourtRepository();

@@ -14,6 +14,18 @@ export function useFields() {
   const [mapItems, setMapItems] = useState<CourtMapData[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Slugify helper — matches backend
+  const slugify = (str: string): string =>
+    str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -34,7 +46,7 @@ export function useFields() {
           location: item.ten_dia_diem || "Chưa có tên địa điểm",
           address: item.dia_chi || "Chưa có địa chỉ",
           imageUrl: item.anh_dai_dien || "/images/categories/soccer.png",
-          slug: String(item.ma_san),
+          slug: item.ten_dia_diem ? slugify(item.ten_dia_diem) : String(item.ma_san),
         }));
 
         // Map to map items
@@ -53,7 +65,7 @@ export function useFields() {
             price: priceFormatted,
             rating: item.so_sao ? item.so_sao.toFixed(1) : "0.0",
             image: item.anh_dai_dien || "/images/categories/soccer.png",
-            slug: String(item.ma_san),
+            slug: item.ten_dia_diem ? slugify(item.ten_dia_diem) : String(item.ma_san),
           };
         });
 

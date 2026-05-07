@@ -11,6 +11,16 @@ interface DetailCardProps {
 }
 
 export default function DetailCard({ location, onClose }: DetailCardProps) {
+  const slug = location.ten_dia_diem
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+
   return (
     <div className="absolute bottom-8 left-8 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300 z-1001">
       {/* Banner Image */}
@@ -45,7 +55,7 @@ export default function DetailCard({ location, onClose }: DetailCardProps) {
           </div>
         </div>
         <div className="flex items-center justify-end mt-4">
-          <Link href={`/courts/${location.ma_dia_diem}`}>
+          <Link href={`/courts/${slug}`}>
             <Button className="w-full font-bold bg-primary hover:bg-primary/90">
                Đặt lịch ngay
             </Button>
