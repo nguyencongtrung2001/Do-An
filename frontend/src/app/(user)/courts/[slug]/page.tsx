@@ -7,18 +7,7 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Slugify helper (matches backend)
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim();
-}
+
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;

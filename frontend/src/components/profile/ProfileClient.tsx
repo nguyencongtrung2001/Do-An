@@ -1,16 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 export default function ProfileClient() {
-  const router = useRouter();
 
-  const handleLogout = () => {
-    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-      router.push("/login");
-    }
-  };
+ 
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 lg:px-8 py-8 min-h-[calc(100vh-200px)]">
@@ -90,35 +84,9 @@ export default function ProfileClient() {
         </div>
       </div>
 
-      {/* Menu List */}
-      <div className="bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden mb-6">
-        <div className="px-6 pt-5 pb-3">
-          <h3 className="text-xs font-bold uppercase text-slate-400 dark:text-slate-500 tracking-widest">Quản lý</h3>
-        </div>
+    
 
-        {/* Action Items could go here, e.g. "Sân yêu thích", "Đổi mật khẩu" */}
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-full menu-item flex items-center gap-4 px-6 py-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all cursor-pointer group"
-        >
-          <div className="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors">
-            <span className="material-symbols-outlined text-red-500 dark:text-red-400">logout</span>
-          </div>
-          <div className="flex-1 min-w-0 text-left">
-            <span className="block text-sm font-bold text-red-600 dark:text-red-400 group-hover:text-red-700 transition-colors">
-              Đăng xuất
-            </span>
-            <span className="block text-xs text-slate-400 dark:text-slate-500 mt-0.5">Thoát khỏi tài khoản</span>
-          </div>
-        </button>
-      </div>
-
-      {/* App Version */}
-      <p className="text-center text-xs text-slate-400 dark:text-slate-600 mb-4">
-        Book Sport v2.1.0 • Made with ❤️ in Vietnam
-      </p>
+      
     </div>
   );
 }
