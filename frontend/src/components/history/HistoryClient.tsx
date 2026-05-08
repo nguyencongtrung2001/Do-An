@@ -7,96 +7,38 @@ import { apiGet } from "@/services/api";
 import { toast } from "react-hot-toast";
 
 // ==============================
-// Types & Mock Data
+// Types
 // ==============================
-type BookingStatus = "confirmed" | "pending" | "cancelled";
-
-interface BookingInfo {
-  id: string;
-  courtName: string;
-  address: string;
-  totalPrice: number;
-  depositPrice?: number;
-  status: BookingStatus;
-  image: string;
-  courtSubName: string;
-  date: string;
-  timeRange: string;
-  cancelDate?: string;
+interface BookingDetail {
+  ma_dat_san_chi_tiet: string;
+  ngay_dat: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
+  trang_thai_dat: string;
+  san: {
+    ten_san: string;
+    anhsan?: { duong_dan_anh: string }[];
+    diadiem?: {
+      ten_dia_diem: string;
+      dia_chi: string;
+    };
+  };
 }
 
-const MOCK_BOOKINGS: BookingInfo[] = [
-  {
-    id: "#BK20260305001",
-    courtName: "Sân bóng đá K34",
-    address: "123 Đường Bạch Đằng, Hải Châu, Đà Nẵng",
-    totalPrice: 400000,
-    depositPrice: 200000,
-    status: "confirmed",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAauiqdyNWVqjMU-Gkl5aqFLVfulhFpw0Hqha3VQhLjyid0gZJB6f0o-9T9uoScJMYUAUC97puxCjT9FeEFLFHfltL8BC6IPaNpllVu7PBjUnNTOqkC_S6L0KjIlQPqjI5r4NieQwCl1xA2jIcfW79nBwXX-y4AxZnX_3ajpINCy80E97a2zONBECkyFvSa28lnD3zxyPkc9iGaAz59dQwRUtr6Dl3DGLjRtvPH3wheVRoyK2va7IKvx47GxDXw168SjqQT9Jjt24kV",
-    courtSubName: "Sân 5 người - A",
-    date: "5/3/2026",
-    timeRange: "17:00 → 19:00 (2 tiếng)",
-  },
-  {
-    id: "#BK20260307002",
-    courtName: "Tennis Sơn Trà",
-    address: "45 Ngô Quyền, Sơn Trà, Đà Nẵng",
-    totalPrice: 600000,
-    depositPrice: 300000,
-    status: "confirmed",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA9sS28oSBqGXC5LgD5R_CrfxjT2yrJp4E-KLbO7YPGoBV7BpZLvfM07bR8TMk2m9hEthZHPMr6aSiU7IATa2hbpWNaT6X3_VNQ5aDhQ59ckIa5ib1e8nywcSXhdhcQpeCTRJ_yyRt4mA",
-    courtSubName: "Sân 2",
-    date: "7/3/2026",
-    timeRange: "08:00 → 11:00 (3 tiếng)",
-  },
-  {
-    id: "#BK20260306003",
-    courtName: "Sân Cầu lông Thanh Khê",
-    address: "78 Điện Biên Phủ, Thanh Khê, Đà Nẵng",
-    totalPrice: 200000,
-    status: "pending",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCcDd1VhaBo0zCcsjHNkEkhAq2I_Za3RRqTaxatKSZSiHXIqKw_joEYSWUk6GbznOE4QhiLf9iJ-90TetB09-hiZI7f9VFzthrKFiB34IFv9r6d_l7afvQoCL1Y_1cLSpBJ9bVj-3egZQqL4lm80kz0ayKiAt4GdS0Mdd6jizop30Ke6WOnftFLFJfCE_Gk61eiQq_A51zkkx5xE6VlG-CNdNExTh5f2x1etfRIh9Cls8xzVbrFf4GLHE_mRYwJ0b9gzS5XfA8W07-P",
-    courtSubName: "Sân 1",
-    date: "6/3/2026",
-    timeRange: "14:00 → 15:00 (1 tiếng)",
-  },
-  {
-    id: "#BK20260308004",
-    courtName: "Sân bóng đá K34",
-    address: "123 Đường Bạch Đằng, Hải Châu, Đà Nẵng",
-    totalPrice: 800000,
-    status: "pending",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAauiqdyNWVqjMU-Gkl5aqFLVfulhFpw0Hqha3VQhLjyid0gZJB6f0o-9T9uoScJMYUAUC97puxCjT9FeEFLFHfltL8BC6IPaNpllVu7PBjUnNTOqkC_S6L0KjIlQPqjI5r4NieQwCl1xA2jIcfW79nBwXX-y4AxZnX_3ajpINCy80E97a2zONBECkyFvSa28lnD3zxyPkc9iGaAz59dQwRUtr6Dl3DGLjRtvPH3wheVRoyK2va7IKvx47GxDXw168SjqQT9Jjt24kV",
-    courtSubName: "Sân 7 người - B",
-    date: "8/3/2026",
-    timeRange: "18:00 → 20:00 (2 tiếng)",
-  },
-  {
-    id: "#BK20260301005",
-    courtName: "Pickleball Ngũ Hành Sơn",
-    address: "56 Lê Văn Hiến, Ngũ Hành Sơn, Đà Nẵng",
-    totalPrice: 300000,
-    status: "cancelled",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA9sS28oSBqGXC5LgD5R_CrfxjT2yrJp4E-KLbO7YPGoBV7BpZLvfM07bR8TMk2m9hEthZHPMr6aSiU7IATa2hbpWNaT6X3_VNQ5aDhQ59ckIa5ib1e8nywcSXhdhcQpeCTRJ_yyRt4mA",
-    courtSubName: "Sân 3",
-    date: "1/3/2026",
-    timeRange: "09:00 → 10:30 (1.5 tiếng)",
-    cancelDate: "28/2/2026",
-  },
-];
+interface Booking {
+  ma_dat_san: string;
+  tong_tien: string | number;
+  phuong_thuc_thanh_toan: string;
+  datsanchitiet: BookingDetail[];
+}
+
 
 // ==============================
 // Component
 // ==============================
 export default function HistoryClient() {
   const { user, token } = useAuth() || {};
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "Chờ xử lý" | "Đã xác nhận" | "Đã hủy" | "Đã thanh toán">("all");
 
@@ -104,7 +46,7 @@ export default function HistoryClient() {
     const fetchHistory = async () => {
       if (!user || !token) return;
       try {
-        const response: any = await apiGet(`/booking/user/${user.ma_nguoi_dung}`, token);
+        const response = await apiGet<{ data: Booking[] }>(`/booking/user/${user.ma_nguoi_dung}`, token);
         setBookings(response.data || []);
       } catch (error) {
         toast.error("Không thể tải lịch sử đặt sân");
@@ -122,7 +64,7 @@ export default function HistoryClient() {
     : bookings.filter((b) => {
         // A booking (datsan) has multiple details (datsanchitiet)
         // We filter if ANY detail matches the status
-        return b.datsanchitiet.some((d: any) => d.trang_thai_dat === filter);
+        return b.datsanchitiet.some((d) => d.trang_thai_dat === filter);
       });
 
   const getStatusColor = (status: string) => {
@@ -256,7 +198,7 @@ export default function HistoryClient() {
                     </div>
 
                     <div className="space-y-2 mt-4 bg-gray-50/50 dark:bg-gray-800/30 p-3 rounded-xl">
-                      {booking.datsanchitiet.map((detail: any, dIdx: number) => (
+                      {booking.datsanchitiet.map((detail, dIdx: number) => (
                         <div key={dIdx} className="flex flex-wrap gap-x-6 gap-y-2 text-xs border-b border-gray-100 dark:border-gray-800 last:border-0 pb-2 last:pb-0">
                           <div className="flex items-center gap-1.5 min-w-[120px]">
                             <span className="material-symbols-outlined text-base text-primary">sports_soccer</span>

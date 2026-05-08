@@ -44,13 +44,21 @@ export class BookingService {
     // 4. Set Status based on Payment Method
     const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ nhận cọc";
     
+    // Mapping for Database Check Constraint
+    const paymentMap: Record<string, string> = {
+      cash: "Tiền mặt",
+      wallet: "Ví hệ thống",
+      vnpay: "VNPAY"
+    };
+    const mappedPayment = paymentMap[phuong_thuc_thanh_toan] || phuong_thuc_thanh_toan;
+
     const ma_dat_san = `DS_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     const bookingData = {
       ma_dat_san,
       ma_nguoi_dung,
       tong_tien: tongTien,
-      phuong_thuc_thanh_toan
+      phuong_thuc_thanh_toan: mappedPayment
     };
 
     const detailsData = formattedSlots.map((s: any, idx: number) => {

@@ -19,6 +19,9 @@ export const createBookingHandler = async (req: Request, res: Response, next: Ne
 export const getUserBookingsHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
+    if (typeof userId !== 'string') {
+      throw new ApiError(400, "User ID is invalid");
+    }
     const bookings = await bookingService.getUserBookings(userId);
     
     res.status(200).json({
