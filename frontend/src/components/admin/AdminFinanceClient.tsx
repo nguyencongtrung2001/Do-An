@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -45,15 +45,18 @@ const TYPE_COLOR_MAP: Record<string, string> = {
 };
 
 export default function AdminFinanceClient() {
-  const [currentDate, setCurrentDate] = useState("");
+  const [currentDate] = useState(() => {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    };
+    return now.toLocaleDateString('vi-VN', options);
+  });
   const [selectedMonth, setSelectedMonth] = useState("03/2026");
   const [selectedRegion, setSelectedRegion] = useState("all");
-
-  useEffect(() => {
-    const now = new Date();
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    setCurrentDate(now.toLocaleDateString('vi-VN', options));
-  }, []);
 
   // Line Chart Config
   const lineData = {
@@ -218,7 +221,7 @@ export default function AdminFinanceClient() {
           </div>
           <div className="text-right">
             <p className="text-xs text-slate-400">Hôm nay</p>
-            <p className="text-sm font-semibold text-slate-700">{currentDate}</p>
+            <p className="text-sm font-semibold text-slate-700" suppressHydrationWarning>{currentDate}</p>
           </div>
         </div>
       </header>
