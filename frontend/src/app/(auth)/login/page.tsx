@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import AuthClient from "@/components/auth/AuthClient";
+import AuthTabs from "@/components/features/auth/AuthTabs";
 
 export const metadata = {
   title: "Đăng nhập & Đăng ký — Book Sport",
@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background-light">Đang tải...</div>}>
-      <AuthClient />
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background-light text-slate-500 font-medium">Đang tải hệ thống xác thực...</div>}>
+      <AuthTabs />
     </Suspense>
   );
 }

@@ -1,4 +1,4 @@
-import OwnerStatusClient from "@/components/owner/OwnerStatusClient";
+import OwnerStatus from "@/components/features/owner/Status";
 
 export const metadata = {
   title: "Trạng thái sân — Admin Panel",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function StatusPage() {
-  return <OwnerStatusClient />;
+  return <OwnerStatus />;
 }

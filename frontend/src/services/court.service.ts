@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, API_BASE_URL } from './api';
+import { apiGet, apiPost, apiPut, apiPatch } from './api';
 import type {
   FieldListResponse,
   OwnerCourtsResponse,
@@ -12,8 +12,8 @@ export const courtService = {
     return apiGet<FieldListResponse>('/field');
   },
 
-  async getMapLocations(sportType: string): Promise<any> {
-    return apiGet<any>(`/field/map-locations?sport=${encodeURIComponent(sportType)}`);
+  async getMapLocations(sportType: string): Promise<unknown> {
+    return apiGet<unknown>(`/field/map-locations?sport=${encodeURIComponent(sportType)}`);
   },
 
   async getOwnerCourts(token: string): Promise<OwnerCourtsResponse> {
@@ -35,26 +35,12 @@ export const courtService = {
     data: FormData | Record<string, unknown>,
   ): Promise<UpdateCourtResponse> {
     const isFormData = data instanceof FormData;
-
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-    };
-    // Do NOT set Content-Type for FormData — browser sets it automatically with boundary
-    if (!isFormData) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    const body = isFormData ? data : JSON.stringify(data);
-
-    const res = await fetch(`${API_BASE_URL}/owner/update-court/${ma_san}`, {
-      method: 'PUT',
-      headers,
-      body: body as BodyInit,
-    });
-
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || 'Cập nhật sân thất bại');
-    return json;
+    return apiPut<UpdateCourtResponse>(
+      `/owner/update-court/${ma_san}`,
+      data,
+      token,
+      !isFormData,
+    );
   },
 
   async updateCourtStatus(
@@ -64,7 +50,7 @@ export const courtService = {
   ): Promise<UpdateCourtResponse> {
     return apiPatch<UpdateCourtResponse>(
       `/owner/update-court-status/${ma_san}`,
-      JSON.stringify({ trang_thai_san }),
+      { trang_thai_san },
       token,
     );
   },

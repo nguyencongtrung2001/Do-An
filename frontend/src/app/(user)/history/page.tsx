@@ -1,4 +1,4 @@
-import HistoryClient from "@/components/history/HistoryClient";
+import History from "@/components/features/user/History";
 
 export const metadata = {
   title: "Lịch sử đặt sân — Book Sport",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function HistoryPage() {
-  return <HistoryClient />;
+  return <History />;
 }

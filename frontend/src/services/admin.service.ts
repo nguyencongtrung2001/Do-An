@@ -15,7 +15,7 @@ export const adminService = {
   },
 
   async toggleUserStatus(token: string, id: string): Promise<ApiResponse> {
-    return apiPut<ApiResponse>(`/admin/users/${id}/toggle-status`, '{}', token);
+    return apiPut<ApiResponse>(`/admin/users/${id}/toggle-status`, {}, token);
   },
 
   async deleteUser(token: string, id: string): Promise<ApiResponse> {
@@ -29,7 +29,7 @@ export const adminService = {
   },
 
   async approveOwner(token: string, id: string): Promise<ApiResponse> {
-    return apiPut<ApiResponse>(`/admin/owners/${id}/approve`, '{}', token);
+    return apiPut<ApiResponse>(`/admin/owners/${id}/approve`, {}, token);
   },
 
   // ── Location Approval ─────────────────────────────────
@@ -43,10 +43,10 @@ export const adminService = {
   },
 
   async approveLocation(token: string, id: string): Promise<ApiResponse> {
-    return apiPut<ApiResponse>(`/admin/locations/${id}/approve`, '{}', token);
+    return apiPut<ApiResponse>(`/admin/locations/${id}/approve`, {}, token);
   },
 
   async rejectLocation(token: string, id: string): Promise<ApiResponse> {
-    return apiPut<ApiResponse>(`/admin/locations/${id}/reject`, '{}', token);
+    return apiPut<ApiResponse>(`/admin/locations/${id}/reject`, {}, token);
   },
 };

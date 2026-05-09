@@ -1,9 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-// Define shapes of our User and AuthContext
 export interface UserData {
   ma_nguoi_dung: string;
   ho_ten: string;
@@ -20,17 +19,17 @@ interface AuthContextType {
   login: (token: string, user: UserData) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isMounted: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Lazy initializers — execute once on client, return null on server (SSR-safe)
   const [user, setUser] = useState<UserData | null>(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem("user");
-      return raw ? (JSON.parse(raw) as UserData) : null;
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
     }
@@ -41,33 +40,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem("token");
   });
 
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  const login = (newToken: string, newUser: UserData) => {
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const login = useCallback((newToken: string, newUser: UserData) => {
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    router.push("/login"); // Redirect to login on logout
-  };
+    router.push("/login");
+  }, [router]);
+
+  const value = useMemo(() => ({
+    // Safe exposure: Only provide auth data after component has mounted on the client
+    user: isMounted ? user : null,
+    token: isMounted ? token : null,
+    login,
+    logout,
+    isAuthenticated: isMounted ? !!token : false,
+    isMounted,
+  }), [user, token, isMounted, login, logout]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        isAuthenticated: !!token,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

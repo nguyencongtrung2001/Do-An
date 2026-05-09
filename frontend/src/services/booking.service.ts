@@ -7,7 +7,7 @@ export const bookingService = {
   },
 
   async updateBookingStatus(token: string, id: string, status: string): Promise<UpdateBookingStatusResponse> {
-    return apiPatch<UpdateBookingStatusResponse>(`/owner/update-booking-status/${id}`, JSON.stringify({ status }), token);
+    return apiPatch<UpdateBookingStatusResponse>(`/owner/update-booking-status/${id}`, { status }, token);
   },
 
   async getPendingCount(token: string): Promise<{ success: boolean; count: number }> {

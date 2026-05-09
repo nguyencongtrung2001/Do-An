@@ -1,4 +1,4 @@
-import OwnerDashboardClient from "@/components/owner/OwnerDashboardClient";
+import OwnerDashboard from "@/components/features/owner/Dashboard";
 
 export const metadata = {
   title: "Dashboard — Admin Panel",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function DashboardPage() {
-  return <OwnerDashboardClient />;
+  return <OwnerDashboard />;
 }

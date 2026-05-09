@@ -1,4 +1,4 @@
-import OwnerCourtsClient from "@/components/owner/OwnerCourtsClient";
+import OwnerCourts from "@/components/features/owner/Courts";
 
 export const metadata = {
   title: "Quản lý sân — Admin Panel",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function CourtsPage() {
-  return <OwnerCourtsClient />;
+  return <OwnerCourts />;
 }

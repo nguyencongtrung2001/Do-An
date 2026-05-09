@@ -3,20 +3,20 @@ import type { AuthResponse, LoginRequest, RegisterRequest, OwnerRegisterRequest 
 
 export const authService = {
   async loginUser(data: LoginRequest): Promise<AuthResponse> {
-    return apiPost<AuthResponse>("/user/login", JSON.stringify({
+    return apiPost<AuthResponse>("/user/login", {
       email: data.contact,
       so_dien_thoai: data.contact,
       mat_khau: data.mat_khau,
-    }));
+    });
   },
 
   async registerUser(data: RegisterRequest): Promise<AuthResponse> {
-    return apiPost<AuthResponse>("/user/register", JSON.stringify({
+    return apiPost<AuthResponse>("/user/register", {
       ho_ten: data.ho_ten,
       email: data.email,
       so_dien_thoai: data.so_dien_thoai,
       mat_khau: data.mat_khau,
-    }));
+    });
   },
 
   async registerOwner(data: OwnerRegisterRequest): Promise<AuthResponse> {

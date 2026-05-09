@@ -1,5 +1,5 @@
 
-import CourtDetailClient from "@/components/courts/CourtDetailClient";
+import CourtDetail from "@/components/features/courts/CourtDetail";
 import { courtService } from "@/services/court.service";
 import { notFound } from "next/navigation";
 
@@ -39,5 +39,5 @@ export default async function CourtDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <CourtDetailClient location={location} />;
+  return <CourtDetail location={location} />;
 }

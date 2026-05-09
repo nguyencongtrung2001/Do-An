@@ -3,22 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ADMIN_NAV_LINKS } from "@/constants/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { user, isMounted, logout } = useAuth();
 
   const navGroups = [
     {
-      label: "Tổng quan",
-      items: [
-        { href: "/admin", icon: "dashboard", label: "Dashboard", exact: true },
-      ],
-    },
-    {
       label: "Quản lý hệ thống",
-      items: [
-        { href: "/admin/users", icon: "group", label: "Quản lý người dùng", exact: false },
-        { href: "/admin/approvals", icon: "rule", label: "Kiểm duyệt", exact: false },
-      ],
+      items: ADMIN_NAV_LINKS,
     },
   ];
 
@@ -60,8 +55,8 @@ export default function AdminSidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-red-50 text-red-600 border-r-4 border-red-600"
-                      : "text-slate-600 hover:bg-red-50 hover:text-red-600"
+                      ? "bg-primary/10 text-primary border-r-[3px] border-primary"
+                      : "text-slate-600 hover:bg-primary/5 hover:text-primary"
                   }`}
                 >
                   <span
@@ -80,21 +75,32 @@ export default function AdminSidebar() {
 
       {/* User */}
       <div className="border-t border-gray-100 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-linear-to-br from-red-600 to-red-800 flex items-center justify-center text-white text-sm font-bold shrink-0">
-            SA
+        {!isMounted ? (
+          <div className="flex items-center gap-3 animate-pulse">
+            <div className="w-9 h-9 rounded-full bg-slate-100 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-slate-100 rounded w-24" />
+              <div className="h-2 bg-slate-100 rounded w-32" />
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">System Admin</p>
-            <p className="text-xs text-slate-400 truncate">sysadmin@sportlink.vn</p>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-lg shadow-slate-200">
+              {user?.ho_ten?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || "AD"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-slate-900">{user?.ho_ten || "Quản trị viên"}</p>
+              <p className="text-[10px] text-slate-400 truncate">{user?.email || "admin@sportlink.vn"}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="text-slate-400 hover:text-red-600 transition-all hover:rotate-12"
+              title="Đăng xuất"
+            >
+              <span className="material-symbols-outlined text-xl">logout</span>
+            </button>
           </div>
-          <Link
-            href="/login"
-            className="text-slate-400 hover:text-red-600 transition-colors shrink-0"
-          >
-            <span className="material-symbols-outlined text-xl">logout</span>
-          </Link>
-        </div>
+        )}
       </div>
     </aside>
   );

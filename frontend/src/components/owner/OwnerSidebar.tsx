@@ -5,17 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { bookingService } from "@/services/booking.service";
-
-const NAV_LINKS = [
-  { label: "Dashboard", href: "/dashboard", icon: "dashboard", category: "Tổng quan" },
-  { label: "Quản lý sân", href: "/courts", icon: "stadium", category: "Quản lý" },
-  { label: "Trạng thái sân", href: "/status", icon: "toggle_on", category: "Quản lý" },
-  { label: "Lịch đặt sân", href: "/bookings", icon: "calendar_month", category: "Quản lý" },
-];
+import { OWNER_NAV_LINKS } from "@/constants/navigation";
 
 export default function OwnerSidebar() {
   const pathname = usePathname();
-  const { token, user } = useAuth();
+  const { token, user, isMounted, logout } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
@@ -53,7 +47,7 @@ export default function OwnerSidebar() {
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tổng quan</p>
-        {NAV_LINKS.filter((l) => l.category === "Tổng quan").map((link) => {
+        {OWNER_NAV_LINKS.filter((l) => l.category === "Tổng quan").map((link) => {
           const isActive = pathname === link.href;
           return (
             <Link
@@ -72,7 +66,7 @@ export default function OwnerSidebar() {
         })}
 
         <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6 mb-2">Quản lý</p>
-        {NAV_LINKS.filter((l) => l.category === "Quản lý").map((link) => {
+        {OWNER_NAV_LINKS.filter((l) => l.category === "Quản lý").map((link) => {
           const isActive = pathname === link.href;
           const isBookings = link.label === "Lịch đặt sân";
           
@@ -103,26 +97,36 @@ export default function OwnerSidebar() {
 
       {/* User Section */}
       <div className="border-t border-gray-100 p-4">
-        <div className="flex items-center gap-3">
-          {/* suppressHydrationWarning: avatar initial may differ between SSR (null user) and client */}
-          <div
-            suppressHydrationWarning
-            className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105"
-          >
-            {user?.ho_ten?.charAt(0) || "O"}
+        {!isMounted ? (
+          <div className="flex items-center gap-3 animate-pulse">
+            <div className="w-9 h-9 rounded-full bg-slate-100 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-slate-100 rounded w-24" />
+              <div className="h-2 bg-slate-100 rounded w-32" />
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p suppressHydrationWarning className="text-sm font-semibold truncate text-slate-900">
-              {user?.ho_ten || "Chủ sân"}
-            </p>
-            <p suppressHydrationWarning className="text-[10px] text-slate-400 truncate">
-              {user?.email || ""}
-            </p>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105">
+              {user?.ho_ten?.charAt(0) || "O"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-slate-900">
+                {user?.ho_ten || "Chủ sân"}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">
+                {user?.email || ""}
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              className="text-slate-400 hover:text-red-600 transition-all hover:rotate-12"
+              title="Đăng xuất"
+            >
+              <span className="material-symbols-outlined text-xl">logout</span>
+            </button>
           </div>
-          <Link href="/login" className="text-slate-400 hover:text-red-600 transition-all hover:rotate-12">
-            <span className="material-symbols-outlined text-xl">logout</span>
-          </Link>
-        </div>
+        )}
       </div>
     </aside>
   );

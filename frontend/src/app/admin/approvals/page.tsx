@@ -1,4 +1,4 @@
-import AdminApprovalsClient from "@/components/admin/AdminApprovalsClient";
+import AdminApprovals from "@/components/features/admin/Approvals";
 
 export const metadata = {
   title: "Kiểm duyệt sân - Admin SportLink",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function AdminApprovalsPage() {
-  return <AdminApprovalsClient />;
+  return <AdminApprovals />;
 }

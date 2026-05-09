@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { courtService } from "@/services/court.service";
-import { normalizeSport } from "@/utils/sport.utils";
+import { normalizeSport } from "@/lib/constants/sports";
 import type { CourtGridItem, CourtMapData, CourtApiItem } from "@/types/court.types";
 
 /**

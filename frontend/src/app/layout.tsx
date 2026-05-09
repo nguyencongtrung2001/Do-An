@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-page-custom-font */
 import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
@@ -23,8 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { AuthProvider } from "@/contexts/AuthContext";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,7 +41,18 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: { borderRadius: '12px', padding: '12px 16px', fontSize: '14px' },
+              success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
+              error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
   );

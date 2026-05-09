@@ -1,4 +1,4 @@
-import OwnerBookingsClient from "@/components/owner/OwnerBookingsClient";
+import OwnerBookings from "@/components/features/owner/Bookings";
 
 export const metadata = {
   title: "Lịch đặt sân — Admin Panel",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function BookingsPage() {
-  return <OwnerBookingsClient/>;
+  return <OwnerBookings />;
 }

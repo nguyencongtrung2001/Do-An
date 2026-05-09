@@ -1,4 +1,4 @@
-import AdminUsersClient from "@/components/admin/AdminUsersClient";
+import AdminUsers from "@/components/features/admin/Users";
 
 export const metadata = {
   title: "Quản lý người dùng - Admin SportLink",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function AdminUsersPage() {
-  return <AdminUsersClient />;
+  return <AdminUsers />;
 }
