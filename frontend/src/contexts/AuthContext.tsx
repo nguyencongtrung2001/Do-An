@@ -11,6 +11,7 @@ export interface UserData {
   so_dien_thoai: string | null;
   vai_tro: string;
   anh_dai_dien: string | null;
+  so_vi_du?: number;
 }
 
 interface AuthContextType {

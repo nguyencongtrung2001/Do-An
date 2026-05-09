@@ -7,15 +7,29 @@ import type { BookingDetail } from "@/types/booking.types";
 // ==============================
 // Status Config — khớp với DB constraint
 // ==============================
-const STATUS_CONFIG: Record<string, { bg: string; text: string; gradient: string; label: string }> = {
-  "Chờ xử lý":   { bg: "bg-amber-50",  text: "text-amber-700",  gradient: "linear-gradient(135deg, #f59e0b, #d97706)", label: "Chờ xử lý" },
-  "Đã xác nhận":  { bg: "bg-green-50",  text: "text-green-700",  gradient: "linear-gradient(135deg, #22c55e, #16a34a)", label: "Đã xác nhận" },
-  "Đã nhận sân":  { bg: "bg-violet-50", text: "text-violet-700", gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)", label: "Đã nhận sân" },
-  "Hoàn thành":   { bg: "bg-blue-50",   text: "text-blue-700",   gradient: "linear-gradient(135deg, #3b82f6, #2563eb)", label: "Hoàn thành" },
-  "Đã hủy":       { bg: "bg-red-50",    text: "text-red-700",    gradient: "linear-gradient(135deg, #ef4444, #dc2626)", label: "Đã hủy" },
+const STATUS_CONFIG: Record<string, { bg: string; text: string; gradient: string; label: string; border: string }> = {
+  "Chờ xử lý":   { bg: "bg-amber-50",  text: "text-amber-700",  gradient: "linear-gradient(135deg, #f59e0b, #d97706)", label: "Chờ xử lý",   border: "border-amber-200" },
+  "Đã xác nhận":  { bg: "bg-green-50",  text: "text-green-700",  gradient: "linear-gradient(135deg, #22c55e, #16a34a)", label: "Đã xác nhận",  border: "border-green-200" },
+  "Đã nhận sân":  { bg: "bg-violet-50", text: "text-violet-700", gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)", label: "Đã nhận sân",  border: "border-violet-200" },
+  "Hoàn thành":   { bg: "bg-blue-50",   text: "text-blue-700",   gradient: "linear-gradient(135deg, #3b82f6, #2563eb)", label: "Hoàn thành",   border: "border-blue-200" },
+  "Đã hủy":       { bg: "bg-red-50",    text: "text-red-700",    gradient: "linear-gradient(135deg, #ef4444, #dc2626)", label: "Đã hủy",       border: "border-red-200" },
 };
 
-const DEFAULT_STATUS = { bg: "bg-gray-50", text: "text-gray-700", gradient: "linear-gradient(135deg, #94a3b8, #64748b)", label: "Không rõ" };
+const DEFAULT_STATUS = { bg: "bg-gray-50", text: "text-gray-700", gradient: "linear-gradient(135deg, #94a3b8, #64748b)", label: "Không rõ", border: "border-gray-200" };
+
+// Khoảng giờ timeline: 6:00 → 22:00 (mỗi cột = 30 phút)
+const TIMELINE_START_HOUR = 6;
+const TIMELINE_END_HOUR = 22;
+const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; // 32 cột
+
+// Tạo mảng nhãn header: 6:00, 6:30, 7:00, 7:30, ...
+const TIMELINE_LABELS: string[] = [];
+for (let h = TIMELINE_START_HOUR; h < TIMELINE_END_HOUR; h++) {
+  TIMELINE_LABELS.push(`${h}:00`);
+  TIMELINE_LABELS.push(`${h}:30`);
+}
+
+type StatusFilter = "all" | "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Hoàn thành" | "Đã hủy";
 
 export default function OwnerBookingsClient() {
   const { bookings, courts, loading, updateBookingStatus } = useOwnerBookings();
@@ -25,6 +39,8 @@ export default function OwnerBookingsClient() {
   });
   const [checkinData, setCheckinData] = useState<BookingDetail | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const prevDay = () => {
     const d = new Date(dateStr);
@@ -46,12 +62,20 @@ export default function OwnerBookingsClient() {
     setCheckinData(null);
   };
 
+  const showToastMessage = (msg: string) => {
+    setToastMessage(msg);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   const handleConfirmStatus = async (id: string, status: string) => {
     const success = await updateBookingStatus(id, status);
-    if (success && status === "Đã nhận sân") {
+    if (success) {
       handleCloseCheckin();
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      if (status === "Đã nhận sân") showToastMessage("✅ Đã xác nhận nhận sân thành công!");
+      if (status === "Hoàn thành") showToastMessage("✅ Đã chuyển sang Hoàn thành!");
+      if (status === "Đã xác nhận") showToastMessage("✅ Đã xác nhận đơn đặt sân!");
+      if (status === "Đã hủy") showToastMessage("❌ Đã hủy đơn đặt sân!");
     }
   };
 
@@ -67,30 +91,23 @@ export default function OwnerBookingsClient() {
     return `${h}:${m}`;
   };
 
-  const getTimelineColumn = (timeStr: string) => {
-    const date = new Date(timeStr);
-    const hour = date.getUTCHours();
-    const minute = date.getUTCMinutes();
-    return (hour - 5) * 2 + (minute >= 30 ? 1 : 0) + 2;
-  };
-
-  const getTimelineSpan = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffMs = endDate.getTime() - startDate.getTime();
-    const diffMins = Math.round(diffMs / (1000 * 60));
-    return Math.max(1, Math.round(diffMins / 30));
-  };
+  // Tính cột grid từ giờ (cột 2 = 6:00, cột 3 = 6:30, ...)
+  // (Vị trí booking trên timeline được tính bằng % trong JSX)
 
   const getStatusConfig = (status: string) => STATUS_CONFIG[status] || DEFAULT_STATUS;
 
   // Filter bookings for the selected date
-  const filteredBookings = bookings.filter(b => {
+  const filteredByDate = bookings.filter(b => {
     const bDate = new Date(b.ngay_dat).toISOString().split("T")[0];
     return bDate === dateStr;
   });
 
-  const countByStatus = (status: string) => filteredBookings.filter(n => n.trang_thai_dat === status).length;
+  // Filter bookings by status tab
+  const filteredBookings = statusFilter === "all"
+    ? filteredByDate
+    : filteredByDate.filter(b => b.trang_thai_dat === statusFilter);
+
+  const countByStatus = (status: string) => filteredByDate.filter(n => n.trang_thai_dat === status).length;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -126,69 +143,93 @@ export default function OwnerBookingsClient() {
       <div className="p-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
-            {/* Header row */}
-            <div className="timeline-grid bg-gray-50 border-b border-gray-200 min-w-[1200px]">
-              <div className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 bg-gray-50 z-10 border-r border-gray-200 w-40">
+            {/* Header row: 6:00, 6:30, 7:00, 7:30, ... */}
+            <div className="tl-header min-w-[1400px]">
+              <div className="tl-court-col bg-gray-50 border-r border-gray-200 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 z-10">
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
-              {Array.from({ length: 17 }).map((_, i) => {
-                const hour = i + 5;
-                return (
-                  <div key={hour} className="contents">
-                    <div className="px-1 py-3 text-[10px] font-bold text-slate-400 text-center">{hour}:00</div>
-                    <div className="px-1 py-3 text-[10px] font-medium text-slate-300 text-center">:30</div>
+              <div className="tl-time-cols bg-gray-50">
+                {TIMELINE_LABELS.map((label, idx) => (
+                  <div
+                    key={idx}
+                    className={`tl-time-cell px-1 py-3 text-[10px] font-bold text-center ${
+                      label.endsWith(":00") ? "text-slate-500" : "text-slate-300"
+                    }`}
+                  >
+                    {label}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
             {/* Rows for each court */}
             {loading ? (
-              <div className="min-w-[1200px] p-10 flex justify-center">
+              <div className="min-w-[1400px] p-10 flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : courts.length === 0 ? (
               <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
-            ) : courts.map(court => (
-              <div key={court.ma_san} className="timeline-grid hover:bg-gray-50/30 transition-colors min-w-[1200px] relative" style={{ minHeight: "50px" }}>
-                <div className="px-4 py-3 flex items-center gap-2 border-r border-gray-100 bg-gray-50/50 sticky left-0 z-10 w-40">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  <span className="text-sm font-bold text-slate-700 truncate">{court.ten_san}</span>
-                </div>
-                {/* Render booking blocks */}
-                {filteredBookings.filter(b => b.ma_san === court.ma_san).map(booking => {
-                  const startCol = getTimelineColumn(booking.gio_bat_dau);
-                  const span = getTimelineSpan(booking.gio_bat_dau, booking.gio_ket_thuc);
-                  const statusCfg = getStatusConfig(booking.trang_thai_dat);
+            ) : courts.map(court => {
+              const courtBookings = filteredByDate.filter(b => b.ma_san === court.ma_san);
 
-                  return (
-                    <div
-                      key={booking.ma_dat_san_chi_tiet}
-                      className="booking-block"
-                      style={{
-                        gridColumn: `${startCol} / span ${span}`,
-                        background: statusCfg.gradient,
-                      }}
-                    >
-                      <span className="truncate">{booking.datsan?.nguoidung?.ho_ten}</span>
-                      <div className="tooltip-content">
-                        <p className="font-bold text-sm mb-1">{booking.datsan?.nguoidung?.ho_ten}</p>
-                        <p className="text-xs text-slate-300">📞 {booking.datsan?.nguoidung?.so_dien_thoai}</p>
-                        <p className="text-xs text-slate-300 mt-1">
-                          ⏰ {formatTime(booking.gio_bat_dau)} - {formatTime(booking.gio_ket_thuc)}
-                        </p>
-                        <p className="text-xs text-slate-300 mt-1">
-                          💰 Cọc: {formatVND(booking.tien_coc)} • Còn lại: {formatVND(booking.tien_con_lai)}
-                        </p>
-                        <p className="text-xs mt-1.5">
-                          <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px] font-bold">{booking.trang_thai_dat}</span>
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+              return (
+                <div key={court.ma_san} className="tl-row min-w-[1400px]">
+                  {/* Court name (sticky left) */}
+                  <div className="tl-court-col px-4 py-3 flex items-center gap-2 border-r border-gray-100 bg-gray-50/50 sticky left-0 z-10">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span className="text-sm font-bold text-slate-700 truncate">{court.ten_san}</span>
+                  </div>
+
+                  {/* Timeline area: grid cells + booking blocks overlaid */}
+                  <div className="tl-time-cols relative">
+                    {/* Grid cells for visual grid lines */}
+                    {Array.from({ length: TOTAL_HALF_HOURS }).map((_, idx) => (
+                      <div key={idx} className="tl-grid-cell" />
+                    ))}
+
+                    {/* Booking blocks — absolutely positioned on top of grid */}
+                    {courtBookings.map(booking => {
+                      const startDate = new Date(booking.gio_bat_dau);
+                      const endDate = new Date(booking.gio_ket_thuc);
+                      const startMinutes = (startDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + startDate.getUTCMinutes();
+                      const endMinutes = (endDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + endDate.getUTCMinutes();
+                      const totalMinutes = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
+
+                      const leftPct = (startMinutes / totalMinutes) * 100;
+                      const widthPct = ((endMinutes - startMinutes) / totalMinutes) * 100;
+                      const statusCfg = getStatusConfig(booking.trang_thai_dat);
+
+                      return (
+                        <div
+                          key={booking.ma_dat_san_chi_tiet}
+                          className="booking-block"
+                          style={{
+                            left: `${leftPct}%`,
+                            width: `${widthPct}%`,
+                            background: statusCfg.gradient,
+                          }}
+                        >
+                          <span className="truncate">{booking.datsan?.nguoidung?.ho_ten}</span>
+                          <div className="tooltip-content">
+                            <p className="font-bold text-sm mb-1">{booking.datsan?.nguoidung?.ho_ten}</p>
+                            <p className="text-xs text-slate-300">📞 {booking.datsan?.nguoidung?.so_dien_thoai}</p>
+                            <p className="text-xs text-slate-300 mt-1">
+                              ⏰ {formatTime(booking.gio_bat_dau)} - {formatTime(booking.gio_ket_thuc)}
+                            </p>
+                            <p className="text-xs text-slate-300 mt-1">
+                              💰 Cọc: {formatVND(booking.tien_coc)} • Còn lại: {formatVND(booking.tien_con_lai)}
+                            </p>
+                            <p className="text-xs mt-1.5">
+                              <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px] font-bold">{booking.trang_thai_dat}</span>
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -201,22 +242,42 @@ export default function OwnerBookingsClient() {
               <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>notifications_active</span>
               <h3 className="text-sm font-bold text-slate-900">Danh sách đặt chỗ ({dateStr})</h3>
             </div>
+            {/* Status filter tabs — bấm để lọc danh sách */}
             <div className="flex items-center gap-2 flex-wrap text-[10px] font-bold uppercase tracking-wider">
-              <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg">Chờ: {countByStatus("Chờ xử lý")}</span>
-              <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-lg">Xác nhận: {countByStatus("Đã xác nhận")}</span>
-              <span className="px-2.5 py-1 bg-violet-50 text-violet-700 rounded-lg">Nhận sân: {countByStatus("Đã nhận sân")}</span>
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg">Hoàn thành: {countByStatus("Hoàn thành")}</span>
-              <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-lg">Hủy: {countByStatus("Đã hủy")}</span>
+              <button
+                onClick={() => setStatusFilter("all")}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  statusFilter === "all" ? "bg-slate-900 text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Tất cả: {filteredByDate.length}
+              </button>
+              {(["Chờ xử lý", "Đã xác nhận", "Đã nhận sân", "Hoàn thành", "Đã hủy"] as StatusFilter[]).map(status => {
+                const cfg = getStatusConfig(status);
+                const count = countByStatus(status);
+                return (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      statusFilter === status ? `${cfg.bg} ${cfg.text} shadow-md ring-2 ${cfg.border}` : `${cfg.bg} ${cfg.text} hover:opacity-80`
+                    }`}
+                  >
+                    {cfg.label}: {count}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredBookings.length === 0 ? (
-              <div className="col-span-full py-10 text-center text-slate-400 text-sm">Không có ca đặt chỗ nào cho ngày này.</div>
+              <div className="col-span-full py-10 text-center text-slate-400 text-sm">Không có ca đặt chỗ nào cho bộ lọc này.</div>
             ) : filteredBookings.map((booking) => {
               const statusCfg = getStatusConfig(booking.trang_thai_dat);
               const isPending = booking.trang_thai_dat === "Chờ xử lý";
               const isConfirmed = booking.trang_thai_dat === "Đã xác nhận";
+              const isCheckedIn = booking.trang_thai_dat === "Đã nhận sân";
 
               return (
                 <div
@@ -289,7 +350,15 @@ export default function OwnerBookingsClient() {
                         📋 Nhận sân
                       </button>
                     )}
-                    {!isPending && !isConfirmed && <div />}
+                    {isCheckedIn && (
+                      <button
+                        onClick={() => handleConfirmStatus(booking.ma_dat_san_chi_tiet, "Hoàn thành")}
+                        className="text-[11px] bg-blue-500 hover:bg-blue-600 text-white px-3.5 py-1.5 rounded-lg font-bold transition-colors"
+                      >
+                        ✓ Hoàn thành
+                      </button>
+                    )}
+                    {!isPending && !isConfirmed && !isCheckedIn && <div />}
                     <span className="text-[10px] text-slate-400 ml-auto">
                       {new Date(booking.datsan?.ngay_tao).toLocaleDateString("vi-VN")}
                     </span>
@@ -350,21 +419,51 @@ export default function OwnerBookingsClient() {
 
       {showToast && (
         <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold z-50 animate-bounce">
-          ✅ Đã xác nhận nhận sân thành công!
+          {toastMessage}
         </div>
       )}
 
       <style>{`
-        .timeline-grid {
-          display: grid;
-          grid-template-columns: 160px repeat(34, 1fr);
+        /* Row layout: fixed court column + flexible timeline area */
+        .tl-header, .tl-row {
+          display: flex;
           border-bottom: 1px solid #f1f5f9;
         }
+        .tl-header {
+          background: #f9fafb;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        .tl-court-col {
+          width: 160px;
+          min-width: 160px;
+          flex-shrink: 0;
+        }
+        /* Timeline area = CSS grid for cells */
+        .tl-time-cols {
+          flex: 1;
+          display: grid;
+          grid-template-columns: repeat(${TOTAL_HALF_HOURS}, 1fr);
+          min-height: 50px;
+        }
+        /* Grid cells with visible borders */
+        .tl-grid-cell {
+          border-right: 1px solid #f1f5f9;
+          min-height: 50px;
+        }
+        /* Darker border every full hour (even cells: :00 cols) */
+        .tl-grid-cell:nth-child(odd) {
+          border-right-color: #e2e8f0;
+        }
+        .tl-time-cell {
+          border-right: 1px solid #e2e8f0;
+        }
+        /* Booking block — absolute within the tl-time-cols (position: relative) */
         .booking-block {
-          position: relative;
-          margin: 4px 2px;
+          position: absolute;
+          top: 4px;
+          bottom: 4px;
           border-radius: 8px;
-          padding: 6px 10px;
+          padding: 0 10px;
           font-size: 11px;
           font-weight: 700;
           color: white;
@@ -376,8 +475,9 @@ export default function OwnerBookingsClient() {
           transition: transform 0.15s, box-shadow 0.15s;
         }
         .booking-block:hover {
-          transform: scale(1.02);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transform: scaleY(1.08);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          z-index: 6;
         }
         .tooltip-content {
           display: none;
