@@ -7,7 +7,7 @@ import { mergeSelectedSlots } from "@/utils/booking.utils";
 import { apiPost } from "@/services/api";
 import toast from "react-hot-toast";
 
-export function useBooking(_locationSans: DetailCourt[]) {
+export function useBooking() {
   const { user, token } = useAuth() || {};
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [selectedCourt, setSelectedCourt] = useState<string | null>(null);

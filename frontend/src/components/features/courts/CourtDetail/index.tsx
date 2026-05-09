@@ -35,7 +35,7 @@ export default function CourtDetail({ location }: CourtDetailProps) {
     isSubmitting,
     paymentStatus,
     confirmBooking,
-  } = useBooking(location.sans);
+  } = useBooking();
 
   const handleCheckoutClick = () => {
     if (selectedSlots.length === 0 || isInvalid) return;
