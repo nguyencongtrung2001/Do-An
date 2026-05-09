@@ -507,7 +507,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
                     className={`p-4 rounded-2xl border-2 text-left transition-all ${paymentMethod === "wallet" ? "border-primary bg-primary/5" : "border-gray-100 bg-white hover:border-gray-200"}`}
                   >
                     <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-3">💳</div>
-                    <p className="font-bold text-slate-800 text-sm">Ví hệ thống</p>
+                    <p className="font-bold text-slate-800 text-sm">Ví nội bộ</p>
                     <p className="text-xs text-slate-500 mt-1">Sử dụng số dư ví</p>
                   </button>
                   <button 

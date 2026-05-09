@@ -104,7 +104,8 @@ export class BookingRepository {
           include: {
             san: {
               include: {
-                diadiem: true
+                diadiem: true,
+                anhsan: true
               }
             }
           }

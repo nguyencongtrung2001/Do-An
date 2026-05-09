@@ -1,8 +1,114 @@
 import { bookingRepository } from '../repositories/booking.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 
+// ==============================
+// Types
+// ==============================
+interface RawSlot {
+  ma_san: string;
+  ngay_dat: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
+  gia_thue: number;
+}
+
+interface FormattedSlot {
+  ma_san: string;
+  ngay_dat: Date;
+  gio_bat_dau: Date;
+  gio_ket_thuc: Date;
+  gia_thue: number;
+}
+
+interface MergedSlot {
+  ma_san: string;
+  ngay_dat: Date;
+  gio_bat_dau: Date;
+  gio_ket_thuc: Date;
+  tong_gia: number;
+}
+
+// ==============================
+// Utility: Merge consecutive slots
+// ==============================
+/**
+ * Gộp các khung giờ liên tiếp trên cùng một sân thành 1 bản ghi duy nhất.
+ *
+ * Ví dụ: [06:00-06:30, 06:30-07:00, 07:00-07:30, 09:00-09:30]
+ *   → [06:00-07:30, 09:00-09:30]
+ *
+ * Quy tắc:
+ *   - Cùng ma_san VÀ cùng ngay_dat
+ *   - gio_ket_thuc của slot trước === gio_bat_dau của slot sau
+ */
+function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
+  if (slots.length === 0) return [];
+
+  // Sắp xếp theo sân → ngày → giờ bắt đầu
+  const sorted = [...slots].sort((a, b) => {
+    if (a.ma_san !== b.ma_san) return a.ma_san.localeCompare(b.ma_san);
+    if (a.ngay_dat.getTime() !== b.ngay_dat.getTime()) return a.ngay_dat.getTime() - b.ngay_dat.getTime();
+    return a.gio_bat_dau.getTime() - b.gio_bat_dau.getTime();
+  });
+
+  const merged: MergedSlot[] = [];
+
+  const first = sorted[0];
+  if (!first) return [];
+
+  let current: MergedSlot = {
+    ma_san: first.ma_san,
+    ngay_dat: first.ngay_dat,
+    gio_bat_dau: first.gio_bat_dau,
+    gio_ket_thuc: first.gio_ket_thuc,
+    tong_gia: first.gia_thue,
+  };
+
+  for (let i = 1; i < sorted.length; i++) {
+    const slot = sorted[i];
+    if (!slot) continue;
+
+    const sameCourt = slot.ma_san === current.ma_san;
+    const sameDate = slot.ngay_dat.getTime() === current.ngay_dat.getTime();
+    const consecutive = slot.gio_bat_dau.getTime() === current.gio_ket_thuc.getTime();
+
+    if (sameCourt && sameDate && consecutive) {
+      // Gộp: mở rộng giờ kết thúc, cộng dồn giá
+      current.gio_ket_thuc = slot.gio_ket_thuc;
+      current.tong_gia += slot.gia_thue;
+    } else {
+      // Không liên tiếp → push bản ghi hiện tại, bắt đầu bản ghi mới
+      merged.push(current);
+      current = {
+        ma_san: slot.ma_san,
+        ngay_dat: slot.ngay_dat,
+        gio_bat_dau: slot.gio_bat_dau,
+        gio_ket_thuc: slot.gio_ket_thuc,
+        tong_gia: slot.gia_thue,
+      };
+    }
+  }
+
+  // Đừng quên push bản ghi cuối cùng
+  merged.push(current);
+
+  return merged;
+}
+
+/**
+ * Chuyển chuỗi "HH:mm" thành Date dạng UTC 1970-01-01T[HH:mm:ss]Z
+ * Giúp Prisma lưu đúng giá trị Time mà không bị lệch múi giờ.
+ */
+function parseTimeUTC(timeStr: string): Date {
+  const [h, m] = timeStr.split(':').map(Number);
+  return new Date(`1970-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00Z`);
+}
+
+// ==============================
+// Service
+// ==============================
 export class BookingService {
-  async createBooking(data: any) {
+  async createBooking(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }) {
     const { ma_nguoi_dung, phuong_thuc_thanh_toan, selectedSlots } = data;
 
     if (!selectedSlots || selectedSlots.length === 0) {
@@ -13,42 +119,37 @@ export class BookingService {
       throw new ApiError(401, "Bạn chưa đăng nhập.");
     }
 
-    // 1. Prepare slots for Concurrency Check
-    const formattedSlots = selectedSlots.map((s: any) => {
-      const ngayDat = new Date(s.ngay_dat);
-      
-      const [startH, startM] = s.gio_bat_dau.split(':').map(Number);
-      const gioBatDau = new Date(0, 0, 0, startH, startM);
-      
-      const [endH, endM] = s.gio_ket_thuc.split(':').map(Number);
-      const gioKetThuc = new Date(0, 0, 0, endH, endM);
+    // 1. Parse raw strings → Date objects
+    const formattedSlots: FormattedSlot[] = selectedSlots.map((s) => ({
+      ma_san: s.ma_san,
+      ngay_dat: new Date(s.ngay_dat),
+      gio_bat_dau: parseTimeUTC(s.gio_bat_dau),
+      gio_ket_thuc: parseTimeUTC(s.gio_ket_thuc),
+      gia_thue: Number(s.gia_thue),
+    }));
 
-      return {
-        ma_san: s.ma_san,
-        ngay_dat: ngayDat,
-        gio_bat_dau: gioBatDau,
-        gio_ket_thuc: gioKetThuc,
-        gia_thue: Number(s.gia_thue)
-      };
-    });
-
-    // 2. Concurrency Check
+    // 2. Concurrency Check (kiểm tra trùng lịch trước khi gộp)
     const overlaps = await bookingRepository.checkSlotsAvailability(formattedSlots);
     if (overlaps && overlaps.length > 0) {
       throw new ApiError(409, "Một số khung giờ bạn chọn đã có người đặt hoặc đang chờ xử lý. Vui lòng tải lại trang và chọn giờ khác.");
     }
 
-    // 3. Calculate Deposit & Total
-    const tongTien = formattedSlots.reduce((sum: number, slot: any) => sum + slot.gia_thue, 0);
+    // 3. Gộp các slot liên tiếp trên cùng sân thành 1 bản ghi
+    const mergedSlots = mergeSlots(formattedSlots);
 
-    // 4. Set Status based on Payment Method
-const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ xử lý";   
- 
-    // Mapping for Database Check Constraint
+    // 4. Tính tổng tiền từ các slot đã gộp
+    const tongTien = mergedSlots.reduce((sum, slot) => sum + slot.tong_gia, 0);
+
+    // 5. Trạng thái & mapping phương thức thanh toán
+    // - Ví nội bộ: tự động "Đã xác nhận", không cần chủ sân xác nhận
+    // - Tiền mặt: "Chờ xử lý", cần chủ sân xác nhận
+    // Check constraint: 'Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành', 'Đã hủy'
+    const status = phuong_thuc_thanh_toan === "wallet" ? "Đã xác nhận" : "Chờ xử lý";
+
     const paymentMap: Record<string, string> = {
       cash: "Tiền mặt",
-      wallet: "Ví hệ thống",
-      vnpay: "VNPAY"
+      wallet: "Ví nội bộ",
+      vnpay: "VNPAY",
     };
     const mappedPayment = paymentMap[phuong_thuc_thanh_toan] || phuong_thuc_thanh_toan;
 
@@ -58,13 +159,14 @@ const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ
       ma_dat_san,
       ma_nguoi_dung,
       tong_tien: tongTien,
-      phuong_thuc_thanh_toan: mappedPayment
+      phuong_thuc_thanh_toan: mappedPayment,
     };
 
-    const detailsData = formattedSlots.map((s: any, idx: number) => {
-      const tienCoc = s.gia_thue * 0.3;
-      const tienConLai = s.gia_thue - tienCoc;
-      
+    // 6. Tạo chi tiết từ các slot ĐÃ GỘP (không phải từ slot thô)
+    const detailsData = mergedSlots.map((s, idx) => {
+      const tienCoc = s.tong_gia * 0.3;
+      const tienConLai = s.tong_gia - tienCoc;
+
       return {
         ma_dat_san_chi_tiet: `CTDS_${Date.now()}_${idx}`,
         ma_san: s.ma_san,
@@ -73,11 +175,11 @@ const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ
         gio_ket_thuc: s.gio_ket_thuc,
         tien_coc: tienCoc,
         tien_con_lai: tienConLai,
-        trang_thai_dat: status
+        trang_thai_dat: status,
       };
     });
 
-    // 5. Call Repository to save
+    // 7. Lưu vào DB (trong transaction)
     try {
       let walletDeduction;
       if (phuong_thuc_thanh_toan === "wallet") {
@@ -86,8 +188,8 @@ const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ
 
       const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
       return booking;
-    } catch (error: any) {
-      if (error.message === "Số dư ví không đủ để thực hiện giao dịch này") {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === "Số dư ví không đủ để thực hiện giao dịch này") {
         throw new ApiError(400, error.message);
       }
       throw error;

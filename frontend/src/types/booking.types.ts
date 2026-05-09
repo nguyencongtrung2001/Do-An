@@ -1,4 +1,4 @@
-export type BookingStatus = "Chờ xử lý" | "Đã xác nhận" | "Đã đặt cọc" | "Đã nhận sân" | "Đã hủy";
+export type BookingStatus = "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Hoàn thành" | "Đã hủy";
 
 export interface BookingDetail {
   ma_dat_san_chi_tiet: string;
