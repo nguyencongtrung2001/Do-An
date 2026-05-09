@@ -17,21 +17,20 @@ interface BookingDetail {
   trang_thai_dat: string;
   san: {
     ten_san: string;
-    anhsan?: { duong_dan_anh: string }[];
-    diadiem?: {
+    diadiem: {
       ten_dia_diem: string;
       dia_chi: string;
     };
+    anhsan: { duong_dan_anh: string }[];
   };
 }
 
 interface Booking {
   ma_dat_san: string;
-  tong_tien: string | number;
+  tong_tien: string;
   phuong_thuc_thanh_toan: string;
   datsanchitiet: BookingDetail[];
 }
-
 
 // ==============================
 // Component
@@ -62,8 +61,6 @@ export default function HistoryClient() {
   const filteredBookings = filter === "all" 
     ? bookings 
     : bookings.filter((b) => {
-        // A booking (datsan) has multiple details (datsanchitiet)
-        // We filter if ANY detail matches the status
         return b.datsanchitiet.some((d) => d.trang_thai_dat === filter);
       });
 
@@ -123,6 +120,16 @@ export default function HistoryClient() {
             }`}
           >
             Chờ xử lý
+          </button>
+          <button
+            onClick={() => setFilter("Đã thanh toán")}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+              filter === "Đã thanh toán"
+                ? "bg-primary text-white shadow-md shadow-primary/30"
+                : "bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-300 border border-gray-200 dark:border-gray-700 hover:border-primary hover:text-primary"
+            }`}
+          >
+            Đã thanh toán
           </button>
           <button
             onClick={() => setFilter("Đã hủy")}
@@ -198,7 +205,7 @@ export default function HistoryClient() {
                     </div>
 
                     <div className="space-y-2 mt-4 bg-gray-50/50 dark:bg-gray-800/30 p-3 rounded-xl">
-                      {booking.datsanchitiet.map((detail, dIdx: number) => (
+                      {booking.datsanchitiet.map((detail, dIdx) => (
                         <div key={dIdx} className="flex flex-wrap gap-x-6 gap-y-2 text-xs border-b border-gray-100 dark:border-gray-800 last:border-0 pb-2 last:pb-0">
                           <div className="flex items-center gap-1.5 min-w-[120px]">
                             <span className="material-symbols-outlined text-base text-primary">sports_soccer</span>

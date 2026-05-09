@@ -218,7 +218,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
 
         toast.success("Đặt sân thành công! Vui lòng kiểm tra lịch sử.");
         setTimeout(() => {
-          window.location.href = "/user/history";
+          window.location.href = "/history";
         }, 1500);
       } else if (paymentMethod === "vnpay") {
         setPaymentStatus("Đang kết nối cổng thanh toán VNPAY...");

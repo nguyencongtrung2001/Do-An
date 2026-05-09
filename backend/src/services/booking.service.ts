@@ -42,8 +42,8 @@ export class BookingService {
     const tongTien = formattedSlots.reduce((sum: number, slot: any) => sum + slot.gia_thue, 0);
 
     // 4. Set Status based on Payment Method
-    const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ nhận cọc";
-    
+const status = phuong_thuc_thanh_toan === "wallet" ? "Đã thanh toán" : "Chờ xử lý";   
+ 
     // Mapping for Database Check Constraint
     const paymentMap: Record<string, string> = {
       cash: "Tiền mặt",
