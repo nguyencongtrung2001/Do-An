@@ -131,3 +131,13 @@ export const updateBookingStatus = async (req: AuthRequest, res: Response, next:
     next(error);
   }
 };
+
+export const getPendingCount = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const count = await ownerService.getPendingCount(userId);
+    res.json({ success: true, count });
+  } catch (error) {
+    next(error);
+  }
+};

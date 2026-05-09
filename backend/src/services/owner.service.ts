@@ -199,6 +199,10 @@ export class OwnerService {
 
     return bookingRepository.updateStatus(bookingDetailId, status);
   }
+
+  async getPendingCount(userId: string) {
+    return bookingRepository.countPendingByOwnerId(userId);
+  }
 }
 
 export const ownerService = new OwnerService();

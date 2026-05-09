@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 // Define shapes of our User and AuthContext
@@ -25,24 +25,23 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const router = useRouter();
-
-  // Load from localStorage on initial render
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to parse user from local storage", error);
-      }
+  // Lazy initializers — execute once on client, return null on server (SSR-safe)
+  const [user, setUser] = useState<UserData | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? (JSON.parse(raw) as UserData) : null;
+    } catch {
+      return null;
     }
-  }, []);
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("token");
+  });
+
+  const router = useRouter();
 
   const login = (newToken: string, newUser: UserData) => {
     setToken(newToken);

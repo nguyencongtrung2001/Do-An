@@ -44,6 +44,19 @@ export class BookingRepository {
     });
   }
 
+  async countPendingByOwnerId(userId: string) {
+    return prisma.datsanchitiet.count({
+      where: {
+        trang_thai_dat: "Chờ xử lý",
+        san: {
+          diadiem: {
+            ma_nguoi_dung: userId
+          }
+        }
+      }
+    });
+  }
+
   async checkSlotsAvailability(slots: { ma_san: string; ngay_dat: Date; gio_bat_dau: Date; gio_ket_thuc: Date }[]) {
     const OR = slots.map(s => ({
       ma_san: s.ma_san,

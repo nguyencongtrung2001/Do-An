@@ -57,32 +57,48 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   for (const marker of sorted) {
     if (!currentGroup) {
       // First marker in a potential group
-      currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker] };
+      const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+      const endDate = new Date(0, 0, 0, h, m + 30);
+      const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+      
+      currentGroup = { 
+        ...marker, 
+        gio_ket_thuc, 
+        slots: [marker] 
+      };
     } else {
       // Check if this marker is exactly 30 mins after the current group's last marker
       const [lastH, lastM] = currentGroup.gio_ket_thuc.split(':').map(Number);
-      const expectedDate = new Date(0, 0, 0, lastH, lastM + 30);
-      const expectedTime = `${String(expectedDate.getHours()).padStart(2, '0')}:${String(expectedDate.getMinutes()).padStart(2, '0')}`;
+      const expectedTime = `${String(lastH).padStart(2, '0')}:${String(lastM).padStart(2, '0')}`;
 
       if (
         currentGroup.ma_san === marker.ma_san &&
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        // Extend current group
+        const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+        const endDate = new Date(0, 0, 0, h, m + 30);
+        currentGroup.gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+        currentGroup.gia_thue += marker.gia_thue;
         currentGroup.slots.push(marker);
       } else {
         // Gap detected, start new group
         grouped.push(currentGroup);
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker] };
+        const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+        const endDate = new Date(0, 0, 0, h, m + 30);
+        const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+        currentGroup = { 
+          ...marker, 
+          gio_ket_thuc, 
+          slots: [marker] 
+        };
       }
     }
   }
   if (currentGroup) grouped.push(currentGroup);
 
-  // After grouping markers, we need to filter out groups with only 1 marker (no duration)
-  // because 2 markers = 1 slot (30 mins).
-  return grouped.filter(g => g.slots.length > 1);
+  return grouped;
 }
 
 // Sport label map
@@ -150,9 +166,9 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
 
   const groupedSlots = useMemo(() => mergeSelectedSlots(selectedSlots), [selectedSlots]);
 
-  // Ruler Logic: 2 markers = 30 min, 3 markers = 1 hour. 
-  // Minimum 1 hour = 3 consecutive markers.
-  const invalidGroups = groupedSlots.filter(g => g.slots.length < 3);
+  // Ruler Logic: Each marker = 30 min.
+  // Minimum 1 hour = 2 markers.
+  const invalidGroups = groupedSlots.filter(g => g.slots.length < 2);
   const isInvalid = invalidGroups.length > 0;
 
   const handleBooking = () => {
@@ -181,28 +197,20 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         
         // Convert markers back to 30-min slots for backend
         const slotsForBackend = groupedSlots.flatMap(group => {
-          const slots: {
-            ma_san: string;
-            ten_san: string;
-            ngay_dat: string;
-            gio_bat_dau: string;
-            gio_ket_thuc: string;
-            gia_thue: number;
-          }[] = [];
-          
-          for (let i = 0; i < group.slots.length - 1; i++) {
-            const currentMarker = group.slots[i];
-            const nextMarker = group.slots[i + 1];
-            slots.push({
+          return group.slots.map(marker => {
+            const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+            const endDate = new Date(0, 0, 0, h, m + 30);
+            const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+            
+            return {
               ma_san: group.ma_san,
               ten_san: group.ten_san,
               ngay_dat: group.ngay_dat,
-              gio_bat_dau: currentMarker.gio_bat_dau,
-              gio_ket_thuc: nextMarker.gio_bat_dau,
-              gia_thue: currentMarker.gia_thue
-            });
-          }
-          return slots;
+              gio_bat_dau: marker.gio_bat_dau,
+              gio_ket_thuc: gio_ket_thuc,
+              gia_thue: marker.gia_thue
+            };
+          });
         });
 
         console.log("📤 Sending Booking Payload:", { paymentMethod, slotsCount: slotsForBackend.length });
