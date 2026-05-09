@@ -4,10 +4,9 @@ import { useState, useMemo } from "react";
 import { useOwnerCourts } from "@/hooks/useOwnerCourts";
 import { ToggleRight, SearchX, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-
-// Sub-components
 import StatusStats from "./StatusStats";
 import CourtStatusItem from "./CourtStatusItem";
+
 
 export default function OwnerStatus() {
   const { courts, loading, changeCourtStatus } = useOwnerCourts();
@@ -30,6 +29,7 @@ export default function OwnerStatus() {
       await changeCourtStatus(court, newStatus);
       toast.success(`Đã cập nhật trạng thái sân thành ${newStatus}`);
     } catch (err) {
+      console.error("Failed to update court status:", err);
       toast.error("Không thể cập nhật trạng thái sân.");
     } finally {
       setUpdatingId(null);

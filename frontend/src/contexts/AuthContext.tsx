@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useCallback, useMemo, ReactNode, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 export interface UserData {
@@ -24,53 +24,70 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// --- External Store Subscription Logic ---
+// This handles synchronization with localStorage outside the React render cycle.
+const subscribe = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+
+const getSnapshot = (key: string) => () => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(key);
+};
+
+const getServerSnapshot = () => null;
+
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserData | null>(() => {
-    if (typeof window === "undefined") return null;
+  const router = useRouter();
+
+  // useSyncExternalStore handles hydration and synchronization automatically
+  const tokenRaw = useSyncExternalStore(
+    subscribe,
+    getSnapshot("token"),
+    getServerSnapshot
+  );
+
+  const userRaw = useSyncExternalStore(
+    subscribe,
+    getSnapshot("user"),
+    getServerSnapshot
+  );
+
+  // Memoize parsing to ensure stable references
+  const user = useMemo(() => {
+    if (!userRaw) return null;
     try {
-      const stored = localStorage.getItem("user");
-      return stored ? JSON.parse(stored) : null;
+      return JSON.parse(userRaw) as UserData;
     } catch {
       return null;
     }
-  });
-
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
-  });
-
-  const [isMounted, setIsMounted] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  }, [userRaw]);
 
   const login = useCallback((newToken: string, newUser: UserData) => {
-    setToken(newToken);
-    setUser(newUser);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
+    // Trigger local update for useSyncExternalStore
+    window.dispatchEvent(new Event("storage"));
   }, []);
 
   const logout = useCallback(() => {
-    setToken(null);
-    setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    window.dispatchEvent(new Event("storage"));
     router.push("/login");
   }, [router]);
 
   const value = useMemo(() => ({
-    // Safe exposure: Only provide auth data after component has mounted on the client
-    user: isMounted ? user : null,
-    token: isMounted ? token : null,
+    user,
+    token: tokenRaw,
     login,
     logout,
-    isAuthenticated: isMounted ? !!token : false,
-    isMounted,
-  }), [user, token, isMounted, login, logout]);
+    isAuthenticated: !!tokenRaw,
+    isMounted: true, // Data exposure is handled by useSyncExternalStore's hydration logic
+  }), [user, tokenRaw, login, logout]);
 
   return (
     <AuthContext.Provider value={value}>

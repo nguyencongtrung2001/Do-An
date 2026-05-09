@@ -11,15 +11,15 @@ export const USER_NAV_LINKS: NavLink[] = [
 ];
 
 export const ADMIN_NAV_LINKS: NavLink[] = [
-  { label: "Dashboard", href: "/admin", icon: "dashboard", exact: true },
-  { label: "Quản lý người dùng", href: "/admin/users", icon: "group" },
-  { label: "Kiểm duyệt sân", href: "/admin/approvals", icon: "verified" },
-  { label: "Tài chính", href: "/admin/finance", icon: "payments" },
+  { label: "Dashboard", href: "/overview", icon: "dashboard", exact: true },
+  { label: "Quản lý người dùng", href: "/users", icon: "group" },
+  { label: "Kiểm duyệt sân", href: "/approvals", icon: "verified" },
+  { label: "Tài chính", href: "/finance", icon: "payments" },
 ];
 
 export const OWNER_NAV_LINKS: (NavLink & { category: string })[] = [
-  { label: "Dashboard", href: "/owner/dashboard", icon: "dashboard", category: "Tổng quan", exact: true },
-  { label: "Quản lý sân", href: "/owner/courts", icon: "stadium", category: "Quản lý" },
-  { label: "Lịch đặt sân", href: "/owner/bookings", icon: "calendar_month", category: "Quản lý" },
-  { label: "Trạng thái sân", href: "/owner/status", icon: "toggle_on", category: "Quản lý" },
+  { label: "Dashboard", href: "/dashboard", icon: "dashboard", category: "Tổng quan", exact: true },
+  { label: "Quản lý sân", href: "/courts", icon: "stadium", category: "Quản lý" },
+  { label: "Lịch đặt sân", href: "/bookings", icon: "calendar_month", category: "Quản lý" },
+  { label: "Trạng thái sân", href: "/status", icon: "toggle_on", category: "Quản lý" },
 ];

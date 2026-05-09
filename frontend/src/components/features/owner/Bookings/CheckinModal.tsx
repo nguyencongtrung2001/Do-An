@@ -3,7 +3,7 @@
 import { BookingDetail } from "@/types/booking.types";
 import { formatTimeFromISO } from "@/utils/booking.utils";
 import { formatVND } from "@/utils/date.utils";
-import { X, User, Stadium, Wallet, CheckCircle2 } from "lucide-react";
+import { X, User, Trophy, Wallet, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -61,7 +61,7 @@ export default function CheckinModal({
             <div className="space-y-3 text-right">
               <div className="flex items-center gap-2 text-slate-400 justify-end">
                 <span className="text-[10px] font-black uppercase tracking-widest">Thông tin sân</span>
-                <Stadium className="w-4 h-4" />
+                <Trophy className="w-4 h-4" />
               </div>
               <div>
                 <p className="font-black text-slate-900">{booking.san?.ten_san}</p>
