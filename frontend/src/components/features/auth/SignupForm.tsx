@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useSignup } from "@/hooks/useSignup";
 import { Role } from "@/types/auth.types";
 
@@ -45,7 +46,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
       </div>
 
       {/* Owner Specific Fields */}
-      {role === "owner" && (
+      {role === Role.OWNER && (
         <div className="flex flex-col gap-4 auth-fade-in">
           {/* Avatar Upload */}
           <div className="flex flex-col gap-1.5">
@@ -53,7 +54,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
             <div className="flex items-center gap-4">
               <div className="relative w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
                 {state.avatarPreview ? (
-                  <img src={state.avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+                  <Image src={state.avatarPreview} alt="Avatar preview" fill className="object-cover" />
                 ) : (
                   <span className="material-symbols-outlined text-3xl text-slate-300">person</span>
                 )}

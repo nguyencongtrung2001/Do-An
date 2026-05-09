@@ -13,14 +13,14 @@ const VenueMapSelector = dynamic(
   { ssr: false }
 );
 
-type AuthTab = "login" | "signup";
+type AuthTab = "login" | "register";
 type Role = "player" | "owner";
 
 export default function AuthClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const initialTab = searchParams.get("tab") === "signup" ? "signup" : "login";
+  const initialTab = searchParams.get("tab") === "register" ? "register" : "login";
 
   const { login } = useAuth();
   const [activeTab, setActiveTab] = useState<AuthTab>(initialTab);
@@ -251,9 +251,9 @@ export default function AuthClient() {
             </button>
             <button
               className={`flex-1 pb-3 text-center text-sm font-bold transition-colors duration-200 z-10 ${
-                activeTab === "signup" ? "text-primary border-b-2 border-primary" : "text-slate-400 hover:text-slate-600"
+                activeTab === "register" ? "text-primary border-b-2 border-primary" : "text-slate-400 hover:text-slate-600"
               }`}
-              onClick={() => switchTab("signup")}
+              onClick={() => switchTab("register")}
             >
               Đăng ký
             </button>
@@ -368,15 +368,15 @@ export default function AuthClient() {
 
               <p className="text-center text-sm text-slate-400 mt-2">
                 Chưa có tài khoản?{" "}
-                <button type="button" onClick={() => switchTab("signup")} className="text-primary font-semibold hover:underline">
+                <button type="button" onClick={() => switchTab("register")} className="text-primary font-semibold hover:underline">
                   Đăng ký ngay
                 </button>
               </p>
             </form>
           )}
 
-          {/* ===== SIGN UP FORM ===== */}
-          {activeTab === "signup" && (
+          {/* ===== REGISTER FORM ===== */}
+          {activeTab === "register" && (
             <form onSubmit={handleSignupSubmit} className="flex flex-col gap-5 auth-fade-in">
               <div className="flex flex-col gap-1.5">
                 <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Họ và tên</label>

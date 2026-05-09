@@ -11,23 +11,23 @@ import type { LocationMapData } from "@/types/court.types";
 export default function MapClient() {
   const [filter, setFilter] = useState("all");
   const [locations, setLocations] = useState<LocationMapData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<LocationMapData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const fetchLocations = async () => {
-      setLoading(true);
       try {
         const data = await courtService.getMapLocations(filter);
         if (isMounted) {
-          setLocations(data);
+          setLocations(data as LocationMapData[]);
         }
       } catch (err) {
         console.error("Lỗi khi tải danh sách địa điểm:", err);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          // loading logic removed as it was unused
+        }
       }
     };
     fetchLocations();

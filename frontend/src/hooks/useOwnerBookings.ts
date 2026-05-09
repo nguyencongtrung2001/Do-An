@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { bookingService } from "@/services/booking.service";
 import type { BookingDetail } from "@/types/booking.types";
+import { OwnerCourt } from "@/types/court.types";
 
 export function useOwnerBookings() {
   const { token } = useAuth();
   const [bookings, setBookings] = useState<BookingDetail[]>([]);
-  const [courts, setCourts] = useState<{ ma_san: string; ten_san: string }[]>([]);
+  const [courts, setCourts] = useState<OwnerCourt[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchBookings = useCallback(async () => {
@@ -21,7 +22,15 @@ export function useOwnerBookings() {
         // Extract unique courts for the timeline
         const uniqueCourts = Array.from(
           new Set(data.bookings.map(b => JSON.stringify({ ma_san: b.san.ma_san, ten_san: b.san.ten_san })))
-        ).map(s => JSON.parse(s as string) as { ma_san: string; ten_san: string });
+        ).map(s => {
+          const parsed = JSON.parse(s as string);
+          return {
+            ...parsed,
+            loai_the_thao: "Bóng đá", // Mocked as required by interface
+            trang_thai_san: "Đang hoạt động", // Mocked as required by interface
+            gia_thue_30p: 100000, // Mocked as required by interface
+          } as OwnerCourt;
+        });
 
         setCourts(uniqueCourts);
       }

@@ -127,3 +127,16 @@ export interface LocationDetail {
   hinh_anh: string[];
   sans: DetailCourt[];
 }
+
+export interface SelectedSlot {
+  ma_san: string;
+  ten_san: string;
+  ngay_dat: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
+  gia_thue: number;
+}
+
+export interface GroupedSlot extends SelectedSlot {
+  slots: SelectedSlot[];
+}

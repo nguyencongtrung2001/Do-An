@@ -14,10 +14,10 @@ export default function AuthTabs() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   
-  const initialTab = (searchParams.get("tab") === "signup" ? "signup" : "login") as AuthTab;
+  const initialTab = (searchParams.get("tab") === "register" ? "register" : "login") as AuthTab;
 
   const [activeTab, setActiveTab] = useState<AuthTab>(initialTab);
-  const [role, setRole] = useState<Role>("player");
+const [role, setRole] = useState<Role>(Role.CUSTOMER);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const switchTab = (tab: AuthTab) => {
@@ -96,9 +96,9 @@ export default function AuthTabs() {
             </button>
             <button
               className={`flex-1 pb-3 text-center text-sm font-bold transition-colors duration-200 ${
-                activeTab === "signup" ? "text-primary border-b-2 border-primary" : "text-slate-400 hover:text-slate-600"
+                activeTab === "register" ? "text-primary border-b-2 border-primary" : "text-slate-400 hover:text-slate-600"
               }`}
-              onClick={() => switchTab("signup")}
+              onClick={() => switchTab("register")}
             >
               Đăng ký
             </button>
@@ -108,7 +108,7 @@ export default function AuthTabs() {
           <RoleSelector 
             role={role} 
             setRole={setRole} 
-            isVisible={activeTab === "signup"} 
+            isVisible={activeTab === "register"} 
           />
 
           {errorMsg && (
@@ -119,7 +119,7 @@ export default function AuthTabs() {
 
           {activeTab === "login" ? (
             <LoginForm 
-              onSwitchToSignup={() => switchTab("signup")} 
+              onSwitchToRegister={() => switchTab("register")} 
               onError={setErrorMsg} 
             />
           ) : (

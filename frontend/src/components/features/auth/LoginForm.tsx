@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import { UserData } from "@/types/auth.types";
 
 interface LoginFormProps {
-  onSwitchToSignup: () => void;
+  onSwitchToRegister: () => void;
   onError: (msg: string | null) => void;
 }
 
-export default function LoginForm({ onSwitchToSignup, onError }: LoginFormProps) {
+export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProps) {
   const router = useRouter();
   const { login } = useAuth();
   
@@ -41,8 +42,12 @@ export default function LoginForm({ onSwitchToSignup, onError }: LoginFormProps)
       } else {
         router.push("/");
       }
-    } catch (error: any) {
-      onError(error.message || "Đăng nhập thất bại");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        onError(error.message);
+      } else {
+        onError("Đăng nhập thất bại");
+      }
     } finally {
       setLoading(false);
     }
@@ -120,14 +125,19 @@ export default function LoginForm({ onSwitchToSignup, onError }: LoginFormProps)
           type="button"
           className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
         >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+          <Image 
+            src="https://www.svgrepo.com/show/475656/google-color.svg" 
+            alt="Google" 
+            width={20} 
+            height={20} 
+          />
           Google
         </button>
       </div>
 
       <p className="text-center text-sm text-slate-400 mt-2">
         Chưa có tài khoản?{" "}
-        <button type="button" onClick={onSwitchToSignup} className="text-primary font-semibold hover:underline">
+        <button type="button" onClick={onSwitchToRegister} className="text-primary font-semibold hover:underline">
           Đăng ký ngay
         </button>
       </p>

@@ -52,7 +52,7 @@ export function useSignup(role: Role) {
     setLoading(true);
     try {
       let data;
-      if (role === "owner") {
+      if (role === Role.OWNER) {
         data = await authService.registerOwner({
           ho_ten: name,
           email,
@@ -79,15 +79,19 @@ export function useSignup(role: Role) {
       
       if (data.user.vai_tro === "Quản trị viên") {
         router.push("/admin/users");
-      } else if (role === "owner") {
+      } else if (role === Role.OWNER) {
         router.push("/owner/dashboard");
       } else {
         router.push("/");
       }
       
       toast.success("Đăng ký thành công!");
-    } catch (error: any) {
-      setErrorMsg(error.message || "Đăng ký thất bại");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMsg(error.message);
+      } else {
+        setErrorMsg("Đăng ký thất bại");
+      }
     } finally {
       setLoading(false);
     }

@@ -7,7 +7,7 @@ import { mergeSelectedSlots } from "@/utils/booking.utils";
 import { apiPost } from "@/services/api";
 import toast from "react-hot-toast";
 
-export function useBooking(locationSans: DetailCourt[]) {
+export function useBooking(_locationSans: DetailCourt[]) {
   const { user, token } = useAuth() || {};
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [selectedCourt, setSelectedCourt] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export function useBooking(locationSans: DetailCourt[]) {
         setPaymentStatus("Đang xử lý đơn hàng...");
         
         const slotsForBackend = groupedSlots.flatMap(group => {
-          return group.slots.map(marker => {
+          return group.slots.map((marker: SelectedSlot) => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
@@ -94,8 +94,12 @@ export function useBooking(locationSans: DetailCourt[]) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         window.location.href = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?fake_params=123";
       }
-    } catch (error: any) {
-      toast.error(error.message || "Có lỗi xảy ra khi xử lý.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Có lỗi xảy ra khi xử lý.");
+      }
       setIsSubmitting(false);
       setPaymentStatus("");
     }

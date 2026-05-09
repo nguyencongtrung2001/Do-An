@@ -40,3 +40,11 @@ export interface AuthResponse {
   token: string;
   location?: unknown;
 }
+
+export type AuthTab = 'login' | 'register'; 
+
+export enum Role {
+  CUSTOMER = 'KHACH_HANG',
+  OWNER = 'CHỦ_SÂN',
+  ADMIN = 'ADMIN',
+}
