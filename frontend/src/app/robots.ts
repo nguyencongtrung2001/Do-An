@@ -8,12 +8,10 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           // Admin routes
-          '/admin/',
           '/users',
           '/approvals',
           '/finance',
           // Owner routes
-          '/owner/',
           '/dashboard',
           '/status',
           '/bookings',

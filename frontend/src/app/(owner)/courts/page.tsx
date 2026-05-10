@@ -1,8 +1,8 @@
-import OwnerCourts from "@/components/features/owner/Courts";
+import OwnerCourts from "@/components/owner/OwnerCourtsClient";
 
 export const metadata = {
-  title: "Quản lý sân — Admin Panel",
-  description: "Trang hỗ trợ owner thêm, xóa, sửa sân thể thao của mình",
+  title: "Quản lý sân — Owner Panel",
+  description: "Trang hỗ trợ chủ sân thêm, xóa, sửa sân thể thao của mình",
 };
 
 export default function CourtsPage() {

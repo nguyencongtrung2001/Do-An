@@ -78,9 +78,9 @@ export function useSignup(role: Role) {
       login(data.token, data.user as UserData);
       
       if (data.user.vai_tro === "Quản trị viên") {
-        router.push("/admin/users");
+        router.push("/overview");
       } else if (role === Role.OWNER) {
-        router.push("/owner/dashboard");
+        router.push("/dashboard");
       } else {
         router.push("/");
       }

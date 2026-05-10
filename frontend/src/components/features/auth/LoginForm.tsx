@@ -36,9 +36,9 @@ export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProp
       
       // Navigate based on role
       if (data.user.vai_tro === "Quản trị viên") {
-        router.push("/admin/users");
+        router.push("/overview");
       } else if (data.user.vai_tro === "Chủ sân") {
-        router.push("/owner/dashboard");
+        router.push("/dashboard");
       } else {
         router.push("/");
       }

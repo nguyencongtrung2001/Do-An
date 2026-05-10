@@ -1,7 +1,7 @@
-import OwnerBookings from "@/components/features/owner/Bookings";
+import OwnerBookings from "@/components/owner/OwnerBookingsClient";
 
 export const metadata = {
-  title: "Lịch đặt sân — Admin Panel",
+  title: "Lịch đặt sân — Owner Panel",
   description: "Theo dõi danh sách đặt sân theo thời gian thực.",
 };
 
