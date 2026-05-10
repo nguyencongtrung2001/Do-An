@@ -1,4 +1,4 @@
-import AdminFinance from "@/components/features/admin/Finance";
+import AdminFinance from "@/components/admin/AdminFinanceClient";
 
 export const metadata = {
   title: "Tài chính & Thống kê - Admin SportLink",
