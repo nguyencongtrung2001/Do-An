@@ -1,10 +1,17 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'booking_sport_secret_key_2026';
-const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('❌ JWT_SECRET is not defined');
+}
+
+// Đọc từ môi trường, nếu không có thì mới lấy mặc định là '7d'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'; 
 
 export const generateToken = (payload: object): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET, { 
+    expiresIn: JWT_EXPIRES_IN as any // Ép kiểu để tránh lỗi TS nếu cần
+  });
 };
 
 export const verifyToken = (token: string): object | string => {
