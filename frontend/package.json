@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint ",
-    "check": "tsc --noEmit && npm run lint"
+    "lint": "next lint src",
+    "check": "tsc --noEmit ; npm run lint"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
