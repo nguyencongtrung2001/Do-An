@@ -8,31 +8,18 @@ import fieldRoutes from "./routers/field.routes.js";
 import ownerRoutes from "./routers/owner.routes.js";
 import bookingRoutes from "./routers/booking.routes.js";
 dotenv.config();
-
 const app = express();
 app.use(cors({
-  origin: ["https://do-an-blue.vercel.app", "http://localhost:3000", "*"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true,
+    origin: ["https://do-an-blue.vercel.app", "http://localhost:3000", "*"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
 }));
 app.use(express.json());
-
-// Bắt lỗi cú pháp JSON từ body-parser
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ 
-      status: "error", 
-      message: "Dữ liệu không đúng định dạng JSON" 
-    });
-  }
-  next(err);
-});
-
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/field", fieldRoutes);
 app.use("/owner", ownerRoutes);
 app.use("/booking", bookingRoutes);
 app.use(errorHandler);
-
 export default app;
+//# sourceMappingURL=app.js.map

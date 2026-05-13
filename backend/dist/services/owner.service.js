@@ -1,0 +1,175 @@
+import bcrypt from 'bcryptjs';
+import { ApiError } from '../utils/ApiError.js';
+import { generateToken } from '../utils/jwt.js';
+import { userRepository } from '../repositories/user.repository.js';
+import { locationRepository } from '../repositories/location.repository.js';
+import { courtRepository } from '../repositories/court.repository.js';
+import { bookingRepository } from '../repositories/booking.repository.js';
+import prisma from '../config/prisma.js';
+import cloudinary from '../config/cloudinary.config.js';
+export class OwnerService {
+    async registerOwner(data) {
+        const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau, ten_dia_diem, dia_chi, kinh_do, vi_do, anh_dai_dien } = data;
+        // 1. Check if email or phone already exists
+        const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
+        if (existingUser) {
+            if (existingUser.email === email)
+                throw new ApiError(400, "Email đã tồn tại trong hệ thống");
+            if (existingUser.so_dien_thoai === so_dien_thoai)
+                throw new ApiError(400, "Số điện thoại đã tồn tại trong hệ thống");
+        }
+        // 2. Generate next IDs
+        const newUserId = await userRepository.generateNextUserId();
+        const newLocationId = await locationRepository.generateNextLocationId();
+        // 3. Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(mat_khau, salt);
+        // 4. Transaction: Save User and Location atomically
+        const result = await prisma.$transaction(async (tx) => {
+            const user = await tx.nguoidung.create({
+                data: {
+                    ma_nguoi_dung: newUserId,
+                    ho_ten,
+                    email,
+                    so_dien_thoai,
+                    mat_khau: hashedPassword,
+                    vai_tro: "Chủ sân",
+                    trang_thai: false, // Wait for admin approval
+                    anh_cccd_truoc,
+                    anh_cccd_sau,
+                    anh_dai_dien: anh_dai_dien || null
+                }
+            });
+            const location = await tx.diadiem.create({
+                data: {
+                    ma_dia_diem: newLocationId,
+                    ten_dia_diem,
+                    dia_chi,
+                    kinh_do,
+                    vi_do,
+                    ma_nguoi_dung: newUserId
+                }
+            });
+            return { user, location };
+        });
+        // 5. Return token and user info
+        const token = generateToken({ id: result.user.ma_nguoi_dung, role: result.user.vai_tro });
+        return { user: result.user, location: result.location, token };
+    }
+    async getMyCourts(userId) {
+        const locations = await locationRepository.findByOwnerId(userId);
+        const allCourts = locations.flatMap(loc => loc.san);
+        return allCourts;
+    }
+    async addCourt(userId, data, images) {
+        const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
+        // 1. Find owner's location
+        const location = await locationRepository.findFirstByOwnerId(userId);
+        if (!location) {
+            throw new ApiError(404, "Không tìm thấy địa điểm của bạn. Vui lòng liên hệ admin.");
+        }
+        // 2. Generate next court ID
+        const newSanId = await courtRepository.generateNextCourtId();
+        // 3. Create court and images in transaction
+        return prisma.$transaction(async (tx) => {
+            const san = await tx.san.create({
+                data: {
+                    ma_san: newSanId,
+                    ma_dia_diem: location.ma_dia_diem,
+                    ten_san,
+                    loai_the_thao,
+                    gia_thue_30p: parseFloat(gia_thue_30p),
+                    trang_thai_san: trang_thai_san || "Đang hoạt động"
+                }
+            });
+            if (images && images.length > 0) {
+                // Generate sequential IDs (IMG001, IMG002, ...)
+                const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
+                let nextNum = 1;
+                if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
+                    const parsed = parseInt(lastImg.ma_anh_san.replace("IMG", ""), 10);
+                    if (!isNaN(parsed))
+                        nextNum = parsed + 1;
+                }
+                await tx.anhsan.createMany({
+                    data: images.map((img, idx) => ({
+                        ma_anh_san: `IMG${String(nextNum + idx).padStart(3, '0')}`,
+                        ma_san: newSanId,
+                        duong_dan_anh: img.url,
+                        ma_cloudinary: img.public_id || "manual_upload"
+                    }))
+                });
+            }
+            return san;
+        });
+    }
+    async updateCourt(userId, maSan, data, images) {
+        const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
+        // Check if court belongs to this owner
+        const court = await courtRepository.findByIdAndOwnerId(maSan, userId);
+        if (!court) {
+            throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền chỉnh sửa.");
+        }
+        // If new images uploaded, fetch old ones so we can delete them from Cloudinary
+        let oldImages = [];
+        if (images && images.length > 0) {
+            oldImages = await courtRepository.findImagesByCourtId(maSan);
+        }
+        // Update court fields + replace images in a single transaction
+        const updatedCourt = await prisma.$transaction(async (tx) => {
+            const updated = await tx.san.update({
+                where: { ma_san: maSan },
+                data: {
+                    ten_san,
+                    loai_the_thao,
+                    gia_thue_30p: gia_thue_30p !== undefined ? parseFloat(gia_thue_30p) : undefined,
+                    trang_thai_san: trang_thai_san ? trang_thai_san.trim() : undefined
+                }
+            });
+            if (images && images.length > 0) {
+                // Remove old image rows
+                await tx.anhsan.deleteMany({ where: { ma_san: maSan } });
+                // Generate next sequential IDs
+                const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
+                let nextNum = 1;
+                if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
+                    const parsed = parseInt(lastImg.ma_anh_san.replace("IMG", ""), 10);
+                    if (!isNaN(parsed))
+                        nextNum = parsed + 1;
+                }
+                await tx.anhsan.createMany({
+                    data: images.map((img, idx) => ({
+                        ma_anh_san: `IMG${String(nextNum + idx).padStart(3, '0')}`,
+                        ma_san: maSan,
+                        duong_dan_anh: img.url,
+                        ma_cloudinary: img.public_id || "manual_upload"
+                    }))
+                });
+            }
+            return updated;
+        });
+        // Delete old images from Cloudinary (best-effort, outside transaction)
+        if (oldImages.length > 0) {
+            await Promise.all(oldImages
+                .filter(img => img.ma_cloudinary && img.ma_cloudinary !== "manual_upload")
+                .map(img => cloudinary.uploader.destroy(img.ma_cloudinary).catch(() => null)));
+        }
+        return updatedCourt;
+    }
+    async getMyBookings(userId) {
+        return bookingRepository.findByOwnerId(userId);
+    }
+    async updateBookingStatus(userId, bookingDetailId, status) {
+        // Check if booking belongs to this owner
+        const booking = await bookingRepository.findByIdAndOwnerId(bookingDetailId, userId);
+        if (!booking) {
+            throw new ApiError(404, "Không tìm thấy lịch đặt hoặc bạn không có quyền.");
+        }
+        return bookingRepository.updateStatus(bookingDetailId, status);
+    }
+    async getPendingCount(userId) {
+        return bookingRepository.countPendingByOwnerId(userId);
+    }
+}
+export const ownerService = new OwnerService();
+//# sourceMappingURL=owner.service.js.map

@@ -221,7 +221,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
           selectedSlots: slotsForBackend
         };
 
-        const result = await apiPost("/booking", JSON.stringify(payload), token);
+        const result = await apiPost("/booking", payload, token);
         console.log("✅ Booking Success Result:", result);
 
         toast.success("Đặt sân thành công! Vui lòng kiểm tra lịch sử.");
