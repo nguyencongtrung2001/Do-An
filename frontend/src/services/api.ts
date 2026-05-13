@@ -74,7 +74,7 @@ export async function apiPost<T>(path: string, body: unknown, token?: string | n
     method: "POST",
     token,
     isJSON,
-    body: isJSON ? JSON.stringify(body) : (body as BodyInit),
+    body: isJSON ? (typeof body === 'string' ? body : JSON.stringify(body)) : (body as BodyInit),
   });
 }
 
@@ -83,7 +83,7 @@ export async function apiPut<T>(path: string, body: unknown, token?: string | nu
     method: "PUT",
     token,
     isJSON,
-    body: isJSON ? JSON.stringify(body) : (body as BodyInit),
+    body: isJSON ? (typeof body === 'string' ? body : JSON.stringify(body)) : (body as BodyInit),
   });
 }
 
@@ -92,7 +92,7 @@ export async function apiPatch<T>(path: string, body: unknown, token?: string | 
     method: "PATCH",
     token,
     isJSON,
-    body: isJSON ? JSON.stringify(body) : (body as BodyInit),
+    body: isJSON ? (typeof body === 'string' ? body : JSON.stringify(body)) : (body as BodyInit),
   });
 }
 
