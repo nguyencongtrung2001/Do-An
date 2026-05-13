@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useSignup } from "@/hooks/useSignup";
 import { Role } from "@/types/auth.types";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 const VenueMapSelector = dynamic(
   () => import("@/components/map/VenueMapSelector"),
@@ -223,6 +224,17 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         <span>{state.loading ? "Đang xử lý..." : "Tạo tài khoản"}</span>
         {!state.loading && <span className="material-symbols-outlined text-lg">how_to_reg</span>}
       </button>
+
+      {/* Social Divider */}
+      <div className="flex items-center gap-4 my-1">
+        <div className="flex-1 h-px bg-gray-200" />
+        <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Hoặc tiếp tục với</span>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
+
+      <div className="flex gap-3 mt-1">
+        <GoogleLoginButton />
+      </div>
 
       <p className="text-center text-sm text-slate-400 mt-2">
         Đã có tài khoản?{" "}

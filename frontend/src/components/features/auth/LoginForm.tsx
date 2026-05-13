@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import { UserData } from "@/types/auth.types";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -120,19 +121,8 @@ export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProp
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-gray-50 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200"
-        >
-          <Image 
-            src="https://www.svgrepo.com/show/475656/google-color.svg" 
-            alt="Google" 
-            width={20} 
-            height={20} 
-          />
-          Google
-        </button>
+      <div className="flex gap-3 mt-1">
+        <GoogleLoginButton />
       </div>
 
       <p className="text-center text-sm text-slate-400 mt-2">
