@@ -28,17 +28,37 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       headers,
     });
 
-    const data = await response.json().catch(() => ({}));
+    let data: Record<string, unknown> = {};
+    const textData = await response.text();
+    try {
+      if (textData) {
+        data = JSON.parse(textData);
+      }
+    } catch {
+      // Nếu backend crash văng ra HTML/Text thay vì JSON
+      const excerpt = textData.length > 200 ? textData.substring(0, 200) + "..." : textData;
+      data = { message: excerpt || `API Error: ${response.status} ${response.statusText}` };
+    }
 
     if (!response.ok) {
       // Global Interceptor logic (e.g., handle 401 Unauthorized)
       if (response.status === 401) {
         console.warn("Session expired. Redirection logic should be handled by the caller or a global event.");
       }
-      throw new Error(data.message || `API Error: ${response.status} ${response.statusText}`);
+      
+      let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+      if (typeof data?.message === 'string') {
+        errorMessage = data.message;
+      } else if (typeof data?.error === 'string') {
+        errorMessage = data.error;
+      } else if (data?.message || data?.error) {
+        errorMessage = JSON.stringify(data.message || data.error);
+      }
+      
+      throw new Error(errorMessage);
     }
 
-    return data;
+    return data as T;
   } catch (error) {
     console.error(`API Request Failure [${options.method || 'GET'} ${path}]:`, error);
     throw error;

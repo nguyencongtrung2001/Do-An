@@ -100,6 +100,9 @@ function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
  * Giúp Prisma lưu đúng giá trị Time mà không bị lệch múi giờ.
  */
 function parseTimeUTC(timeStr: string): Date {
+  if (!timeStr || !/^\d{2}:\d{2}$/.test(timeStr)) {
+    throw new ApiError(400, "Định dạng giờ không hợp lệ");
+  }
   const [h, m] = timeStr.split(':').map(Number);
   return new Date(`1970-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00Z`);
 }
@@ -152,6 +155,11 @@ export class BookingService {
       vnpay: "VNPAY",
     };
     const mappedPayment = paymentMap[phuong_thuc_thanh_toan] || phuong_thuc_thanh_toan;
+
+    const validPayments = ["Tiền mặt", "Ví nội bộ", "VNPAY"];
+    if (!validPayments.includes(mappedPayment)) {
+      throw new ApiError(400, `Phương thức thanh toán không hợp lệ: ${mappedPayment}`);
+    }
 
     const ma_dat_san = `DS_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 

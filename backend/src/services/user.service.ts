@@ -43,11 +43,17 @@ export class UserService {
 
   async loginUser(data: User.LoginUserClient) {
     const { so_dien_thoai, email, mat_khau } = data;
+    console.log("Login attempt for email:", email);
 
     const user = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
 
     if (!user) {
       throw new ApiError(404, "User not found");
+    }
+
+    // Check if account was created via Google and has no password
+    if (user.ma_google && !user.mat_khau) {
+      throw new ApiError(400, "Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google");
     }
 
     if (!user.mat_khau) {

@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 
 export const createBookingHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log("📦 Booking Payload:", req.body);
     const bookingData = req.body;
     const booking = await bookingService.createBooking(bookingData);
     
@@ -12,6 +13,7 @@ export const createBookingHandler = async (req: Request, res: Response, next: Ne
       data: booking
     });
   } catch (error: any) {
+    console.error("❌ Booking Error Detail:", error);
     next(error);
   }
 };
