@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, CreditCard, Wallet, Banknote } from "lucide-react";
+import {  CreditCard, Wallet, Banknote } from "lucide-react";
 import { GroupedSlot } from "@/types/court.types";
 import {
   Dialog,
@@ -105,14 +105,18 @@ export default function CheckoutModal({
               </button>
               
               <button 
-                disabled
-                className="p-4 rounded-2xl border-2 text-left transition-all border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed group"
+                onClick={() => setPaymentMethod("vnpay")}
+                className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col ${
+                  paymentMethod === "vnpay" 
+                  ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                  : "border-gray-100 bg-white hover:border-gray-200"
+                }`}
               >
                 <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mb-3">
                   <CreditCard className="w-4 h-4" />
                 </div>
-                <p className="font-bold text-slate-400 text-sm">VNPAY</p>
-                <p className="text-[10px] text-primary font-bold uppercase tracking-tight mt-1">Sắp ra mắt</p>
+                <p className="font-bold text-slate-800 text-sm">VNPAY</p>
+                <p className="text-xs text-slate-500 mt-1">Thanh toán qua ví/thẻ</p>
               </button>
             </div>
           </div>

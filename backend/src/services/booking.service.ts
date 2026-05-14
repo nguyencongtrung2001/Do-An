@@ -1,5 +1,6 @@
 import { bookingRepository } from '../repositories/booking.repository.js';
 import { ApiError } from '../utils/ApiError.js';
+import { VNPayUtil } from '../utils/vnpay.util.js';
 
 // ==============================
 // Types
@@ -111,7 +112,7 @@ function parseTimeUTC(timeStr: string): Date {
 // Service
 // ==============================
 export class BookingService {
-  async createBooking(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }) {
+  async createBooking(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }, ipAddr: string = '127.0.0.1') {
     const { ma_nguoi_dung, phuong_thuc_thanh_toan, selectedSlots } = data;
 
     if (!selectedSlots || selectedSlots.length === 0) {
@@ -195,7 +196,19 @@ export class BookingService {
       }
 
       const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
-      return booking;
+      
+      if (mappedPayment === "VNPAY") {
+        const orderInfo = `Thanh toan dat san ${ma_dat_san}`;
+        const paymentUrl = VNPayUtil.createPaymentUrl(
+          ma_dat_san,
+          tongTien,
+          orderInfo,
+          ipAddr
+        );
+        return { booking, paymentUrl, message: 'Chuyển hướng đến VNPAY' };
+      }
+
+      return { booking };
     } catch (error: unknown) {
       if (error instanceof Error && error.message === "Số dư ví không đủ để thực hiện giao dịch này") {
         throw new ApiError(400, error.message);

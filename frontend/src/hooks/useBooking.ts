@@ -60,40 +60,40 @@ export function useBooking() {
     setIsSubmitting(true);
     
     try {
-      if (paymentMethod === "cash" || paymentMethod === "wallet") {
-        setPaymentStatus("Đang xử lý đơn hàng...");
-        
-        const slotsForBackend = groupedSlots.flatMap(group => {
-          return group.slots.map((marker: SelectedSlot) => {
-            const [h, m] = marker.gio_bat_dau.split(':').map(Number);
-            const endDate = new Date(0, 0, 0, h, m + 30);
-            const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
-            
-            return {
-              ma_san: group.ma_san,
-              ten_san: group.ten_san,
-              ngay_dat: group.ngay_dat,
-              gio_bat_dau: marker.gio_bat_dau,
-              gio_ket_thuc: gio_ket_thuc,
-              gia_thue: marker.gia_thue
-            };
-          });
+      setPaymentStatus(paymentMethod === "vnpay" ? "Đang kết nối cổng thanh toán VNPAY..." : "Đang xử lý đơn hàng...");
+      
+      const slotsForBackend = groupedSlots.flatMap(group => {
+        return group.slots.map((marker: SelectedSlot) => {
+          const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+          const endDate = new Date(0, 0, 0, h, m + 30);
+          const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+          
+          return {
+            ma_san: group.ma_san,
+            ten_san: group.ten_san,
+            ngay_dat: group.ngay_dat,
+            gio_bat_dau: marker.gio_bat_dau,
+            gio_ket_thuc: gio_ket_thuc,
+            gia_thue: marker.gia_thue
+          };
         });
+      });
 
-        const payload = {
-          ma_nguoi_dung: user.ma_nguoi_dung,
-          phuong_thuc_thanh_toan: paymentMethod,
-          selectedSlots: slotsForBackend
-        };
+      const payload = {
+        ma_nguoi_dung: user.ma_nguoi_dung,
+        phuong_thuc_thanh_toan: paymentMethod,
+        selectedSlots: slotsForBackend
+      };
 
-        await apiPost("/booking", JSON.stringify(payload), token);
-        toast.success("Đặt sân thành công! Vui lòng kiểm tra lịch sử.");
-        setTimeout(() => { window.location.href = "/history"; }, 1500);
-      } else if (paymentMethod === "vnpay") {
-        setPaymentStatus("Đang kết nối cổng thanh toán VNPAY...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        window.location.href = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?fake_params=123";
+      const res = await apiPost("/booking", JSON.stringify(payload), token) as { paymentUrl?: string; [key: string]: unknown };
+      
+      if (paymentMethod === "vnpay" && res?.paymentUrl) {
+        window.location.href = res.paymentUrl;
+        return;
       }
+
+      toast.success("Đặt sân thành công! Vui lòng kiểm tra lịch sử.");
+      setTimeout(() => { window.location.href = "/history"; }, 1500);
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message);
