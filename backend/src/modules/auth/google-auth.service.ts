@@ -32,7 +32,7 @@ export class GoogleAuthService {
 
     const email = payload.email;
     const name = payload.name || "Google User";
-    const picture = payload.picture || null;
+    const picture = payload.picture ?? undefined;
     const googleId = payload.sub;
 
     // Find user by email
@@ -46,7 +46,7 @@ export class GoogleAuthService {
         email: email,
         ho_ten: name,
         ma_google: googleId,
-        anh_dai_dien: picture,
+        anh_dai_dien: picture ?? undefined,
         trang_thai: true,
       });
     } else {
