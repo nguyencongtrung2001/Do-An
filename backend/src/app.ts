@@ -11,9 +11,27 @@ import authRoutes from "./modules/auth/auth.routes.js";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : [
+      "https://do-an-blue.vercel.app",
+      "https://do-g3jixpcwc-nguyencongtrung2001s-projects.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001"
+    ];
+
 app.use(cors({
-  origin: ["https://do-an-blue.vercel.app", "http://localhost:3001", "*"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  origin: (origin, callback) => {
+    // Cho phép requests không có origin (như mobile apps hoặc curl requests) 
+    // hoặc origin nằm trong danh sách allowedOrigins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type"],
   credentials: true,
 }));
 app.use(express.json());
