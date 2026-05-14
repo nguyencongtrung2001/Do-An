@@ -1,13 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import userRoutes from "./routers/user.routes";
-import { errorHandler } from "./middlewares/errorHandler";
-import adminRoutes from "./routers/admin.routes";
-import fieldRoutes from "./routers/field.routes";
-import ownerRoutes from "./routers/owner.routes";
-import bookingRoutes from "./routers/booking.routes";
-import authRoutes from "./modules/auth/auth.routes";
+import userRoutes from "./routers/user.routes.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import adminRoutes from "./routers/admin.routes.js";
+import fieldRoutes from "./routers/field.routes.js";
+import ownerRoutes from "./routers/owner.routes.js";
+import bookingRoutes from "./routers/booking.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 dotenv.config();
 
 const app = express();
