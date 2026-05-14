@@ -8,9 +8,9 @@
     "target": "esnext",
     "types": ["node"],
     
-    "baseUrl": ".",
+    // ✅ Đã sửa: Xóa baseUrl + chỉnh paths cho đúng
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     "sourceMap": true,
@@ -26,7 +26,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "5.0"
+    "forceConsistentCasingInFileNames": true
   }
 }
