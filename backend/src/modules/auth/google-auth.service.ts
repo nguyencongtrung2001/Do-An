@@ -1,7 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
-import { ApiError } from '../../utils/ApiError';
-import { generateToken } from '../../utils/jwt';
-import { userRepository } from '../../repositories/user.repository';
+import { ApiError } from '../../utils/ApiError.js';
+import { generateToken } from '../../utils/jwt.js';
+import { userRepository } from '../../repositories/user.repository.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

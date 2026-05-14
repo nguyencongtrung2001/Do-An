@@ -48,7 +48,7 @@ export default function GoogleLoginButton() {
         onError={handleError}
         theme="outline"
         size="large"
-        width="100%"
+        width={250}
         text="continue_with"
         shape="rectangular"
       />
