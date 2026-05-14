@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { GoogleLogin, CredentialResponse, GoogleOAuthProvider } from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import { apiPost } from '@/services/api';
 import { useAuth, UserData } from '@/contexts/AuthContext';
@@ -8,50 +8,54 @@ import { useAuth, UserData } from '@/contexts/AuthContext';
 export default function GoogleLoginButton() {
   const { login } = useAuth();
 
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  console.log("🔑 Google Client ID:", googleClientId ? "✅ Loaded" : "❌ Undefined");
+
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     try {
       if (!credentialResponse.credential) {
         throw new Error("Không lấy được token từ Google");
       }
 
-      // 1. Send Google ID Token to our backend
       const res = await apiPost<{ token: string; user: UserData }>('/auth/google', {
         idToken: credentialResponse.credential
       });
 
-      // 2. Extract returned user & token
-      if (res && res.token && res.user) {
-        // 3. Login through AuthContext
+      if (res?.token && res?.user) {
         login(res.token, res.user);
-        toast.success("Đăng nhập bằng Google thành công!");
-      } else {
-        toast.error("Đăng nhập thất bại: Không nhận được dữ liệu xác thực.");
-      }
-    } catch (error: unknown) {
-      console.error("Google Login Error:", error);
-      if (error instanceof Error) {
-        toast.error(error.message || "Đăng nhập thất bại");
+        toast.success("Đăng nhập Google thành công!");
       } else {
         toast.error("Đăng nhập thất bại");
       }
+    } catch (error) {
+      console.error(error);
+      toast.error("Đăng nhập Google thất bại");
     }
   };
 
   const handleError = () => {
-    toast.error("Đăng nhập bằng Google thất bại.");
+    toast.error("Đăng nhập Google thất bại");
   };
+
+  if (!googleClientId) {
+    return <div className="text-red-500 text-center p-4">❌ Chưa cấu hình VITE_GOOGLE_CLIENT_ID</div>;
+  }
 
   return (
     <div className="flex justify-center w-full mt-4">
-      <GoogleLogin
-        onSuccess={handleSuccess}
-        onError={handleError}
-        theme="outline"
-        size="large"
-        width={250}
-        text="continue_with"
-        shape="rectangular"
-      />
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <GoogleLogin
+          onSuccess={handleSuccess}
+          onError={handleError}
+          theme="outline"
+          size="large"
+          width={280}
+          text="continue_with"
+          shape="rectangular"
+          logo_alignment="left"
+        />
+      </GoogleOAuthProvider>
     </div>
   );
 }
