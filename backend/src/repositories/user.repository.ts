@@ -15,6 +15,12 @@ export class UserRepository {
     });
   }
 
+  async findByEmail(email: string) {
+    return prisma.nguoidung.findUnique({
+      where: { email }
+    });
+  }
+
   async findAll() {
     return prisma.nguoidung.findMany();
   }
@@ -23,14 +29,23 @@ export class UserRepository {
     ma_nguoi_dung: string;
     ho_ten: string;
     email: string;
-    so_dien_thoai: string;
-    mat_khau: string;
+    so_dien_thoai?: string;
+    mat_khau?: string;
+    ma_google?: string;
+    anh_dai_dien?: string;
     vai_tro?: string;
     trang_thai?: boolean;
     anh_cccd_truoc?: string;
     anh_cccd_sau?: string;
   }) {
     return prisma.nguoidung.create({ data });
+  }
+
+  async update(id: string, data: any) {
+    return prisma.nguoidung.update({
+      where: { ma_nguoi_dung: id },
+      data
+    });
   }
 
   async generateNextUserId(): Promise<string> {

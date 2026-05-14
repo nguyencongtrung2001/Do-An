@@ -1,31 +1,24 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
     "rootDir": "src",
     "outDir": "./dist",
 
-    // Environment Settings
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "esnext",
     "types": ["node"],
     
-    // Path Aliases
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
 
-    // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
-    // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
 
-    // Recommended Options
     "strict": true,
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
@@ -33,7 +26,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "5.0"
+    "forceConsistentCasingInFileNames": true
   }
 }

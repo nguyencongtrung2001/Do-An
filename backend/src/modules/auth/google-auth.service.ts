@@ -36,7 +36,7 @@ export class GoogleAuthService {
     const googleId = payload.sub;
 
     // Find user by email
-    let user = await userRepository.findByEmailOrPhone(email, undefined);
+    let user = await userRepository.findByEmail(email);
 
     if (!user) {
       // Create new user if not exists
@@ -57,6 +57,10 @@ export class GoogleAuthService {
           anh_dai_dien: picture || user.anh_dai_dien,
         });
       }
+    }
+
+    if (!user) {
+      throw new ApiError(500, "Failed to process user data");
     }
 
     // Generate JWT
