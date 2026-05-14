@@ -150,6 +150,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
             className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
             type="email"
             placeholder="email@example.com"
+            autoComplete="email"
             required
             value={state.email}
             onChange={(e) => state.setEmail(e.target.value)}
@@ -181,6 +182,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
               className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
+              autoComplete="new-password"
               required
               value={state.password}
               onChange={(e) => state.setPassword(e.target.value)}
@@ -197,6 +199,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
               className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
+              autoComplete="new-password"
               required
               value={state.confirmPassword}
               onChange={(e) => state.setConfirmPassword(e.target.value)}

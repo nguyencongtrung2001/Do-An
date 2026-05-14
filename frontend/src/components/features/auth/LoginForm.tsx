@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import { UserData } from "@/types/auth.types";
@@ -64,6 +63,7 @@ export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProp
             className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
             type="text"
             placeholder="email@example.com"
+            autoComplete="username"
             required
             value={contact}
             onChange={(e) => setContact(e.target.value)}
@@ -84,6 +84,7 @@ export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProp
             className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
+            autoComplete="current-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
