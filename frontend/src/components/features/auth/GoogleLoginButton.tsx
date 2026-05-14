@@ -8,7 +8,7 @@ import { useAuth, UserData } from '@/contexts/AuthContext';
 export default function GoogleLoginButton() {
   const { login } = useAuth();
 
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   console.log("🔑 Google Client ID:", googleClientId ? "✅ Loaded" : "❌ Undefined");
 
@@ -39,7 +39,7 @@ export default function GoogleLoginButton() {
   };
 
   if (!googleClientId) {
-    return <div className="text-red-500 text-center p-4">❌ Chưa cấu hình VITE_GOOGLE_CLIENT_ID</div>;
+    return <div className="text-red-500 text-center p-4">❌ Chưa cấu hình NEXT_PUBLIC_GOOGLE_CLIENT_ID</div>;
   }
 
   return (
