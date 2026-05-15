@@ -45,7 +45,7 @@ export function useFields() {
           rating: item.so_sao,
           location: item.ten_dia_diem || "Chưa có tên địa điểm",
           address: item.dia_chi || "Chưa có địa chỉ",
-          imageUrl: item.anh_dai_dien || "/images/categories/soccer.png",
+          imageUrl: item.anh_dai_dien || "/images/categories/soccer.svg",
           slug: item.ten_dia_diem ? slugify(item.ten_dia_diem) : String(item.ma_san),
         }));
 
@@ -64,7 +64,7 @@ export function useFields() {
             address: item.dia_chi || "Chưa có địa chỉ",
             price: priceFormatted,
             rating: item.so_sao ? item.so_sao.toFixed(1) : "0.0",
-            image: item.anh_dai_dien || "/images/categories/soccer.png",
+            image: item.anh_dai_dien || "/images/categories/soccer.svg",
             slug: item.ten_dia_diem ? slugify(item.ten_dia_diem) : String(item.ma_san),
           };
         });

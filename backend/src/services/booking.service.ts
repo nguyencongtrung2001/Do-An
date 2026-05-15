@@ -198,14 +198,32 @@ export class BookingService {
       const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
       
       if (mappedPayment === "VNPAY") {
-        const orderInfo = `Thanh toan dat san ${ma_dat_san}`;
-        const paymentUrl = VNPayUtil.createPaymentUrl(
-          ma_dat_san,
-          tongTien,
-          orderInfo,
-          ipAddr
-        );
-        return { booking, paymentUrl, message: 'Chuyển hướng đến VNPAY' };
+        try {
+          const orderInfo = `Thanh toan dat san ${ma_dat_san}`;
+          
+          console.log('--- VNPAY Payment Debug ---');
+          console.log('OrderId:', ma_dat_san);
+          console.log('Amount:', tongTien);
+          console.log('IpAddr:', ipAddr);
+          console.log('OrderInfo:', orderInfo);
+
+          const paymentUrl = VNPayUtil.createPaymentUrl(
+            ma_dat_san,
+            tongTien,
+            orderInfo,
+            ipAddr
+          );
+          
+          console.log('Payment URL generated:', paymentUrl);
+          return { booking, paymentUrl, message: 'Chuyển hướng đến VNPAY' };
+        } catch (vnpayError: any) {
+          console.error('--- VNPAY Error Details ---');
+          console.error('Error name:', vnpayError.name);
+          console.error('Error message:', vnpayError.message);
+          console.error('Stack trace:', vnpayError.stack);
+          
+          throw new ApiError(500, `Lỗi khởi tạo thanh toán VNPAY: ${vnpayError.message}`);
+        }
       }
 
       return { booking };

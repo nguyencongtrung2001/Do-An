@@ -7,11 +7,19 @@ export class VNPayUtil {
   private static readonly VNP_LOCALE = 'vn';
 
   static get vnp_TmnCode(): string {
-    return process.env.VNP_TMNCODE!;
+    const tmnCode = process.env.VNP_TMNCODE;
+    if (!tmnCode) {
+      throw new Error('Thiếu cấu hình VNPAY trong .env (VNP_TMNCODE)');
+    }
+    return tmnCode;
   }
 
   static get vnp_HashSecret(): string {
-    return process.env.VNP_HASHSECRET!;
+    const hashSecret = process.env.VNP_HASHSECRET;
+    if (!hashSecret) {
+      throw new Error('Thiếu cấu hình VNPAY trong .env (VNP_HASHSECRET)');
+    }
+    return hashSecret;
   }
 
   static get vnp_Url(): string {
@@ -19,7 +27,11 @@ export class VNPayUtil {
   }
 
   static get vnp_ReturnUrl(): string {
-    return process.env.VNP_RETURNURL!;
+    const returnUrl = process.env.VNP_RETURNURL;
+    if (!returnUrl) {
+      throw new Error('Thiếu cấu hình VNPAY trong .env (VNP_RETURNURL)');
+    }
+    return returnUrl;
   }
 
   private static sortObject(obj: any): any {
@@ -92,6 +104,7 @@ export class VNPayUtil {
   static verifyChecksum(vnp_Params: any): boolean {
     const secureHash = vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHashType'];
 
     const sortedParams = this.sortObject(vnp_Params);
     const signData = Object.keys(sortedParams)

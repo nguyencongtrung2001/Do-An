@@ -9,7 +9,7 @@ interface ImageGalleryProps {
 }
 
 export default function ImageGallery({ images, courtName }: ImageGalleryProps) {
-  const [mainImage, setMainImage] = useState(images[0] || "/images/categories/soccer.png");
+  const [mainImage, setMainImage] = useState(images[0] || "/images/categories/soccer.svg");
 
   return (
     <div className="flex flex-col gap-4">
