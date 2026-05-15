@@ -28,14 +28,21 @@ export class VNPayUtil {
     return v;
   }
 
-  /** Sort object by key (alphabetical) */
-  private static sortObject(obj: Record<string, unknown>): Record<string, unknown> {
-    return Object.keys(obj)
-      .sort()
-      .reduce<Record<string, unknown>>((acc, key) => {
-        acc[key] = obj[key];
-        return acc;
-      }, {});
+  /** Sort object by key and encode according to VNPay standards */
+  private static sortObject(obj: Record<string, unknown>): Record<string, string> {
+    const sorted: Record<string, string> = {};
+    const str = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        str.push(encodeURIComponent(key));
+      }
+    }
+    str.sort();
+    for (let i = 0; i < str.length; i++) {
+      // VNPay requires spaces to be encoded as '+' in some versions, or %20. Standard is '+'
+      sorted[str[i]] = encodeURIComponent(String(obj[str[i]])).replace(/%20/g, "+");
+    }
+    return sorted;
   }
 
   /** HMAC-SHA512 */
@@ -114,19 +121,16 @@ export class VNPayUtil {
 
     const sorted = this.sortObject(rawParams);
 
-    // 1. Hash từ raw string (không encode) — đây là chuẩn VNPay
+    // 1. Hash từ chuỗi đã được encode theo chuẩn VNPay
     const signData   = this.buildSignData(sorted);
     const secureHash = this.hmac(signData);
 
     console.log('[VNPay] signData:', signData);
     console.log('[VNPay] secureHash:', secureHash);
 
-    // 2. Build URL — URLSearchParams encode đúng chuẩn HTTP
-    const urlParams = new URLSearchParams();
-    Object.entries(sorted).forEach(([k, v]) => urlParams.set(k, String(v)));
-    urlParams.set('vnp_SecureHash', secureHash);
-
-    return `${this.vnp_Url}?${urlParams.toString()}`;
+    // 2. Build URL — dùng chuỗi signData đã encode và nối thêm secureHash
+    const queryString = signData + '&vnp_SecureHash=' + secureHash;
+    return `${this.vnp_Url}?${queryString}`;
   }
 
   /**
