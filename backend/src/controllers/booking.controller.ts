@@ -42,17 +42,34 @@ export const getUserBookingsHandler = async (req: Request, res: Response, next: 
 };
 
 export const vnpayReturn = async (req: Request, res: Response) => {
-  const vnp_Params = req.query as any;
-
-  const isValid = VNPayUtil.verifyChecksum(vnp_Params);
-
+  // req.query đã được Express decode sẵn
+  const vnp_Params = req.query as Record<string, string>;
+ 
+  console.log('[VNPay Return] params:', vnp_Params);
+  console.log('[VNPay Return] responseCode:', vnp_Params['vnp_ResponseCode']);
+ 
+  const isValid = VNPayUtil.verifyChecksum({ ...vnp_Params });
+ 
   if (!isValid) {
-    return res.redirect(`${process.env.FRONTEND_URL}/payment-status?status=error&message=invalid_checksum`);
+    console.error('[VNPay Return] Checksum INVALID!');
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/payment-status?status=error&message=invalid_checksum`,
+    );
   }
-
+ 
   const responseCode = vnp_Params['vnp_ResponseCode'];
-
-  res.redirect(`${process.env.FRONTEND_URL}/payment-status?status=${responseCode === '00' ? 'success' : 'failed'}&vnp_TxnRef=${vnp_Params['vnp_TxnRef']}`);
+  const txnRef       = vnp_Params['vnp_TxnRef'];
+ 
+  if (responseCode === '00') {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/payment-status?status=success&vnp_TxnRef=${txnRef}`,
+    );
+  }
+ 
+  // Trả về responseCode để frontend/debug biết lý do thất bại
+  return res.redirect(
+    `${process.env.FRONTEND_URL}/payment-status?status=failed&code=${responseCode}&vnp_TxnRef=${txnRef}`,
+  );
 };
 
 export const vnpayIPN = async (req: Request, res: Response) => {
