@@ -27,11 +27,14 @@ export const errorHandler = (
   } else {
     // Log unexpected errors
     console.error("❌ [Server Error]:", err);
+    // TRICK: Always return the real error to the frontend for debugging!
+    message = err.message || "Lỗi không xác định ở Server";
   }
 
   res.status(statusCode).json({
     status: "error",
     statusCode,
-    message
+    message,
+    stack: err.stack // Send stack trace to frontend for easy debugging
   });
 };
