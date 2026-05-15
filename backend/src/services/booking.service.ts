@@ -153,11 +153,13 @@ export class BookingService {
     const paymentMap: Record<string, string> = {
       cash: "Tiền mặt",
       wallet: "Ví nội bộ",
-      vnpay: "VNPAY",
+      vnpay: "VNPay",
     };
-    const mappedPayment = paymentMap[phuong_thuc_thanh_toan] || phuong_thuc_thanh_toan;
+    // Đảm bảo chữ thường để map chính xác
+    const normalizedPayment = phuong_thuc_thanh_toan.toLowerCase();
+    const mappedPayment = paymentMap[normalizedPayment] || phuong_thuc_thanh_toan;
 
-    const validPayments = ["Tiền mặt", "Ví nội bộ", "VNPAY"];
+    const validPayments = ["Tiền mặt", "Ví nội bộ", "VNPay"];
     if (!validPayments.includes(mappedPayment)) {
       throw new ApiError(400, `Phương thức thanh toán không hợp lệ: ${mappedPayment}`);
     }
@@ -197,7 +199,7 @@ export class BookingService {
 
       const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
       
-      if (mappedPayment === "VNPAY") {
+      if (mappedPayment === "VNPay") {
         try {
           const orderInfo = `Thanh toan dat san ${ma_dat_san}`;
           
