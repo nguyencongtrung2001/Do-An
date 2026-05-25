@@ -31,16 +31,13 @@ export class VNPayUtil {
   /** Sort object by key and encode according to VNPay standards */
   private static sortObject(obj: Record<string, unknown>): Record<string, string> {
     const sorted: Record<string, string> = {};
-    const str = [];
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        str.push(encodeURIComponent(key));
+    const keys = Object.keys(obj).map(k => encodeURIComponent(k)).sort();
+    for (const encodedKey of keys) {
+      const originalKey = decodeURIComponent(encodedKey);
+      const val = obj[originalKey];
+      if (val !== undefined && val !== null) {
+        sorted[encodedKey] = encodeURIComponent(String(val)).replace(/%20/g, "+");
       }
-    }
-    str.sort();
-    for (let i = 0; i < str.length; i++) {
-      // VNPay requires spaces to be encoded as '+' in some versions, or %20. Standard is '+'
-      sorted[str[i]] = encodeURIComponent(String(obj[str[i]])).replace(/%20/g, "+");
     }
     return sorted;
   }

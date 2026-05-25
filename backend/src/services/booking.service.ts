@@ -1,6 +1,7 @@
 import { bookingRepository } from '../repositories/booking.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 import { VNPayUtil } from '../utils/vnpay.util.js';
+import prisma from '../config/prisma.js';
 
 // ==============================
 // Types
@@ -234,6 +235,82 @@ export class BookingService {
         throw new ApiError(400, error.message);
       }
       throw error;
+    }
+  }
+
+  // Hàm xử lý kết quả trả về ngầm (IPN) hoặc từ Return URL
+  async processVNPayCallback(vnp_Params: Record<string, string>) {
+    // 1. Kiểm tra chữ ký bảo mật từ VNPay
+    const isValid = VNPayUtil.verifyChecksum(vnp_Params);
+    if (!isValid) {
+      throw new ApiError(400, 'Chữ ký giao dịch không hợp lệ (Invalid Checksum)');
+    }
+
+    const orderId = vnp_Params['vnp_TxnRef']; // Mã đặt sân hệ thống
+    const responseCode = vnp_Params['vnp_ResponseCode']; // Mã phản hồi kết quả
+    const vnpayTranNo = vnp_Params['vnp_TransactionNo']; // Mã giao dịch của VNPay
+    const amount = Number(vnp_Params['vnp_Amount']) / 100; // Chia 100 để về tiền gốc
+
+    // 2. Tìm đơn đặt sân trong DB
+    const booking = await prisma.datsan.findUnique({
+      where: { ma_dat_san: orderId },
+      include: { datsanchitiet: true },
+    });
+
+    if (!booking) {
+      throw new ApiError(404, 'Không tìm thấy đơn đặt sân tương ứng');
+    }
+
+    // Nếu đơn hàng đã được xử lý trước đó rồi thì bỏ qua (tránh trùng lặp IPN)
+    const isAlreadyPaid = booking.datsanchitiet.every((detail: any) => detail.trang_thai_dat === 'Đã xác nhận');
+    if (isAlreadyPaid) {
+      return { success: true, message: 'Đơn hàng đã được xử lý trước đó', status: 'SUCCESS' };
+    }
+
+    // 3. Nếu thanh toán thành công (Mã '00')
+    if (responseCode === '00') {
+      // Dùng $transaction để đảm bảo đồng bộ: Cập nhật trạng thái sân & Tạo bản ghi giao dịch
+      await prisma.$transaction(async (tx: any) => {
+        // Cập nhật trạng thái đơn đặt sân chi tiết
+        await tx.datsanchitiet.updateMany({
+          where: { ma_dat_san: orderId },
+          data: { trang_thai_dat: 'Đã xác nhận' },
+        });
+
+        // Kiểm tra xem đã lưu giao dịch chưa
+        const existingTx = await tx.giaodich.findFirst({
+          where: { ma_dat_san: orderId, trang_thai_giao_dich: 'Thành công' },
+        });
+
+        if (!existingTx) {
+          // Lưu lịch sử vào bảng giao dịch
+          await tx.giaodich.create({
+            data: {
+              ma_giao_dich: `GD_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+              ma_dat_san: orderId,
+              ma_nguoi_dung: booking.ma_nguoi_dung,
+              ma_gd_vnpay: vnpayTranNo,
+              so_tien_tt: amount,
+              trang_thai_giao_dich: 'Thành công',
+              ngay_tao: new Date(),
+              noi_dung_thanh_toan: vnp_Params['vnp_OrderInfo'],
+              ma_ngan_hang: vnp_Params['vnp_BankCode'],
+              ma_phan_hoi: vnp_Params['vnp_ResponseCode'],
+              thoi_gian_tt_vnpay: vnp_Params['vnp_PayDate'],
+            },
+          });
+        }
+      });
+
+      return { success: true, status: 'SUCCESS' };
+    } else {
+      // Nếu khách hàng hủy hoặc lỗi thanh toán
+      await prisma.datsanchitiet.updateMany({
+        where: { ma_dat_san: orderId },
+        data: { trang_thai_dat: 'Đã hủy' },
+      });
+      
+      return { success: false, status: 'FAILED' };
     }
   }
 

@@ -72,6 +72,21 @@ export const vnpayReturn = async (req: Request, res: Response) => {
   );
 };
 
+export const handleVNPayCallback = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Chuyển req.query về dạng Record<string, string>
+    const params = req.query as Record<string, string>;
+    const result = await bookingService.processVNPayCallback(params);
+    
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const vnpayIPN = async (req: Request, res: Response) => {
   const vnp_Params = req.body || req.query;
 
