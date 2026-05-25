@@ -4,6 +4,11 @@ import { TIME_SLOTS } from "@/lib/constants/timeline";
 import { SPORT_LABELS } from "@/lib/constants/sports";
 import { DetailCourt } from "@/types/court.types";
 
+interface BookedSlot {
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
+}
+
 interface TimeSlotGridProps {
   court: DetailCourt;
   selectedDate: string;
@@ -11,6 +16,36 @@ interface TimeSlotGridProps {
   onSlotToggle: (slot: string) => void;
   isSelected: boolean;
   onSelect: () => void;
+  bookedSlots: BookedSlot[];
+}
+
+/**
+ * Chuyển chuỗi "HH:mm" thành số phút tính từ 00:00
+ * Ví dụ: "06:30" → 390
+ */
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/**
+ * Kiểm tra xem 1 slot 30 phút (bắt đầu tại `marker`) có bị trùng
+ * với bất kỳ khoảng booked nào không.
+ *
+ * Ví dụ: marker = "06:00" → block [06:00, 06:30)
+ * BookedSlot = { gio_bat_dau: "06:00", gio_ket_thuc: "07:00" }
+ * → trùng vì [06:00, 06:30) nằm trong [06:00, 07:00)
+ */
+function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
+  const slotStart = timeToMinutes(marker);
+  const slotEnd = slotStart + 30;
+
+  return bookedSlots.some((booked) => {
+    const bookedStart = timeToMinutes(booked.gio_bat_dau);
+    const bookedEnd = timeToMinutes(booked.gio_ket_thuc);
+    // Overlap check: slot starts before booked ends AND slot ends after booked starts
+    return slotStart < bookedEnd && slotEnd > bookedStart;
+  });
 }
 
 export default function TimeSlotGrid({
@@ -20,6 +55,7 @@ export default function TimeSlotGrid({
   onSlotToggle,
   isSelected,
   onSelect,
+  bookedSlots,
 }: TimeSlotGridProps) {
   return (
     <div
@@ -62,10 +98,26 @@ export default function TimeSlotGrid({
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-0 gap-y-3">
             {TIME_SLOTS.map((slot, index) => {
-              const isActive = selectedSlots.includes(slot);
+              const booked = isSlotBooked(slot, bookedSlots);
+              const isActive = !booked && selectedSlots.includes(slot);
               const isPrevActive = index > 0 && selectedSlots.includes(TIME_SLOTS[index - 1]);
               const isNextActive = index < TIME_SLOTS.length - 1 && selectedSlots.includes(TIME_SLOTS[index + 1]);
 
+              // === Slot ĐÃ ĐẶT: disabled, mờ, ghi "Đã đặt" ===
+              if (booked) {
+                return (
+                  <button
+                    key={slot}
+                    disabled
+                    className="px-1 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
+                  >
+                    <span>{slot}</span>
+                    <span className="text-[10px] text-red-400 font-semibold">Đã đặt</span>
+                  </button>
+                );
+              }
+
+              // === Slot CHƯA ĐẶT: logic gộp viền giữ nguyên ===
               let radiusClass = "rounded-lg";
               let borderClass = "border";
 

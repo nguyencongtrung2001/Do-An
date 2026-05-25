@@ -186,6 +186,42 @@ export class FieldService {
       sans: courts
     };
   }
+
+  /**
+   * Lấy danh sách khung giờ đã đặt cho một sân vào một ngày cụ thể.
+   * Chỉ trả về các slot có trạng thái hợp lệ (chưa bị hủy/thất bại).
+   */
+  async getBookedSlots(ma_san: string, ngay_dat: string) {
+    // Parse ngày từ chuỗi YYYY-MM-DD
+    const dateObj = new Date(ngay_dat + 'T00:00:00Z');
+
+    const bookedDetails = await prisma.datsanchitiet.findMany({
+      where: {
+        ma_san: ma_san,
+        ngay_dat: dateObj,
+        trang_thai_dat: {
+          in: ['Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành'],
+        },
+      },
+      select: {
+        gio_bat_dau: true,
+        gio_ket_thuc: true,
+      },
+    });
+
+    // Prisma trả về gio_bat_dau/gio_ket_thuc dạng Date (1970-01-01T[HH:mm:ss]Z)
+    // Convert về chuỗi "HH:mm"
+    const formatTime = (d: Date): string => {
+      const h = d.getUTCHours().toString().padStart(2, '0');
+      const m = d.getUTCMinutes().toString().padStart(2, '0');
+      return `${h}:${m}`;
+    };
+
+    return bookedDetails.map(detail => ({
+      gio_bat_dau: formatTime(detail.gio_bat_dau),
+      gio_ket_thuc: formatTime(detail.gio_ket_thuc),
+    }));
+  }
 }
 
 export const fieldService = new FieldService();

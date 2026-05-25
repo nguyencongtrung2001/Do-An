@@ -33,3 +33,19 @@ export const getLocationBySlug = async (req: Request, res: Response, next: NextF
         next(error);
     }
 }
+
+export const getBookedSlots = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const ma_san = req.params.ma_san as string;
+        const ngay_dat = req.query.ngay_dat as string;
+
+        if (!ngay_dat) {
+            throw new ApiError(400, "Thiếu tham số ngay_dat");
+        }
+
+        const bookedSlots = await fieldService.getBookedSlots(ma_san, ngay_dat);
+        res.status(200).json({ success: true, data: bookedSlots });
+    } catch (error) {
+        next(error);
+    }
+}

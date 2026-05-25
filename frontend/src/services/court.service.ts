@@ -58,4 +58,8 @@ export const courtService = {
   async getLocationBySlug(slug: string): Promise<LocationDetail> {
     return apiGet<LocationDetail>(`/field/slug/${slug}`);
   },
+
+  async getBookedSlots(maSan: string, ngayDat: string): Promise<{ success: boolean; data: { gio_bat_dau: string; gio_ket_thuc: string }[] }> {
+    return apiGet(`/field/courts/${maSan}/booked-slots?ngay_dat=${ngayDat}`);
+  },
 };
