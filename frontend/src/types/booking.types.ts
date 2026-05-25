@@ -16,6 +16,7 @@ export interface BookingDetail {
   };
   datsan: {
     tong_tien: number;
+    phuong_thuc_thanh_toan: string;
     nguoidung: {
       ho_ten: string;
       so_dien_thoai: string;

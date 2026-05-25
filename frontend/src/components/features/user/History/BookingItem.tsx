@@ -33,6 +33,18 @@ export default function BookingItem({ item }: BookingItemProps) {
     }
   };
 
+  const getDetailedLabel = (status: string, phuongThuc: string) => {
+    if (status === "Chờ xử lý") {
+      if (phuongThuc === "VNPay") return "Đang xử lý thanh toán";
+      return "Chờ chủ sân duyệt";
+    }
+    if (status === "Đã xác nhận") {
+      if (phuongThuc === "Ví nội bộ" || phuongThuc === "VNPay") return "Đã xác nhận (Đã TT)";
+      return "Đã xác nhận";
+    }
+    return status;
+  };
+
   return (
     <div className={`group bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden ${status === "Đã hủy" ? "opacity-75 grayscale-[0.5]" : ""}`}>
       <div className="flex flex-col md:flex-row">
@@ -53,7 +65,7 @@ export default function BookingItem({ item }: BookingItemProps) {
           <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors" />
           <div className="absolute top-4 left-4">
             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg ${getStatusStyle(status)}`}>
-              {status}
+              {getDetailedLabel(status, phuong_thuc)}
             </span>
           </div>
         </div>

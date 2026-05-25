@@ -96,6 +96,19 @@ export default function OwnerBookingsClient() {
 
   const getStatusConfig = (status: string) => STATUS_CONFIG[status] || DEFAULT_STATUS;
 
+  // Label chi tiết dựa trên trạng thái + phương thức thanh toán
+  const getDetailedLabel = (status: string, phuongThuc?: string) => {
+    if (status === "Chờ xử lý" && phuongThuc) {
+      if (phuongThuc === "VNPay") return "Đang xử lý TT";
+      return "Chờ duyệt";
+    }
+    if (status === "Đã xác nhận" && phuongThuc) {
+      if (phuongThuc === "Ví nội bộ" || phuongThuc === "VNPay") return "Đã TT online";
+      return "Đã xác nhận";
+    }
+    return getStatusConfig(status).label;
+  };
+
   // Filter bookings for the selected date
   const filteredByDate = bookings.filter(b => {
     const bDate = new Date(b.ngay_dat).toISOString().split("T")[0];
@@ -219,6 +232,9 @@ export default function OwnerBookingsClient() {
                             <p className="text-xs text-slate-300 mt-1">
                               💰 Cọc: {formatVND(booking.tien_coc)} • Còn lại: {formatVND(booking.tien_con_lai)}
                             </p>
+                            <p className="text-xs text-slate-300 mt-1">
+                              💳 {booking.datsan?.phuong_thuc_thanh_toan || "—"}
+                            </p>
                             <p className="text-xs mt-1.5">
                               <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px] font-bold">{booking.trang_thai_dat}</span>
                             </p>
@@ -296,7 +312,7 @@ export default function OwnerBookingsClient() {
                       </div>
                     </div>
                     <span className={`text-[9px] px-2.5 py-1 rounded-full font-bold uppercase ${statusCfg.bg} ${statusCfg.text}`}>
-                      {statusCfg.label}
+                      {getDetailedLabel(booking.trang_thai_dat, booking.datsan?.phuong_thuc_thanh_toan)}
                     </span>
                   </div>
 
@@ -322,6 +338,12 @@ export default function OwnerBookingsClient() {
                         <span className="font-semibold text-amber-700">Còn lại: {formatVND(booking.tien_con_lai)}</span>
                       </span>
                     </div>
+                    {booking.datsan?.phuong_thuc_thanh_toan && (
+                      <div className="flex items-center gap-1.5 text-xs mt-1">
+                        <span className="material-symbols-outlined text-sm text-slate-400">credit_card</span>
+                        <span className="font-semibold text-slate-500">{booking.datsan.phuong_thuc_thanh_toan}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Action buttons */}

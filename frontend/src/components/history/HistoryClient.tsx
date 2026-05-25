@@ -86,6 +86,19 @@ export default function HistoryClient() {
     }
   };
 
+  // Hiển thị label chi tiết dựa trên trạng thái + phương thức thanh toán
+  const getDetailedLabel = (status: string, phuongThuc: string) => {
+    if (status === "Chờ xử lý") {
+      if (phuongThuc === "VNPay") return "Đang xử lý thanh toán";
+      return "Chờ chủ sân duyệt"; // Tiền mặt
+    }
+    if (status === "Đã xác nhận") {
+      if (phuongThuc === "Ví nội bộ" || phuongThuc === "VNPay") return "Đã xác nhận (Đã TT)";
+      return "Đã xác nhận";
+    }
+    return status;
+  };
+
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     // Giờ được lưu dưới dạng UTC (1970-01-01T[HH:mm:ss]Z)
@@ -205,7 +218,7 @@ export default function HistoryClient() {
                     <div className="absolute inset-0 bg-black/10 dark:bg-black/30" />
                     <div className="absolute top-3 left-3">
                       <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase text-white shadow-sm ${getStatusColor(status)}`}>
-                        {status}
+                        {getDetailedLabel(status, item.phuong_thuc)}
                       </span>
                     </div>
                   </div>
