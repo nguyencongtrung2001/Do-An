@@ -56,41 +56,38 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
 
   for (const marker of sorted) {
     if (!currentGroup) {
-      // First marker in a potential group
-      const [h, m] = marker.gio_bat_dau.split(':').map(Number);
-      const endDate = new Date(0, 0, 0, h, m + 30);
-      const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
-      
+      // Marker đầu tiên — giờ kết thúc tạm = chính gio_bat_dau của marker này
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc, 
+        gio_ket_thuc: marker.gio_bat_dau, 
         slots: [marker] 
       };
     } else {
-      // Check if this marker is exactly 30 mins after the current group's last marker
-      const [lastH, lastM] = currentGroup.gio_ket_thuc.split(':').map(Number);
-      const expectedTime = `${String(lastH).padStart(2, '0')}:${String(lastM).padStart(2, '0')}`;
+      // Kiểm tra marker này có liên tiếp 30p sau marker trước không
+      const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
+      if (!lastMarker) {
+        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker] };
+        continue;
+      }
+      const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
+      const expectedDate = new Date(0, 0, 0, lastH, lastM + 30);
+      const expectedTime = `${String(expectedDate.getHours()).padStart(2, '0')}:${String(expectedDate.getMinutes()).padStart(2, '0')}`;
 
       if (
         currentGroup.ma_san === marker.ma_san &&
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Extend current group
-        const [h, m] = marker.gio_bat_dau.split(':').map(Number);
-        const endDate = new Date(0, 0, 0, h, m + 30);
-        currentGroup.gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
+        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.gia_thue += marker.gia_thue;
         currentGroup.slots.push(marker);
       } else {
-        // Gap detected, start new group
+        // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
-        const [h, m] = marker.gio_bat_dau.split(':').map(Number);
-        const endDate = new Date(0, 0, 0, h, m + 30);
-        const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc, 
+          gio_ket_thuc: marker.gio_bat_dau, 
           slots: [marker] 
         };
       }
