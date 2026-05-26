@@ -43,3 +43,7 @@ export const uploadOwnerFiles = multer({
 ]);
 
 export const uploadCourt = multer({ storage: courtStorage }).array('images', 5);
+
+export const uploadAvatar = multer({
+  storage: multer.diskStorage({}),
+}).single('anh_dai_dien');

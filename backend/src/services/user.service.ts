@@ -3,6 +3,7 @@ import type * as User from '../types/user.type.js';
 import { ApiError } from '../utils/ApiError.js';
 import { generateToken } from '../utils/jwt.js';
 import { userRepository } from '../repositories/user.repository.js';
+import cloudinary from '../config/cloudinary.config.js';
 
 export class UserService {
   async createUser(data: User.UserClient) {
@@ -68,6 +69,58 @@ export class UserService {
     const token = generateToken({ id: user.ma_nguoi_dung, role: user.vai_tro });
 
     return { user, token };
+  }
+
+  async getProfile(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "Không tìm thấy người dùng");
+    }
+
+    // Return safe user profile data (exclude password)
+    return {
+      ma_nguoi_dung: user.ma_nguoi_dung,
+      ho_ten: user.ho_ten,
+      email: user.email,
+      so_dien_thoai: user.so_dien_thoai,
+      vai_tro: user.vai_tro,
+      anh_dai_dien: user.anh_dai_dien,
+      so_vi_du: user.so_vi_du,
+      ngay_tao: user.ngay_tao,
+    };
+  }
+
+  async updateAvatar(userId: string, avatarUrl: string, cloudinaryId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "Không tìm thấy người dùng");
+    }
+
+    // Delete old avatar from Cloudinary if it exists
+    if (user.anh_cloudinary) {
+      try {
+        await cloudinary.uploader.destroy(user.anh_cloudinary);
+      } catch (err) {
+        console.warn("Could not delete old avatar from Cloudinary:", err);
+      }
+    }
+
+    // Update user avatar in database
+    const updatedUser = await userRepository.update(userId, {
+      anh_dai_dien: avatarUrl,
+      anh_cloudinary: cloudinaryId,
+    });
+
+    return {
+      ma_nguoi_dung: updatedUser.ma_nguoi_dung,
+      ho_ten: updatedUser.ho_ten,
+      email: updatedUser.email,
+      so_dien_thoai: updatedUser.so_dien_thoai,
+      vai_tro: updatedUser.vai_tro,
+      anh_dai_dien: updatedUser.anh_dai_dien,
+      so_vi_du: updatedUser.so_vi_du,
+      ngay_tao: updatedUser.ngay_tao,
+    };
   }
 }
 
