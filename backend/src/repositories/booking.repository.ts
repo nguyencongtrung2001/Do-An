@@ -129,6 +129,39 @@ export class BookingRepository {
       }
     });
   }
+
+  async cancelBookingWithRefund(bookingId: string, userId: string, refundAmount: number) {
+    return prisma.$transaction(async (tx) => {
+      // 1. Update all details to "Đã hủy"
+      await tx.datsanchitiet.updateMany({
+        where: { ma_dat_san: bookingId },
+        data: { trang_thai_dat: "Đã hủy" }
+      });
+
+      // 2. Increment wallet if refund > 0
+      if (refundAmount > 0) {
+        await tx.nguoidung.update({
+          where: { ma_nguoi_dung: userId },
+          data: { so_vi_du: { increment: refundAmount } }
+        });
+
+        // 3. Create a transaction record for the refund
+        await tx.giaodich.create({
+          data: {
+            ma_giao_dich: `RF_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            ma_dat_san: bookingId,
+            ma_nguoi_dung: userId,
+            so_tien_tt: refundAmount,
+            noi_dung_thanh_toan: "Hoàn tiền hủy đặt sân",
+            trang_thai_giao_dich: "Thành công",
+            ngay_tao: new Date()
+          }
+        });
+      }
+      
+      return { success: true };
+    });
+  }
 }
 
 export const bookingRepository = new BookingRepository();

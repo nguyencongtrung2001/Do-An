@@ -320,6 +320,63 @@ export class BookingService {
     }
     return await bookingRepository.findByUserId(userId);
   }
+
+  async cancelBooking(bookingId: string, userId: string) {
+    if (!bookingId || !userId) {
+      throw new ApiError(400, "Booking ID and User ID are required");
+    }
+
+    const booking = await prisma.datsan.findUnique({
+      where: { ma_dat_san: bookingId },
+      include: { datsanchitiet: true }
+    });
+
+    if (!booking) {
+      throw new ApiError(404, "Không tìm thấy đơn đặt sân");
+    }
+
+    if (booking.ma_nguoi_dung !== userId) {
+      throw new ApiError(403, "Bạn không có quyền hủy đơn đặt sân này");
+    }
+
+    const isAlreadyCancelled = booking.datsanchitiet.every(d => d.trang_thai_dat === "Đã hủy");
+    if (isAlreadyCancelled) {
+      throw new ApiError(400, "Đơn đặt sân này đã được hủy trước đó");
+    }
+
+    // Calculate time difference in minutes
+    const now = new Date();
+    const createdAt = booking.ngay_tao ? new Date(booking.ngay_tao) : now;
+    const diffMs = now.getTime() - createdAt.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    let refundPercentage = 0;
+    if (diffMins <= 30) {
+      refundPercentage = 1; // 100%
+    } else if (diffMins > 30 && diffMins <= 60) {
+      refundPercentage = 0.5; // 50%
+    } else {
+      refundPercentage = 0; // 0%
+    }
+
+    const tongTien = Number(booking.tong_tien);
+    const refundAmount = tongTien * refundPercentage;
+
+    await bookingRepository.cancelBookingWithRefund(bookingId, userId, refundAmount);
+
+    let message = "Hủy đặt sân thành công.";
+    if (refundAmount > 0) {
+      message += ` Bạn được hoàn lại ${refundPercentage * 100}% số tiền (${refundAmount} VNĐ) vào ví nội bộ.`;
+    } else {
+      message += " Đã quá thời gian quy định nên không được hoàn tiền.";
+    }
+
+    return {
+      message,
+      refundAmount,
+      refundPercentage
+    };
+  }
 }
 
 export const bookingService = new BookingService();

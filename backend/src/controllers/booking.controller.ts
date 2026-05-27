@@ -41,6 +41,27 @@ export const getUserBookingsHandler = async (req: Request, res: Response, next: 
   }
 };
 
+export const cancelBookingHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { bookingId } = req.params;
+    const { userId } = req.body; // Assuming userId is sent in body for simplicity, or we should get it from a token in a real app. Let's use req.body.userId
+
+    if (!userId) {
+      throw new ApiError(401, "User ID is required to cancel booking");
+    }
+
+    const result = await bookingService.cancelBooking(bookingId, userId);
+    
+    res.status(200).json({
+      status: "success",
+      message: result.message,
+      data: result
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export const vnpayReturn = async (req: Request, res: Response) => {
   // req.query đã được Express decode sẵn
   const vnp_Params = req.query as Record<string, string>;
