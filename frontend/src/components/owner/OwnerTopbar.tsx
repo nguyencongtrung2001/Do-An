@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -82,6 +83,23 @@ export default function OwnerTopbar() {
         <div className="text-right hidden sm:block">
           <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hôm nay</p>
           <p className="text-sm font-semibold text-slate-700">{currentDate}</p>
+        </div>
+
+        <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden ring-2 ring-primary/20 transition-transform hover:scale-105">
+            {user?.anh_dai_dien ? (
+              <img src={user.anh_dai_dien} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold">{user?.ho_ten?.charAt(0) || "O"}</span>
+            )}
+          </div>
+          <div className="hidden sm:block">
+            <p className="text-sm font-semibold text-slate-900 truncate max-w-[120px]">{user?.ho_ten || "Chủ sân"}</p>
+            <p className="text-[10px] text-slate-400 truncate max-w-[120px]">{user?.email || ""}</p>
+          </div>
         </div>
       </div>
 

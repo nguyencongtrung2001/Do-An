@@ -47,7 +47,7 @@ export class BookingRepository {
   async countPendingByOwnerId(userId: string) {
     return prisma.datsanchitiet.count({
       where: {
-        trang_thai_dat: "Chờ xử lý",
+        trang_thai_dat: { in: ["Chờ xử lý", "Đã hủy"] },
         san: {
           diadiem: {
             ma_nguoi_dung: userId

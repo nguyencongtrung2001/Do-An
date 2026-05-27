@@ -107,8 +107,13 @@ export default function OwnerSidebar() {
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105">
-              {user?.ho_ten?.charAt(0) || "O"}
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105 overflow-hidden">
+              {user?.anh_dai_dien ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.anh_dai_dien} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                user?.ho_ten?.charAt(0) || "O"
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate text-slate-900">
