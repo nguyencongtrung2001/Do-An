@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiGet } from "@/services/api";
+import { apiGet, apiPost } from "@/services/api";
 import toast from "react-hot-toast";
 import { History as HistoryIcon, SearchX, Loader2 } from "lucide-react";
 
@@ -16,22 +16,46 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      if (!user || !token) return;
-      try {
-        const response = await apiGet<{ data: any[] }>(`/booking/user/${user.ma_nguoi_dung}`, token);
-        setBookings(response.data || []);
-      } catch (error) {
-        toast.error("Không thể tải lịch sử đặt sân");
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchHistory = async () => {
+    if (!user || !token) return;
+    try {
+      setLoading(true);
+      const response = await apiGet<{ data: any[] }>(`/booking/user/${user.ma_nguoi_dung}`, token);
+      setBookings(response.data || []);
+    } catch (error) {
+      toast.error("Không thể tải lịch sử đặt sân");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHistory();
   }, [user, token]);
+
+  const handleCancel = async (bookingId: string) => {
+    if (!user || !token) return;
+    
+    if (!window.confirm("Bạn có chắc chắn muốn hủy đơn đặt sân này? Tiền hoàn lại (nếu có) sẽ được cộng vào ví nội bộ theo chính sách.")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await apiPost<{ message: string, refundAmount?: number }>(
+        `/booking/cancel/${bookingId}`, 
+        { userId: user.ma_nguoi_dung }, 
+        token
+      );
+      toast.success(res.message || "Đã hủy đơn đặt sân thành công");
+      await fetchHistory();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "Lỗi khi hủy đơn đặt sân");
+      console.error(error);
+      setLoading(false);
+    }
+  };
 
   const flatDetails = useMemo(() => {
     return bookings.flatMap((booking) =>
@@ -90,7 +114,11 @@ export default function History() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredDetails.map((item) => (
-              <BookingItem key={item.detail.ma_dat_san_chi_tiet} item={item} />
+              <BookingItem 
+                key={item.detail.ma_dat_san_chi_tiet} 
+                item={item} 
+                onCancel={() => handleCancel(item.ma_dat_san)}
+              />
             ))}
           </div>
         )}

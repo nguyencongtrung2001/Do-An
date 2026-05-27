@@ -11,7 +11,7 @@ export const createBookingHandler = async (req: Request, res: Response, next: Ne
       : req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     console.log("📦 Booking Payload:", req.body);
     const bookingData = req.body;
-    const result = await bookingService.createBooking(bookingData, ipAddr);
+    const result = await bookingService.createBooking(bookingData, ipAddr as string);
     
     res.status(201).json({
       message: result.message || "Đặt sân thành công",
@@ -44,13 +44,13 @@ export const getUserBookingsHandler = async (req: Request, res: Response, next: 
 export const cancelBookingHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookingId } = req.params;
-    const { userId } = req.body; // Assuming userId is sent in body for simplicity, or we should get it from a token in a real app. Let's use req.body.userId
+    const { userId } = req.body;
 
     if (!userId) {
       throw new ApiError(401, "User ID is required to cancel booking");
     }
 
-    const result = await bookingService.cancelBooking(bookingId, userId);
+    const result = await bookingService.cancelBooking(String(bookingId), String(userId));
     
     res.status(200).json({
       status: "success",

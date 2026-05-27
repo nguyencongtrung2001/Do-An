@@ -11,9 +11,10 @@ interface BookingItemProps {
     ma_dat_san: string;
     phuong_thuc: string;
   };
+  onCancel?: () => void;
 }
 
-export default function BookingItem({ item }: BookingItemProps) {
+export default function BookingItem({ item, onCancel }: BookingItemProps) {
   const { detail, phuong_thuc } = item;
   const court = detail.san;
   const location = court?.diadiem;
@@ -133,8 +134,11 @@ export default function BookingItem({ item }: BookingItemProps) {
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
               MÃ ĐƠN: <span className="text-slate-500">{detail.ma_dat_san_chi_tiet.toUpperCase()}</span>
             </p>
-            {status === "Chờ xử lý" && (
-              <button className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-red-100 shadow-sm active:scale-95">
+            {["Chờ xử lý", "Đã xác nhận"].includes(status) && (
+              <button 
+                onClick={onCancel}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-red-100 shadow-sm active:scale-95"
+              >
                 <Trash2 className="w-3.5 h-3.5" /> HỦY ĐẶT SÂN
               </button>
             )}
