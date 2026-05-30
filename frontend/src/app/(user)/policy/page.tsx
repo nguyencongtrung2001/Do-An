@@ -47,13 +47,6 @@ export default function PolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3 pb-2 border-b">Cam kết chất lượng sân bãi & dịch vụ</h2>
-            <ul className="list-disc pl-5 space-y-2 text-gray-600">
-              <li>Sân bãi rộng rãi thoáng đãng, hệ thống mái che bạt rút, phòng tắm nóng lạnh, dịch vụ ăn uống đầy đủ.</li>
-            </ul>
-          </section>
-
-          <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3 pb-2 border-b">Quy định an toàn & trách nhiệm người chơi</h2>
             <ul className="list-disc pl-5 space-y-2 text-gray-600">
               <li>Quý khách hàng vui lòng thực hiện các nội quy an toàn tại sân.</li>
