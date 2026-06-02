@@ -31,13 +31,17 @@ export class VNPayUtil {
   /** Sort object by key and encode according to VNPay standards */
   private static sortObject(obj: Record<string, unknown>): Record<string, string> {
     const sorted: Record<string, string> = {};
-    const keys = Object.keys(obj).map(k => encodeURIComponent(k)).sort();
-    for (const encodedKey of keys) {
-      const originalKey = decodeURIComponent(encodedKey);
-      const val = obj[originalKey];
-      if (val !== undefined && val !== null) {
-        sorted[encodedKey] = encodeURIComponent(String(val)).replace(/%20/g, "+");
+    const str: string[] = [];
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        str.push(encodeURIComponent(key));
       }
+    }
+    str.sort();
+    for (let i = 0; i < str.length; i++) {
+      const k = str[i];
+      if (k === undefined) continue;
+      sorted[k] = encodeURIComponent(String(obj[k])).replace(/%20/g, '+');
     }
     return sorted;
   }
@@ -50,11 +54,6 @@ export class VNPayUtil {
       .digest('hex');
   }
 
-  /**
-   * Tạo chuỗi yyyyMMddHHmmss theo GMT+7.
-   * Dùng locale en-CA vì nó cho YYYY-MM-DD,HH:mm:ss.
-   * KHÔNG dùng en-US (cho MM/DD/YYYY → sai thứ tự!).
-   */
   private static getCreateDate(): string {
     return new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Ho_Chi_Minh',
@@ -70,24 +69,17 @@ export class VNPayUtil {
       .replace(/[^0-9]/g, '');
   }
 
-  /** Chuẩn hoá IP: ::1 / ::ffff:x.x.x.x → IPv4 */
   static normalizeIp(ip: string): string {
     if (!ip || ip === '::1') return '127.0.0.1';
     if (ip.startsWith('::ffff:')) return ip.slice(7);
     return ip;
   }
 
-  /**
-   * Build chuỗi dùng để ký: key=value&key2=value2 (KHÔNG encode URL).
-   * Chuẩn VNPay: hash raw string, không encode.
-   */
   private static buildSignData(params: Record<string, unknown>): string {
     return Object.keys(params)
       .map(k => `${k}=${params[k]}`)
       .join('&');
   }
-
-  // ─── PUBLIC API ──────────────────────────────────────────────────────────────
 
   static createPaymentUrl(
     orderId: string,
@@ -102,48 +94,41 @@ export class VNPayUtil {
     console.log('[VNPay] returnUrl:', this.vnp_ReturnUrl);
 
     const rawParams: Record<string, unknown> = {
-      vnp_Version:    this.VNP_VERSION,
-      vnp_Command:    this.VNP_COMMAND,
-      vnp_TmnCode:    this.vnp_TmnCode,
-      vnp_Locale:     this.VNP_LOCALE,
-      vnp_CurrCode:   this.VNP_CURRENCY,
-      vnp_TxnRef:     orderId,
-      vnp_OrderInfo:  orderInfo,
-      vnp_OrderType:  'billpayment',
-      vnp_Amount:     Math.round(amount * 100),
-      vnp_ReturnUrl:  this.vnp_ReturnUrl,
-      vnp_IpAddr:     this.normalizeIp(ipAddr),
+      vnp_Version: this.VNP_VERSION,
+      vnp_Command: this.VNP_COMMAND,
+      vnp_TmnCode: this.vnp_TmnCode,
+      vnp_Locale: this.VNP_LOCALE,
+      vnp_CurrCode: this.VNP_CURRENCY,
+      vnp_TxnRef: orderId,
+      vnp_OrderInfo: orderInfo,
+      vnp_OrderType: 'billpayment',
+      vnp_Amount: Math.round(amount * 100),
+      vnp_ReturnUrl: this.vnp_ReturnUrl,
+      vnp_IpAddr: this.normalizeIp(ipAddr),
       vnp_CreateDate: createDate,
     };
 
     const sorted = this.sortObject(rawParams);
 
-    // 1. Hash từ chuỗi đã được encode theo chuẩn VNPay
-    const signData   = this.buildSignData(sorted);
+    const signData = this.buildSignData(sorted);
     const secureHash = this.hmac(signData);
 
     console.log('[VNPay] signData:', signData);
     console.log('[VNPay] secureHash:', secureHash);
 
-    // 2. Build URL — dùng chuỗi signData đã encode và nối thêm secureHash
     const queryString = signData + '&vnp_SecureHash=' + secureHash;
     return `${this.vnp_Url}?${queryString}`;
   }
 
-  /**
-   * Verify checksum của params trả về từ VNPay (vnp-return hoặc IPN).
-   * req.query đã được Express decode → dùng raw value khớp cách VNPay tính.
-   */
   static verifyChecksum(vnp_Params: Record<string, string>): boolean {
     const secureHash = vnp_Params['vnp_SecureHash'];
     if (!secureHash) return false;
 
-    // Copy để không mutate req.query gốc
     const params = { ...vnp_Params };
     delete params['vnp_SecureHash'];
     delete params['vnp_SecureHashType'];
 
-    const sorted   = this.sortObject(params) as Record<string, string>;
+    const sorted = this.sortObject(params) as Record<string, string>;
     const signData = this.buildSignData(sorted);
     const computed = this.hmac(signData);
 
