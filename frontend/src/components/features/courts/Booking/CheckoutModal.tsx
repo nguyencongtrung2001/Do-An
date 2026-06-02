@@ -53,20 +53,24 @@ export default function CheckoutModal({
                       Ngày: {new Date(group.ngay_dat).toLocaleDateString("vi-VN")} | {group.gio_bat_dau} - {group.gio_ket_thuc}
                     </p>
                   </div>
-                  <p className="font-bold text-slate-800">{group.gia_thue.toLocaleString()}đ</p>
+                  <div className="text-right">
+                    <p className="font-bold text-slate-800">{(group.gia_thue * 0.3).toLocaleString()}đ</p>
+                    <p className="text-xs text-slate-400 line-through">{group.gia_thue.toLocaleString()}đ</p>
+                  </div>
                 </div>
               ))}
             </div>
             
             <div className="mt-4 space-y-2 px-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold text-slate-600">Tổng tiền</span>
-                <span className="text-sm font-bold text-slate-900">{totalPrice.toLocaleString()}đ</span>
+                <span className="text-sm text-slate-500">Tổng giá thuê sân</span>
+                <span className="text-sm text-slate-400 line-through">{totalPrice.toLocaleString()}đ</span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                <span className="font-bold text-slate-800">Tiền cọc (30%)</span>
+                <span className="font-bold text-slate-800">Tiền cọc cần thanh toán (30%)</span>
                 <span className="text-2xl font-black text-primary">{depositPrice.toLocaleString()}đ</span>
               </div>
+              <p className="text-xs text-slate-400 italic">* Phần còn lại ({(totalPrice - depositPrice).toLocaleString()}đ) thanh toán tại sân</p>
             </div>
           </div>
 

@@ -48,7 +48,8 @@ export default function BookingCart({
                 <p className="text-xs text-slate-500 mt-1">
                   Ngày: {new Date(group.ngay_dat).toLocaleDateString("vi-VN")}
                 </p>
-                <p className="text-sm font-bold text-primary mt-1">{group.gia_thue.toLocaleString()}đ</p>
+                <p className="text-sm font-bold text-primary mt-1">Cọc: {(group.gia_thue * 0.3).toLocaleString()}đ</p>
+                <p className="text-[10px] text-slate-400 line-through">{group.gia_thue.toLocaleString()}đ</p>
               </div>
               <button 
                 onClick={() => onRemoveGroup(group)}
@@ -64,8 +65,8 @@ export default function BookingCart({
 
       <div className="mt-6 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-between mb-6">
-          <span className="text-slate-600 font-medium">Tổng tạm tính</span>
-          <span className="text-2xl font-black text-primary">{totalPrice.toLocaleString()}đ</span>
+          <span className="text-slate-600 font-medium">Tổng tiền cọc (30%)</span>
+          <span className="text-2xl font-black text-primary">{(totalPrice * 0.3).toLocaleString()}đ</span>
         </div>
         <button
           onClick={onCheckout}

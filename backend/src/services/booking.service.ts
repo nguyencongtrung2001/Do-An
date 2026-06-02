@@ -195,7 +195,9 @@ export class BookingService {
     try {
       let walletDeduction;
       if (phuong_thuc_thanh_toan === "wallet") {
-        walletDeduction = { userId: ma_nguoi_dung, amount: tongTien };
+        // Chỉ trừ tiền cọc (30%) chứ không trừ toàn bộ tổng tiền
+        const tongTienCoc = detailsData.reduce((sum, d) => sum + d.tien_coc, 0);
+        walletDeduction = { userId: ma_nguoi_dung, amount: tongTienCoc };
       }
 
       const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
@@ -359,14 +361,17 @@ export class BookingService {
       refundPercentage = 0; // 0%
     }
 
-    const tongTien = Number(booking.tong_tien);
-    const refundAmount = tongTien * refundPercentage;
+    // Tính tổng tiền cọc đã trừ (30% tổng tiền) — vì ví chỉ bị trừ tiền cọc
+    const tongTienCoc = booking.datsanchitiet.reduce(
+      (sum, d) => sum + Number(d.tien_coc), 0
+    );
+    const refundAmount = tongTienCoc * refundPercentage;
 
     await bookingRepository.cancelBookingWithRefund(bookingId, userId, refundAmount);
 
     let message = "Hủy đặt sân thành công.";
     if (refundAmount > 0) {
-      message += ` Bạn được hoàn lại ${refundPercentage * 100}% số tiền (${refundAmount} VNĐ) vào ví nội bộ.`;
+      message += ` Bạn được hoàn lại ${refundPercentage * 100}% tiền cọc (${refundAmount.toLocaleString()} VNĐ) vào ví nội bộ.`;
     } else {
       message += " Đã quá thời gian quy định nên không được hoàn tiền.";
     }
