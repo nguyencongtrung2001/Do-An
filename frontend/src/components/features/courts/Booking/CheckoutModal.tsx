@@ -53,10 +53,7 @@ export default function CheckoutModal({
                       Ngày: {new Date(group.ngay_dat).toLocaleDateString("vi-VN")} | {group.gio_bat_dau} - {group.gio_ket_thuc}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-slate-800">{(group.gia_thue * 0.3).toLocaleString()}đ</p>
-                    <p className="text-xs text-slate-400 line-through">{group.gia_thue.toLocaleString()}đ</p>
-                  </div>
+                  <p className="font-bold text-slate-800">{group.gia_thue.toLocaleString()}đ</p>
                 </div>
               ))}
             </div>

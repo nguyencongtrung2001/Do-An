@@ -48,8 +48,7 @@ export default function BookingCart({
                 <p className="text-xs text-slate-500 mt-1">
                   Ngày: {new Date(group.ngay_dat).toLocaleDateString("vi-VN")}
                 </p>
-                <p className="text-sm font-bold text-primary mt-1">Cọc: {(group.gia_thue * 0.3).toLocaleString()}đ</p>
-                <p className="text-[10px] text-slate-400 line-through">{group.gia_thue.toLocaleString()}đ</p>
+                <p className="text-sm font-bold text-primary mt-1">Tổng tiền sân: {group.gia_thue.toLocaleString()}đ</p>
               </div>
               <button 
                 onClick={() => onRemoveGroup(group)}
