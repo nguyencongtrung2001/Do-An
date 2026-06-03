@@ -20,6 +20,16 @@ export function formatTimeFromISO(isoString: string): string {
 }
 
 /**
+ * Cộng thêm phút vào chuỗi "HH:mm" và trả về chuỗi "HH:mm" mới.
+ * Ví dụ: addMinutes("07:30", 30) → "08:00"
+ */
+function addMinutes(time: string, minutes: number): string {
+  const [h, m] = time.split(':').map(Number);
+  const d = new Date(0, 0, 0, h, m + minutes);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/**
  * Gộp các mốc chọn giờ (markers) thành các nhóm liên tiếp.
  * Mỗi marker đại diện cho một block 30 phút.
  */
@@ -41,14 +51,14 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
       // (sẽ được cập nhật khi có marker tiếp theo)
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: marker.gio_bat_dau, 
+        gio_ket_thuc: addMinutes(marker.gio_bat_dau, 30), 
         slots: [marker] 
       };
     } else {
       // Kiểm tra marker này có liên tiếp 30p sau marker trước không
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker] };
+        currentGroup = { ...marker, gio_ket_thuc: addMinutes(marker.gio_bat_dau, 30), slots: [marker] };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -60,8 +70,8 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới + 30 phút
+        currentGroup.gio_ket_thuc = addMinutes(marker.gio_bat_dau, 30);
         currentGroup.gia_thue += marker.gia_thue;
         currentGroup.slots.push(marker);
       } else {
@@ -69,7 +79,7 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: marker.gio_bat_dau, 
+          gio_ket_thuc: addMinutes(marker.gio_bat_dau, 30), 
           slots: [marker] 
         };
       }

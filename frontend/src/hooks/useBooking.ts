@@ -44,11 +44,7 @@ export function useBooking() {
   const isInvalid = invalidGroups.length > 0;
 
   const totalPrice = useMemo(() => {
-    return groupedSlots.reduce((sum, group) => {
-      const slotCount = group.slots.length - 1;
-      const groupPrice = slotCount * group.slots[0].gia_thue;
-      return sum + groupPrice;
-    }, 0);
+    return groupedSlots.reduce((sum, group) => sum + group.gia_thue, 0);
   }, [groupedSlots]);
 
   const confirmBooking = async (paymentMethod: string) => {
