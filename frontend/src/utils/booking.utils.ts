@@ -44,12 +44,13 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
       currentGroup = { 
         ...marker, 
         gio_ket_thuc: marker.gio_bat_dau, 
-        slots: [marker] 
+        slots: [marker],
+        gia_thue: 0 
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker] };
+        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -63,15 +64,17 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
       ) {
         // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
         currentGroup.gio_ket_thuc = marker.gio_bat_dau;
-        currentGroup.gia_thue += marker.gia_thue;
         currentGroup.slots.push(marker);
+        // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
+        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
       } else {
         // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
           gio_ket_thuc: marker.gio_bat_dau, 
-          slots: [marker] 
+          slots: [marker],
+          gia_thue: 0
         };
       }
     }
