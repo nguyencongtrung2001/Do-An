@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { MapPin, Calendar, Clock, CreditCard, Wallet, Trash2, CheckCircle2 } from "lucide-react";
 import { formatVND, formatDate } from "@/utils/date.utils";
 import { formatTimeFromISO } from "@/utils/booking.utils";
+import RatingModal from "@/components/history/RatingModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingItemProps {
   item: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     detail: any;
     ma_dat_san: string;
     phuong_thuc: string;
@@ -15,6 +19,8 @@ interface BookingItemProps {
 }
 
 export default function BookingItem({ item, onCancel }: BookingItemProps) {
+  const { token } = useAuth() || {};
+  const [ratingModal, setRatingModal] = useState(false);
   const { detail, phuong_thuc } = item;
   const court = detail.san;
   const location = court?.diadiem;
@@ -134,17 +140,36 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
               MÃ ĐƠN: <span className="text-slate-500">{detail.ma_dat_san_chi_tiet.toUpperCase()}</span>
             </p>
-            {["Chờ xử lý", "Đã xác nhận"].includes(status) && (
-              <button 
-                onClick={onCancel}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-red-100 shadow-sm active:scale-95"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> HỦY ĐẶT SÂN
-              </button>
-            )}
+            <div className="flex gap-2">
+              {["Chờ xử lý", "Đã xác nhận"].includes(status) && (
+                <button 
+                  onClick={onCancel}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-red-100 shadow-sm active:scale-95"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> HỦY ĐẶT SÂN
+                </button>
+              )}
+              {status !== "Đã hủy" && (
+                <button
+                  onClick={() => setRatingModal(true)}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-yellow-50 hover:bg-yellow-500 text-yellow-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-yellow-100 shadow-sm active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[14px] [font-variation-settings:'FILL'1]">star</span>
+                  Đánh giá
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+      
+      <RatingModal
+        isOpen={ratingModal}
+        onClose={() => setRatingModal(false)}
+        ma_dat_san_chi_tiet={detail.ma_dat_san_chi_tiet}
+        token={token || ""}
+        onSuccess={() => setRatingModal(false)}
+      />
     </div>
   );
 }
