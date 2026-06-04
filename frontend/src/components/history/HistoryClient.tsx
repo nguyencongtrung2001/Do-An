@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiGet, apiPost } from "@/services/api";
 import { toast } from "react-hot-toast";
+import RatingModal from "./RatingModal";
 
 // ==============================
 // Types
@@ -42,24 +43,41 @@ export default function HistoryClient() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "Chờ xử lý" | "Đã xác nhận" | "Đã hủy" | "Hoàn thành">("all");
+  const [ratingModal, setRatingModal] = useState<{ isOpen: boolean, detailId: string }>({ isOpen: false, detailId: "" });
 
-  const fetchHistory = async () => {
+  useEffect(() => {
+    let cancelled = false;
+    const loadHistory = async () => {
+      if (!user || !token) return;
+      try {
+        setLoading(true);
+        const response = await apiGet<{ data: Booking[] }>(`/booking/user/${user.ma_nguoi_dung}`, token);
+        if (!cancelled) setBookings(response.data || []);
+      } catch (error) {
+        if (!cancelled) {
+          toast.error("Không thể tải lịch sử đặt sân");
+          console.error(error);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadHistory();
+    return () => { cancelled = true; };
+  }, [user, token]);
+
+  const refreshHistory = async () => {
     if (!user || !token) return;
     try {
       setLoading(true);
       const response = await apiGet<{ data: Booking[] }>(`/booking/user/${user.ma_nguoi_dung}`, token);
       setBookings(response.data || []);
     } catch (error) {
-      toast.error("Không thể tải lịch sử đặt sân");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchHistory();
-  }, [user, token]);
 
   const handleCancel = async (bookingId: string) => {
     if (!user || !token) return;
@@ -77,10 +95,11 @@ export default function HistoryClient() {
       );
       toast.success(res.message || "Đã hủy đơn đặt sân thành công");
       // Refresh data
-      await fetchHistory();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || "Lỗi khi hủy đơn đặt sân");
-      console.error(error);
+      await refreshHistory();
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error("Lỗi khi hủy đơn đặt sân");
+      toast.error(err.message || "Lỗi khi hủy đơn đặt sân");
+      console.error(err);
       setLoading(false);
     }
   };
@@ -312,6 +331,14 @@ export default function HistoryClient() {
                             Hủy đặt
                           </button>
                         )}
+                        {["Đã xác nhận", "Hoàn thành"].includes(status) && (
+                          <button 
+                            onClick={() => setRatingModal({ isOpen: true, detailId: detail.ma_dat_san_chi_tiet })}
+                            className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 transition-all"
+                          >
+                            Đánh giá
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -321,6 +348,16 @@ export default function HistoryClient() {
           })
         )}
       </div>
+
+      <RatingModal
+        isOpen={ratingModal.isOpen}
+        onClose={() => setRatingModal({ isOpen: false, detailId: "" })}
+        ma_dat_san_chi_tiet={ratingModal.detailId}
+        token={token || ""}
+        onSuccess={() => {
+          // You could optionally refresh history or update state here
+        }}
+      />
     </div>
   );
 }
