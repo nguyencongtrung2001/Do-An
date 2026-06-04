@@ -63,10 +63,6 @@ export default function CheckoutModal({
                 <span className="font-bold text-slate-800">Tiền cọc cần thanh toán</span>
                 <span className="text-2xl font-black text-primary">{(totalPrice * 0.3).toLocaleString()}đ</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-800">Số tiền còn lại</span>
-                <span className="text-2xl font-black text-primary">{(totalPrice * 0.7).toLocaleString()}đ</span>
-              </div>
             </div>
           </div>
 

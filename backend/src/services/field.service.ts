@@ -56,10 +56,10 @@ export class FieldService {
 
       whereClause.san = {
         some: {
-          loai_the_thao: {
-            contains: dbSportName,
-            mode: 'insensitive'
-          }
+          OR: [
+            { loai_the_thao: { contains: sportType, mode: 'insensitive' } },
+            { loai_the_thao: { contains: dbSportName, mode: 'insensitive' } }
+          ]
         },
       };
     }
