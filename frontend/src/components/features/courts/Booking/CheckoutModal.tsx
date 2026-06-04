@@ -61,10 +61,6 @@ export default function CheckoutModal({
             <div className="mt-4 space-y-2 px-4">
               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                 <span className="font-bold text-slate-800">Tiền cọc cần thanh toán</span>
-                <span className="text-2xl font-black text-primary">{totalPrice.toLocaleString()}đ</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-800">Số tiền đã cọc</span>
                 <span className="text-2xl font-black text-primary">{(totalPrice * 0.3).toLocaleString()}đ</span>
               </div>
               <div className="flex justify-between items-center">

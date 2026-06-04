@@ -193,10 +193,11 @@ export class BookingService {
 
     // 7. Lưu vào DB (trong transaction)
     try {
+      // Tính tổng tiền cọc (30%) cho tất cả các phương thức thanh toán cần
+      const tongTienCoc = detailsData.reduce((sum, d) => sum + d.tien_coc, 0);
+
       let walletDeduction;
       if (phuong_thuc_thanh_toan === "wallet") {
-        // Chỉ trừ tiền cọc (30%) chứ không trừ toàn bộ tổng tiền
-        const tongTienCoc = detailsData.reduce((sum, d) => sum + d.tien_coc, 0);
         walletDeduction = { userId: ma_nguoi_dung, amount: tongTienCoc };
       }
 
@@ -204,17 +205,17 @@ export class BookingService {
       
       if (mappedPayment === "VNPay") {
         try {
-          const orderInfo = `Thanh toan dat san ${ma_dat_san}`;
+          const orderInfo = `Thanh toan tien coc dat san ${ma_dat_san}`;
           
           console.log('--- VNPAY Payment Debug ---');
           console.log('OrderId:', ma_dat_san);
-          console.log('Amount:', tongTien);
+          console.log('Amount (Cọc):', tongTienCoc);
           console.log('IpAddr:', ipAddr);
           console.log('OrderInfo:', orderInfo);
 
           const paymentUrl = VNPayUtil.createPaymentUrl(
             ma_dat_san,
-            tongTien,
+            tongTienCoc,
             orderInfo,
             ipAddr
           );
