@@ -1,33 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { bookingService } from "@/services/booking.service";
 import { OWNER_NAV_LINKS } from "@/constants/navigation";
 
 export default function OwnerSidebar() {
   const pathname = usePathname();
-  const { token, user, isMounted, logout } = useAuth();
-  const [pendingCount, setPendingCount] = useState(0);
-
-  useEffect(() => {
-    if (!token) return;
-
-    const checkPending = async () => {
-      try {
-        const res = await bookingService.getPendingCount(token);
-        if (res.success) setPendingCount(res.count);
-      } catch (error) {
-        console.error("Sidebar pending check error:", error);
-      }
-    };
-
-    checkPending();
-    const interval = setInterval(checkPending, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
+  const { user, isMounted, logout } = useAuth();
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50">
@@ -68,7 +48,6 @@ export default function OwnerSidebar() {
         <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6 mb-2">Quản lý</p>
         {OWNER_NAV_LINKS.filter((l) => l.category === "Quản lý").map((link) => {
           const isActive = pathname === link.href;
-          const isBookings = link.label === "Lịch đặt sân";
           
           return (
             <Link
@@ -84,12 +63,6 @@ export default function OwnerSidebar() {
                 </span>
                 {link.label}
               </div>
-              
-              {isBookings && pendingCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-white">
-                  {pendingCount}
-                </span>
-              )}
             </Link>
           );
         })}

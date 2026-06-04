@@ -231,6 +231,10 @@ export default function OwnerTopbar() {
                               <span className="text-[11px] text-slate-400">
                                 {new Date(booking.ngay_dat).toLocaleDateString("vi-VN")}
                               </span>
+                              <span className="text-slate-200">•</span>
+                              <span className="text-[11px] font-bold text-primary">
+                                {(Number(booking.tien_coc) + Number(booking.tien_con_lai)).toLocaleString("vi-VN")}đ
+                              </span>
                             </div>
                             <div className="flex items-center justify-between mt-1.5">
                               <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
