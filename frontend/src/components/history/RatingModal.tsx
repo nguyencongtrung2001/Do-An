@@ -44,8 +44,8 @@ export default function RatingModal({
       onSuccess();
       onClose();
     } catch (error: unknown) {
-      const err = error as any;
-      toast.error(err.response?.data?.message || "Lỗi khi gửi đánh giá");
+      const message = error instanceof Error ? error.message : "Lỗi khi gửi đánh giá";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
