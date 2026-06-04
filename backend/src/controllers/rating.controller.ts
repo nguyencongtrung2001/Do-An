@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const createRating = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const ma_nguoi_dung = req.user?.ma_nguoi_dung; // Lấy từ auth middleware
+        const ma_nguoi_dung = req.user?.id; // Lấy từ auth middleware
         const { ma_dat_san_chi_tiet, so_sao } = req.body;
 
         if (!ma_nguoi_dung) {
@@ -68,7 +68,7 @@ export const getAverageRatingForCourt = async (req: Request, res: Response, next
 
 export const getMyRatingForBooking = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const ma_nguoi_dung = req.user?.ma_nguoi_dung;
+        const ma_nguoi_dung = req.user?.id;
         const ma_dat_san_chi_tiet = req.params.ma_dat_san_chi_tiet as string;
         
         if (!ma_nguoi_dung) {
