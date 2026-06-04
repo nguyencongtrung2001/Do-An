@@ -146,7 +146,7 @@ export default function OwnerTopbar() {
           {showNotifications && (
             <div className="absolute right-0 top-[calc(100%+8px)] w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Header */}
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-slate-50 to-white">
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-primary" />
                   <h3 className="text-sm font-bold text-slate-900">Thông báo</h3>

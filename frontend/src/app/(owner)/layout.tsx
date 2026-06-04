@@ -1,5 +1,4 @@
 import OwnerSidebar from "@/components/owner/OwnerSidebar";
-import OwnerTopbar from "@/components/owner/OwnerTopbar";
 
 export const metadata = {
   title: "Owner Dashboard - SportLink",
@@ -12,7 +11,6 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     <div className="flex min-h-screen bg-slate-50 font-display text-slate-900 antialiased overflow-x-hidden">
       <OwnerSidebar />
       <main className="flex-1 min-w-0 ml-64 flex flex-col min-h-screen">
-        <OwnerTopbar />
         {/* Child Pages Content */}
         {children}
       </main>
