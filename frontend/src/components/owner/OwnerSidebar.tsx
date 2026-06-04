@@ -14,6 +14,13 @@ export default function OwnerSidebar() {
   const router = useRouter();
   const { token, user, isMounted, logout } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [lastSeenCount, setLastSeenCount] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("owner_last_seen_count");
+      return stored ? parseInt(stored, 10) : 0;
+    }
+    return 0;
+  });
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -41,6 +48,14 @@ export default function OwnerSidebar() {
           }
           setPendingCount(res.count);
           prevCountRef.current = res.count;
+          
+          setLastSeenCount(prev => {
+            if (res.count < prev) {
+              localStorage.setItem("owner_last_seen_count", res.count.toString());
+              return res.count;
+            }
+            return prev;
+          });
         }
       } catch (error) {
         console.error("Error checking pending count:", error);
@@ -78,8 +93,13 @@ export default function OwnerSidebar() {
     setShowNotifications(next);
     if (next) {
       fetchNotifications();
+      // Hide badge by marking current count as seen
+      setLastSeenCount(pendingCount);
+      localStorage.setItem("owner_last_seen_count", pendingCount.toString());
     }
   };
+
+  const displayBadgeCount = Math.max(0, pendingCount - lastSeenCount);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -183,15 +203,15 @@ export default function OwnerSidebar() {
             }`}
           >
             <div className="flex items-center gap-3">
-              <span className={`material-symbols-outlined text-xl ${pendingCount > 0 ? "animate-ring text-primary" : ""}`} style={showNotifications ? { fontVariationSettings: "'FILL' 1" } : {}}>
+              <span className={`material-symbols-outlined text-xl ${displayBadgeCount > 0 ? "animate-ring text-primary" : ""}`} style={showNotifications ? { fontVariationSettings: "'FILL' 1" } : {}}>
                 notifications
               </span>
               Thông báo
             </div>
             
-            {pendingCount > 0 && (
+            {displayBadgeCount > 0 && (
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-white">
-                {pendingCount > 99 ? "99+" : pendingCount}
+                {displayBadgeCount > 99 ? "99+" : displayBadgeCount}
               </span>
             )}
           </button>
@@ -204,9 +224,9 @@ export default function OwnerSidebar() {
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-primary" />
                   <h3 className="text-sm font-bold text-slate-900">Thông báo</h3>
-                  {pendingCount > 0 && (
+                  {displayBadgeCount > 0 && (
                     <span className="ml-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white px-1.5">
-                      {pendingCount}
+                      {displayBadgeCount}
                     </span>
                   )}
                 </div>
