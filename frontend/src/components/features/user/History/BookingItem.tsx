@@ -149,7 +149,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
                   <Trash2 className="w-3.5 h-3.5" /> HỦY ĐẶT SÂN
                 </button>
               )}
-              {status !== "Đã hủy" && (
+              {status === "Hoàn thành" && (
                 <button
                   onClick={() => setRatingModal(true)}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-yellow-50 hover:bg-yellow-500 text-yellow-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-yellow-100 shadow-sm active:scale-95"

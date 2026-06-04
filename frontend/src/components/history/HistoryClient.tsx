@@ -331,7 +331,7 @@ export default function HistoryClient() {
                             Hủy đặt
                           </button>
                         )}
-                        {status !== "Đã hủy" && (
+                        {status === "Hoàn thành" && (
                           <button 
                             onClick={() => setRatingModal({ isOpen: true, detailId: detail.ma_dat_san_chi_tiet })}
                             className="px-4 py-2 text-xs font-bold rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all flex items-center gap-1.5 shadow-sm"
