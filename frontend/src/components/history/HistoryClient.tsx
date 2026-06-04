@@ -331,11 +331,12 @@ export default function HistoryClient() {
                             Hủy đặt
                           </button>
                         )}
-                        {["Đã xác nhận", "Hoàn thành"].includes(status) && (
+                        {status !== "Đã hủy" && (
                           <button 
                             onClick={() => setRatingModal({ isOpen: true, detailId: detail.ma_dat_san_chi_tiet })}
-                            className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 transition-all"
+                            className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 transition-all flex items-center gap-1.5"
                           >
+                            <span className="material-symbols-outlined text-sm">star</span>
                             Đánh giá
                           </button>
                         )}
