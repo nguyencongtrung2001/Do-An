@@ -375,12 +375,6 @@ export default function OwnerDashboardClient() {
               </p>
             </div>
           </div>
-          <div className="text-right text-sm text-white/60">
-            <p>Tổng cọc thu được</p>
-            <p className="text-xl font-bold text-white">
-              {formatVND(bookings.reduce((sum, b) => sum + Number(b.tien_coc), 0))}
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
