@@ -371,7 +371,7 @@ export default function OwnerDashboardClient() {
             <div>
               <p className="text-sm text-white/70 font-medium">Số dư ví SportLink</p>
               <p className="text-3xl font-black">
-                {user?.so_vi_du ? formatVND(Number(user.so_vi_du)) : "---"}
+                {user?.so_vi_du !== undefined && user?.so_vi_du !== null ? formatVND(Number(user.so_vi_du)) : "0đ"}
               </p>
             </div>
           </div>

@@ -14,7 +14,6 @@ export const ADMIN_NAV_LINKS: NavLink[] = [
   { label: "Dashboard", href: "/overview", icon: "dashboard", exact: true },
   { label: "Quản lý người dùng", href: "/users", icon: "group" },
   { label: "Kiểm duyệt sân", href: "/approvals", icon: "verified" },
-  { label: "Tài chính", href: "/finance", icon: "payments" },
 ];
 
 export const OWNER_NAV_LINKS: (NavLink & { category: string })[] = [
