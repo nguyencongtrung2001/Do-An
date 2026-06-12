@@ -56,9 +56,8 @@ export default function AdminDashboardPage() {
     { label: "Chủ sân", value: stats.totalOwners, icon: "domain", color: "indigo", href: "/users" },
     { label: "Khách hàng", value: stats.totalRenters, icon: "person", color: "emerald", href: "/users" },
     { label: "Tài khoản bị khóa", value: stats.lockedAccounts, icon: "lock", color: "red", href: "/users" },
-    { label: "Chủ sân chờ duyệt", value: stats.pendingOwners, icon: "hourglass_top", color: "amber", href: "/approvals" },
+    { label: "Yêu cầu đăng ký mới", value: Math.max(stats.pendingOwners, stats.pendingLocations), icon: "pending_actions", color: "amber", href: "/approvals" },
     { label: "Tổng địa điểm", value: stats.totalLocations, icon: "location_on", color: "cyan", href: "/approvals" },
-    { label: "Địa điểm chờ duyệt", value: stats.pendingLocations, icon: "pending", color: "orange", href: "/approvals" },
   ];
 
   const colorMap: Record<string, string> = {

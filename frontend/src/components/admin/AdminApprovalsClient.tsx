@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin.service";
-
-type TabType = "owners" | "locations";
 
 interface PendingOwner {
   ma_nguoi_dung: string;
@@ -38,120 +36,123 @@ interface Location {
   san: { ma_san: string }[];
 }
 
+interface OwnerBasicInfo {
+  ma_nguoi_dung: string;
+  ho_ten: string;
+  email: string;
+  so_dien_thoai: string | null;
+  trang_thai: boolean;
+}
+
 export default function AdminApprovalsClient() {
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>("owners");
-
-  // Owner state
+  
+  // Data states
   const [pendingOwners, setPendingOwners] = useState<PendingOwner[]>([]);
-  const [loadingOwners, setLoadingOwners] = useState(true);
-  const [approvingOwnerId, setApprovingOwnerId] = useState<string | null>(null);
-
-  // Location state
   const [locations, setLocations] = useState<Location[]>([]);
-  const [loadingLocations, setLoadingLocations] = useState(true);
-  const [approvingLocationId, setApprovingLocationId] = useState<string | null>(null);
-  const [rejectingLocationId, setRejectingLocationId] = useState<string | null>(null);
-  const [locationFilter, setLocationFilter] = useState<"all" | "pending" | "approved">("pending");
+  const [loading, setLoading] = useState(true);
+  
+  // UI states
+  const [filter, setFilter] = useState<"pending" | "approved">("pending");
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   // ── Fetch ─────────────────────────────────────────────
+  useEffect(() => {
+    let isMounted = true;
+    const fetchApprovalData = async () => {
+      if (!token) return;
+      try {
+        const [ownersRes, locsRes] = await Promise.all([
+          adminService.getPendingOwners(token),
+          adminService.getAllLocations(token)
+        ]);
+        
+        if (!isMounted) return;
+        if (ownersRes.success) setPendingOwners(ownersRes.owners);
+        if (locsRes.success) setLocations(locsRes.locations);
+      } catch (err) {
+        console.error("Error fetching approval data:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
 
-  const fetchOwners = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await adminService.getPendingOwners(token);
-      if (res.success) setPendingOwners(res.owners);
-    } catch (err) {
-      console.error("Error fetching pending owners:", err);
-    } finally {
-      setLoadingOwners(false);
-    }
+    fetchApprovalData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
-  const fetchLocations = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await adminService.getAllLocations(token);
-      if (res.success) setLocations(res.locations);
-    } catch (err) {
-      console.error("Error fetching locations:", err);
-    } finally {
-      setLoadingLocations(false);
-    }
-  }, [token]);
+  // ── Unified Data Models ───────────────────────────────
+  
+  const pendingRequests = useMemo(() => {
+    const map = new Map<string, { ownerFull: PendingOwner | null, ownerBasic: OwnerBasicInfo, locations: Location[] }>();
+    
+    // Add pending owners
+    pendingOwners.forEach(o => {
+      map.set(o.ma_nguoi_dung, { ownerFull: o, ownerBasic: o, locations: [] });
+    });
 
-  useEffect(() => {
-    (async () => { await fetchOwners(); })();
-  }, [fetchOwners]);
+    // Add pending locations
+    locations.filter(l => !l.trang_thai_duyet).forEach(l => {
+      const ownerId = l.nguoidung.ma_nguoi_dung;
+      if (map.has(ownerId)) {
+        map.get(ownerId)!.locations.push(l);
+      } else {
+        map.set(ownerId, { ownerFull: null, ownerBasic: l.nguoidung, locations: [l] });
+      }
+    });
 
-  useEffect(() => {
-    (async () => { await fetchLocations(); })();
-  }, [fetchLocations]);
+    return Array.from(map.values());
+  }, [pendingOwners, locations]);
+
+  const approvedRequests = useMemo(() => {
+    const map = new Map<string, { ownerBasic: OwnerBasicInfo, locations: Location[] }>();
+    locations.filter(l => l.trang_thai_duyet).forEach(l => {
+      const ownerId = l.nguoidung.ma_nguoi_dung;
+      if (!map.has(ownerId)) {
+        map.set(ownerId, { ownerBasic: l.nguoidung, locations: [] });
+      }
+      map.get(ownerId)!.locations.push(l);
+    });
+    return Array.from(map.values());
+  }, [locations]);
 
   // ── Actions ───────────────────────────────────────────
 
-  const handleApproveOwner = async (id: string) => {
-    if (!token || approvingOwnerId) return;
-    setApprovingOwnerId(id);
+  const handleApproveRequest = async (ownerId: string, locationIds: string[]) => {
+    if (!token || approvingId) return;
+    setApprovingId(ownerId);
     try {
-      const res = await adminService.approveOwner(token, id);
-      if (res.success) {
-        setPendingOwners((prev) => prev.filter((o) => o.ma_nguoi_dung !== id));
+      const promises = [];
+      const isOwnerPending = pendingOwners.some(o => o.ma_nguoi_dung === ownerId);
+      
+      if (isOwnerPending) {
+        promises.push(adminService.approveOwner(token, ownerId));
+      }
+      
+      locationIds.forEach(locId => {
+        promises.push(adminService.approveLocation(token, locId));
+      });
+
+      await Promise.all(promises);
+      
+      // Update local state
+      if (isOwnerPending) {
+        setPendingOwners(prev => prev.filter(o => o.ma_nguoi_dung !== ownerId));
+      }
+      if (locationIds.length > 0) {
+        setLocations(prev => prev.map(l => locationIds.includes(l.ma_dia_diem) ? { ...l, trang_thai_duyet: true } : l));
       }
     } catch (err) {
-      console.error("Error approving owner:", err);
+      console.error("Error approving request:", err);
     } finally {
-      setApprovingOwnerId(null);
+      setApprovingId(null);
     }
   };
 
-  const handleApproveLocation = async (id: string) => {
-    if (!token || approvingLocationId) return;
-    setApprovingLocationId(id);
-    try {
-      const res = await adminService.approveLocation(token, id);
-      if (res.success) {
-        setLocations((prev) =>
-          prev.map((l) => (l.ma_dia_diem === id ? { ...l, trang_thai_duyet: true } : l))
-        );
-      }
-    } catch (err) {
-      console.error("Error approving location:", err);
-    } finally {
-      setApprovingLocationId(null);
-    }
-  };
-
-  const handleRejectLocation = async (id: string) => {
-    if (!token || rejectingLocationId) return;
-    setRejectingLocationId(id);
-    try {
-      const res = await adminService.rejectLocation(token, id);
-      if (res.success) {
-        setLocations((prev) =>
-          prev.map((l) => (l.ma_dia_diem === id ? { ...l, trang_thai_duyet: false } : l))
-        );
-      }
-    } catch (err) {
-      console.error("Error rejecting location:", err);
-    } finally {
-      setRejectingLocationId(null);
-    }
-  };
-
-  // ── Derived ───────────────────────────────────────────
-
-  const pendingLocations = locations.filter((l) => !l.trang_thai_duyet);
-  const approvedLocations = locations.filter((l) => l.trang_thai_duyet);
-  const filteredLocations =
-    locationFilter === "pending"
-      ? pendingLocations
-      : locationFilter === "approved"
-      ? approvedLocations
-      : locations;
-
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+  // ── Utils ─────────────────────────────────────────────
 
   const getInitials = (name: string) => {
     const p = name.split(" ");
@@ -169,319 +170,215 @@ export default function AdminApprovalsClient() {
       </header>
 
       <div className="p-8">
-        {/* Tabs */}
-        <div className="flex items-center gap-2 mb-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+              <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>hourglass_top</span>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-900">{pendingRequests.length}</p>
+              <p className="text-sm text-slate-400">Yêu cầu đăng ký mới</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+              <span className="material-symbols-outlined text-green-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-900">{approvedRequests.length}</p>
+              <p className="text-sm text-slate-400">Đã duyệt thành công</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 mb-6">
           <button
-            onClick={() => setActiveTab("owners")}
+            onClick={() => setFilter("pending")}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-              activeTab === "owners"
+              filter === "pending"
                 ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
                 : "bg-white text-slate-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">person_check</span>
-            Duyệt chủ sân
-            {pendingOwners.length > 0 && (
+            <span className="material-symbols-outlined text-lg">pending_actions</span>
+            Chờ duyệt
+            {pendingRequests.length > 0 && (
               <span className={`ml-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                activeTab === "owners" ? "bg-white text-red-600" : "bg-red-500 text-white"
+                filter === "pending" ? "bg-white text-red-600" : "bg-red-500 text-white"
               }`}>
-                {pendingOwners.length}
+                {pendingRequests.length}
               </span>
             )}
           </button>
           <button
-            onClick={() => setActiveTab("locations")}
+            onClick={() => setFilter("approved")}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-              activeTab === "locations"
-                ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
+              filter === "approved"
+                ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
                 : "bg-white text-slate-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">location_on</span>
-            Duyệt địa điểm
-            {pendingLocations.length > 0 && (
-              <span className={`ml-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                activeTab === "locations" ? "bg-white text-red-600" : "bg-red-500 text-white"
-              }`}>
-                {pendingLocations.length}
-              </span>
-            )}
+            <span className="material-symbols-outlined text-lg">verified</span>
+            Lịch sử đã duyệt
           </button>
         </div>
 
-        {/* ═══════════════ TAB: OWNERS ═══════════════ */}
-        {activeTab === "owners" && (
-          <div>
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>hourglass_top</span>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{pendingOwners.length}</p>
-                  <p className="text-sm text-slate-400">Chủ sân chờ duyệt</p>
-                </div>
-              </div>
+        {/* Content */}
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-500" />
+          </div>
+        ) : filter === "pending" ? (
+          /* ═══════════════ PENDING LIST ═══════════════ */
+          pendingRequests.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
+              <span className="material-symbols-outlined text-5xl text-slate-300">check_circle</span>
+              <p className="text-lg font-bold text-slate-400 mt-2">Tuyệt vời! Không có yêu cầu nào đang chờ xử lý.</p>
             </div>
-
-            {/* List */}
-            {loadingOwners ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-500" />
-              </div>
-            ) : pendingOwners.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
-                <span className="material-symbols-outlined text-5xl text-slate-300">check_circle</span>
-                <p className="text-lg font-bold text-slate-400 mt-2">Không có chủ sân chờ duyệt</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {pendingOwners.map((owner) => (
-                  <div key={owner.ma_nguoi_dung} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <div className="flex flex-col gap-4">
-                      {/* Top: Avatar + Info + Button */}
-                      <div className="flex items-start gap-4">
-                        {/* Avatar */}
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
-                          {owner.anh_dai_dien ? (
-                            <Image
-                              src={owner.anh_dai_dien}
-                              alt={owner.ho_ten}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">
-                              {getInitials(owner.ho_ten)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-base font-bold text-slate-900">{owner.ho_ten}</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm">
-                            <p className="text-slate-500 flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-sm text-slate-400">mail</span>
-                              {owner.email}
-                            </p>
-                            <p className="text-slate-500 flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-sm text-slate-400">call</span>
-                              {owner.so_dien_thoai || "—"}
-                            </p>
-                            <p className="text-slate-500 flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-sm text-slate-400">calendar_today</span>
-                              Đăng ký: {formatDate(owner.ngay_tao)}
-                            </p>
+          ) : (
+            <div className="space-y-6">
+              {pendingRequests.map((req) => (
+                <div key={req.ownerBasic.ma_nguoi_dung} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row">
+                  
+                  {/* Left: Owner Profile */}
+                  <div className="p-6 md:w-1/2 border-b md:border-b-0 md:border-r border-gray-100 bg-slate-50/50">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden shrink-0">
+                        {req.ownerFull?.anh_dai_dien ? (
+                          <Image src={req.ownerFull.anh_dai_dien} alt={req.ownerBasic.ho_ten} width={56} height={56} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full text-slate-400 flex items-center justify-center text-sm font-bold">
+                            {getInitials(req.ownerBasic.ho_ten)}
                           </div>
-                        </div>
-
-                        {/* Action */}
-                        <button
-                          onClick={() => handleApproveOwner(owner.ma_nguoi_dung)}
-                          disabled={approvingOwnerId === owner.ma_nguoi_dung}
-                          className={`px-5 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-colors flex items-center gap-2 shadow-sm shrink-0 ${
-                            approvingOwnerId === owner.ma_nguoi_dung ? "opacity-50 cursor-wait" : ""
-                          }`}
-                        >
-                          {approvingOwnerId === owner.ma_nguoi_dung ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          ) : (
-                            <span className="material-symbols-outlined text-lg">check</span>
-                          )}
-                          Duyệt
-                        </button>
+                        )}
                       </div>
-
-                      {/* CCCD Images */}
-                      {(owner.anh_cccd_truoc || owner.anh_cccd_sau) && (
-                        <div className="border-t border-gray-100 pt-4">
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Ảnh CCCD</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            {owner.anh_cccd_truoc && (
-                              <a href={owner.anh_cccd_truoc} target="_blank" rel="noreferrer" className="block group">
-                                <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 group-hover:border-blue-300 transition-colors">
-                                  <Image src={owner.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="(max-width: 768px) 50vw, 400px" className="object-contain" />
-                                </div>
-                                <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt trước</p>
-                              </a>
-                            )}
-                            {owner.anh_cccd_sau && (
-                              <a href={owner.anh_cccd_sau} target="_blank" rel="noreferrer" className="block group">
-                                <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 group-hover:border-blue-300 transition-colors">
-                                  <Image src={owner.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="(max-width: 768px) 50vw, 400px" className="object-contain" />
-                                </div>
-                                <p className="text-xs text-center text-slate-400 mt-2 font-medium">Mặt sau</p>
-                              </a>
-                            )}
-                          </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-base font-bold text-slate-900">{req.ownerBasic.ho_ten}</h4>
+                          {req.ownerFull ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">Chủ sân mới</span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">Đã duyệt</span>
+                          )}
                         </div>
+                        <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">mail</span>{req.ownerBasic.email}</p>
+                        <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">call</span>{req.ownerBasic.so_dien_thoai || "—"}</p>
+                      </div>
+                    </div>
+
+                    {req.ownerFull && (req.ownerFull.anh_cccd_truoc || req.ownerFull.anh_cccd_sau) && (
+                      <div className="mt-4">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ảnh căn cước công dân</p>
+                        <div className="flex gap-3">
+                          {req.ownerFull.anh_cccd_truoc && (
+                            <a href={req.ownerFull.anh_cccd_truoc} target="_blank" rel="noreferrer" className="relative w-24 h-16 rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors block">
+                              <Image src={req.ownerFull.anh_cccd_truoc} alt="CCCD mặt trước" fill sizes="96px" className="object-cover" />
+                              <div className="absolute bottom-0 w-full bg-black/50 text-white text-[9px] text-center py-0.5">Mặt trước</div>
+                            </a>
+                          )}
+                          {req.ownerFull.anh_cccd_sau && (
+                            <a href={req.ownerFull.anh_cccd_sau} target="_blank" rel="noreferrer" className="relative w-24 h-16 rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors block">
+                              <Image src={req.ownerFull.anh_cccd_sau} alt="CCCD mặt sau" fill sizes="96px" className="object-cover" />
+                              <div className="absolute bottom-0 w-full bg-black/50 text-white text-[9px] text-center py-0.5">Mặt sau</div>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right: Locations & Actions */}
+                  <div className="p-6 md:w-1/2 flex flex-col justify-between">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Địa điểm đăng ký ({req.locations.length})</p>
+                      {req.locations.length > 0 ? (
+                        <div className="space-y-3 mb-6">
+                          {req.locations.map(loc => (
+                            <div key={loc.ma_dia_diem} className="bg-slate-50 p-3 rounded-xl border border-gray-100 flex gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-xl">location_on</span>
+                              </div>
+                              <div>
+                                <h5 className="text-sm font-bold text-slate-900">{loc.ten_dia_diem}</h5>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{loc.dia_chi}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-400 mb-6 italic">Không có địa điểm nào đang chờ duyệt.</p>
                       )}
                     </div>
+
+                    {/* Action Button */}
+                    <div className="flex justify-end pt-4 border-t border-gray-100 mt-auto">
+                      <button
+                        onClick={() => handleApproveRequest(req.ownerBasic.ma_nguoi_dung, req.locations.map(l => l.ma_dia_diem))}
+                        disabled={approvingId === req.ownerBasic.ma_nguoi_dung}
+                        className={`px-6 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-all shadow-md shadow-green-500/20 flex items-center gap-2 ${
+                          approvingId === req.ownerBasic.ma_nguoi_dung ? "opacity-50 cursor-wait" : ""
+                        }`}
+                      >
+                        {approvingId === req.ownerBasic.ma_nguoi_dung ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        ) : (
+                          <span className="material-symbols-outlined text-lg">fact_check</span>
+                        )}
+                        Duyệt toàn bộ yêu cầu
+                      </button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ═══════════════ TAB: LOCATIONS ═══════════════ */}
-        {activeTab === "locations" && (
-          <div>
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-blue-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{locations.length}</p>
-                  <p className="text-sm text-slate-400">Tổng địa điểm</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-amber-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>hourglass_top</span>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{pendingLocations.length}</p>
-                  <p className="text-sm text-slate-400">Chờ duyệt</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-green-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{approvedLocations.length}</p>
-                  <p className="text-sm text-slate-400">Đã duyệt</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Filter */}
-            <div className="flex items-center gap-2 mb-6">
-              {(["all", "pending", "approved"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setLocationFilter(f)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                    locationFilter === f
-                      ? "bg-slate-900 text-white"
-                      : "bg-white text-slate-600 border border-gray-200 hover:bg-gray-50"
-                  }`}
-                >
-                  {f === "all" ? "Tất cả" : f === "pending" ? "Chờ duyệt" : "Đã duyệt"}
-                </button>
               ))}
             </div>
-
-            {/* List */}
-            {loadingLocations ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-500" />
-              </div>
-            ) : filteredLocations.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
-                <span className="material-symbols-outlined text-5xl text-slate-300">location_off</span>
-                <p className="text-lg font-bold text-slate-400 mt-2">Không có địa điểm nào</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-xs text-slate-400 uppercase tracking-wider bg-gray-50/50">
-                      <th className="px-6 py-3 font-semibold">Địa điểm</th>
-                      <th className="px-6 py-3 font-semibold">Chủ sân</th>
-                      <th className="px-6 py-3 font-semibold">Số sân</th>
-                      <th className="px-6 py-3 font-semibold">Ngày tạo</th>
-                      <th className="px-6 py-3 font-semibold">Trạng thái</th>
-                      <th className="px-6 py-3 font-semibold text-center">Thao tác</th>
+          )
+        ) : (
+          /* ═══════════════ APPROVED LIST ═══════════════ */
+          approvedRequests.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
+              <span className="material-symbols-outlined text-5xl text-slate-300">history</span>
+              <p className="text-lg font-bold text-slate-400 mt-2">Chưa có lịch sử duyệt nào.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-slate-400 uppercase tracking-wider bg-gray-50/50">
+                    <th className="px-6 py-3 font-semibold">Chủ sân</th>
+                    <th className="px-6 py-3 font-semibold">Địa điểm đã duyệt</th>
+                    <th className="px-6 py-3 font-semibold text-center">Tùy chọn</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {approvedRequests.map((req) => (
+                    <tr key={req.ownerBasic.ma_nguoi_dung} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 align-top">
+                        <p className="font-bold text-slate-900">{req.ownerBasic.ho_ten}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{req.ownerBasic.email}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-2">
+                          {req.locations.map(loc => (
+                            <div key={loc.ma_dia_diem} className="text-sm">
+                              <span className="font-semibold text-slate-700">{loc.ten_dia_diem}</span>
+                              <p className="text-xs text-slate-400">{loc.dia_chi}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center align-top">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-600 inline-flex items-center gap-1 border border-green-200">
+                          <span className="material-symbols-outlined text-[12px]">verified</span> Hoàn tất
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {filteredLocations.map((loc) => (
-                      <tr key={loc.ma_dia_diem} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div>
-                            <p className="font-semibold text-slate-900">{loc.ten_dia_diem}</p>
-                            <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                              <span className="material-symbols-outlined text-xs">location_on</span>
-                              {loc.dia_chi}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-slate-700 font-medium">{loc.nguoidung.ho_ten}</p>
-                          <p className="text-xs text-slate-400">{loc.nguoidung.so_dien_thoai || loc.nguoidung.email}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-slate-700 font-semibold">{loc.san.length}</span>
-                        </td>
-                        <td className="px-6 py-4 text-slate-600">{formatDate(loc.ngay_tao)}</td>
-                        <td className="px-6 py-4">
-                          {loc.trang_thai_duyet ? (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-600 inline-flex items-center gap-1">
-                              <span className="material-symbols-outlined text-xs">check</span>Đã duyệt
-                            </span>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 inline-flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />Chờ duyệt
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          {!loc.trang_thai_duyet ? (
-                            !loc.nguoidung.trang_thai ? (
-                              <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-slate-500 inline-flex items-center gap-1" title="Chủ sân chưa được duyệt">
-                                <span className="material-symbols-outlined text-sm">block</span>
-                                Chờ duyệt chủ sân
-                              </span>
-                            ) : (
-                              <div className="flex items-center justify-center gap-2">
-                              <button
-                                onClick={() => handleApproveLocation(loc.ma_dia_diem)}
-                                disabled={approvingLocationId === loc.ma_dia_diem}
-                                className={`px-4 py-2 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors inline-flex items-center gap-1 ${
-                                  approvingLocationId === loc.ma_dia_diem ? "opacity-50 cursor-wait" : ""
-                                }`}
-                              >
-                                {approvingLocationId === loc.ma_dia_diem ? (
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                                ) : (
-                                  <span className="material-symbols-outlined text-sm">check</span>
-                                )}
-                                Duyệt
-                              </button>
-                              <button
-                                onClick={() => handleRejectLocation(loc.ma_dia_diem)}
-                                disabled={rejectingLocationId === loc.ma_dia_diem}
-                                className={`px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors inline-flex items-center gap-1 ${
-                                  rejectingLocationId === loc.ma_dia_diem ? "opacity-50 cursor-wait" : ""
-                                }`}
-                              >
-                                {rejectingLocationId === loc.ma_dia_diem ? (
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                                ) : (
-                                  <span className="material-symbols-outlined text-sm">close</span>
-                                )}
-                                Từ chối
-                              </button>
-                              </div>
-                            )
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
     </div>
