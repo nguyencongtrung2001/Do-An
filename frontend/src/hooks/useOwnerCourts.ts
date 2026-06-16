@@ -53,10 +53,27 @@ export function useOwnerCourts() {
     }
   };
 
+  const deleteCourt = async (courtId: string) => {
+    if (!token) return false;
+    try {
+      const data = await courtService.deleteCourt(token, courtId);
+      if (data.success) {
+        setCourts((prev) => prev.filter((c) => c.ma_san !== courtId));
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("Error deleting court:", error);
+      alert(error.message || "Có lỗi xảy ra khi xóa sân.");
+      return false;
+    }
+  };
+
   return {
     courts,
     loading,
     fetchCourts,
     changeCourtStatus,
+    deleteCourt,
   };
 }

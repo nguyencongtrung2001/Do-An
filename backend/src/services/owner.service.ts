@@ -185,6 +185,27 @@ export class OwnerService {
     return updatedCourt;
   }
 
+  async deleteCourt(userId: string, maSan: string) {
+    const court = await courtRepository.findByIdAndOwnerId(maSan, userId);
+    if (!court) {
+      throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền xóa.");
+    }
+
+    const activeBookings = await prisma.datsanchitiet.count({
+      where: {
+        ma_san: maSan,
+        trang_thai_dat: { in: ['Chờ xử lý', 'Đã xác nhận'] },
+        ngay_dat: { gte: new Date() }
+      }
+    });
+
+    if (activeBookings > 0) {
+      throw new ApiError(400, "Không thể xóa sân đang có đơn đặt chưa hoàn thành.");
+    }
+
+    return courtRepository.update(maSan, { trang_thai_san: "Đã xóa" });
+  }
+
   async getMyBookings(userId: string) {
     return bookingRepository.findByOwnerId(userId);
   }

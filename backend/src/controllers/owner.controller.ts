@@ -105,6 +105,22 @@ export const updateCourt = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
+export const deleteCourt = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const ma_san = req.params.ma_san as string;
+
+    if (!ma_san) {
+      throw new ApiError(400, "Thiếu mã sân");
+    }
+
+    await ownerService.deleteCourt(userId, ma_san);
+    res.json({ success: true, message: "Xóa sân thành công" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getMyBookings = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;

@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiPatch } from './api';
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from './api';
 import type {
   FieldListResponse,
   OwnerCourtsResponse,
@@ -52,6 +52,13 @@ export const courtService = {
       `/owner/update-court-status/${ma_san}`,
       { trang_thai_san },
       token,
+    );
+  },
+
+  async deleteCourt(token: string, ma_san: string): Promise<{ success: boolean; message: string }> {
+    return apiDelete<{ success: boolean; message: string }>(
+      `/owner/delete-court/${ma_san}`,
+      token
     );
   },
 

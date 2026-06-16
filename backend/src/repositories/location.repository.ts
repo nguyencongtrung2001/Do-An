@@ -6,6 +6,11 @@ export class LocationRepository {
       where: { ma_nguoi_dung: userId },
       include: {
         san: {
+          where: {
+            trang_thai_san: {
+              not: "Đã xóa"
+            }
+          },
           include: {
             anhsan: true
           }

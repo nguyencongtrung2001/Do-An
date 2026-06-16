@@ -17,7 +17,7 @@ const SPORT_LABELS: Record<string, string> = {
 };
 
 export default function OwnerCourtsClient() {
-  const { courts, loading, fetchCourts } = useOwnerCourts();
+  const { courts, loading, fetchCourts, deleteCourt } = useOwnerCourts();
   const { token, user } = useAuth();
   
   const canAddCourt = user?.trang_thai === true && user?.diadiem?.[0]?.trang_thai_duyet === true;
@@ -172,9 +172,16 @@ export default function OwnerCourtsClient() {
     document.body.style.overflow = "";
   };
 
-  const handleDelete = () => {
-    // TODO: Call delete API when available
-    handleCloseDeleteModal();
+  const handleDelete = async () => {
+    if (!courtToDelete) return;
+    
+    setSubmitting(true);
+    const success = await deleteCourt(courtToDelete.ma_san);
+    setSubmitting(false);
+    
+    if (success) {
+      handleCloseDeleteModal();
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -564,9 +571,14 @@ export default function OwnerCourtsClient() {
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-red-500/30"
+                disabled={submitting}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-red-500/30 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Xóa sân
+                {submitting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  "Xóa sân"
+                )}
               </button>
             </div>
           </div>
