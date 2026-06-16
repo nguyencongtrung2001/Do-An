@@ -10,7 +10,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen bg-slate-50 font-display text-slate-900 antialiased overflow-x-hidden">
       <OwnerSidebar />
-      <main className="flex-1 min-w-0 ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 min-w-0 ml-0 md:ml-64 flex flex-col min-h-screen pb-20 md:pb-0">
         {/* Child Pages Content */}
         {children}
       </main>

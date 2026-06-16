@@ -62,9 +62,10 @@ export function useOwnerCourts() {
         return true;
       }
       return false;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting court:", error);
-      alert(error.message || "Có lỗi xảy ra khi xóa sân.");
+      const msg = error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa sân.";
+      alert(msg);
       return false;
     }
   };

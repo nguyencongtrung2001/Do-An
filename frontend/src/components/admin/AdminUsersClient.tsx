@@ -162,12 +162,12 @@ export default function AdminUsersClient() {
   return (
     <div className="flex flex-col min-h-screen pb-10">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4">
-        <h2 className="text-xl font-bold text-slate-900">Quản lý người dùng</h2>
-        <p className="text-sm text-slate-400">Quản lý tài khoản Chủ sân và Khách hàng</p>
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4">
+        <h2 className="text-lg md:text-xl font-bold text-slate-900">Quản lý người dùng</h2>
+        <p className="text-xs md:text-sm text-slate-400">Quản lý tài khoản Chủ sân và Khách hàng</p>
       </header>
 
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
@@ -209,9 +209,9 @@ export default function AdminUsersClient() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex-1 min-w-[280px]">
+        <div className="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm mb-6">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+            <div className="relative w-full md:flex-1 md:min-w-[280px]">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
               <input
                 type="text"
@@ -221,11 +221,11 @@ export default function AdminUsersClient() {
                 className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
               />
             </div>
-            <div className="relative">
+            <div className="relative w-full md:w-auto">
               <select
                 value={roleFilter}
                 onChange={handleRoleChange}
-                className="appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
+                className="w-full md:w-auto appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
               >
                 <option value="all">Tất cả vai trò</option>
                 <option value="owner">Chủ sân</option>
@@ -234,11 +234,11 @@ export default function AdminUsersClient() {
               </select>
               <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
             </div>
-            <div className="relative">
+            <div className="relative w-full md:w-auto">
               <select
                 value={statusFilter}
                 onChange={handleStatusChange}
-                className="appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
+                className="w-full md:w-auto appearance-none pl-4 pr-10 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="active">Hoạt động</option>
@@ -399,7 +399,7 @@ export default function AdminUsersClient() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-xl p-4">
                   <p className="text-xs text-slate-400">Mã người dùng</p>
                   <p className="text-sm font-bold text-slate-900 mt-1">{selectedUser.ma_nguoi_dung}</p>

@@ -121,12 +121,12 @@ export default function OwnerTopbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex items-center justify-between gap-4">
       <div>
-        <h2 className="text-xl font-bold text-slate-900">Dashboard</h2>
-        <p className="text-sm text-slate-400">Chào mừng quay lại, {user?.ho_ten || "Chủ sân"}!</p>
+        <h2 className="text-lg md:text-xl font-bold text-slate-900">Dashboard</h2>
+        <p className="text-xs md:text-sm text-slate-400">Chào mừng quay lại, {user?.ho_ten || "Chủ sân"}!</p>
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 sm:gap-6">
         {/* Notification Bell + Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -144,7 +144,7 @@ export default function OwnerTopbar() {
 
           {/* Notification Dropdown */}
           {showNotifications && (
-            <div className="absolute right-0 top-[calc(100%+8px)] w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-[-60px] sm:right-0 top-[calc(100%+8px)] w-[320px] sm:w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Header */}
               <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-slate-50 to-white">
                 <div className="flex items-center gap-2">

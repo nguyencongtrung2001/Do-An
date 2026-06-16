@@ -202,10 +202,10 @@ export default function OwnerCourtsClient() {
       `}</style>
 
       {/* ── Top Bar ── */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Quản lý sân</h2>
-          <p className="text-sm text-slate-400">Thêm mới, chỉnh sửa thông tin và giá cả các sân</p>
+          <h2 className="text-lg md:text-xl font-bold text-slate-900">Quản lý sân</h2>
+          <p className="text-xs md:text-sm text-slate-400">Thêm mới, chỉnh sửa thông tin và giá cả các sân</p>
         </div>
         <button
           onClick={() => {
@@ -216,7 +216,7 @@ export default function OwnerCourtsClient() {
             handleOpenModal("add");
           }}
           disabled={!canAddCourt}
-          className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 ${
+          className={`w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 ${
             canAddCourt 
               ? "bg-primary hover:bg-red-600 text-white shadow-lg shadow-primary/30 hover:shadow-xl active:scale-[0.98]" 
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -230,7 +230,7 @@ export default function OwnerCourtsClient() {
 
       {/* Banner cảnh báo nếu chưa được duyệt */}
       {!canAddCourt && (
-        <div className="px-8 pt-5">
+        <div className="px-4 md:px-8 pt-4 md:pt-5">
           <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-4 py-3 text-sm font-medium">
             <span className="material-symbols-outlined text-amber-500">hourglass_top</span>
             {!isAccountApproved
@@ -243,8 +243,8 @@ export default function OwnerCourtsClient() {
       )}
 
       {/* ── Filter Bar ── */}
-      <div className="px-8 pt-5 pb-2 flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 flex-1 min-w-[180px] max-w-xs focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+      <div className="px-4 md:px-8 pt-4 md:pt-5 pb-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 w-full sm:flex-1 sm:max-w-xs focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 transition-all">
           <span className="material-symbols-outlined text-slate-400 text-xl">search</span>
           <input
             type="text"
@@ -255,7 +255,7 @@ export default function OwnerCourtsClient() {
           />
         </div>
         <select
-          className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 font-medium outline-none cursor-pointer focus:border-primary transition-all"
+          className="w-full sm:w-auto bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 font-medium outline-none cursor-pointer focus:border-primary transition-all"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value as CourtType)}
         >
@@ -265,13 +265,13 @@ export default function OwnerCourtsClient() {
           <option value="pickleball">🏓 Pickleball</option>
           <option value="bong-ro">🏀 Bóng rổ</option>
         </select>
-        <p className="ml-auto text-xs text-slate-400 font-medium">
+        <p className="w-full sm:w-auto sm:ml-auto text-xs text-slate-400 font-medium text-center sm:text-right">
           {filteredCourts.length} sân
         </p>
       </div>
 
       {/* ── Court Cards Grid ── */}
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {loading ? (
             <div className="col-span-full py-20 flex justify-center">

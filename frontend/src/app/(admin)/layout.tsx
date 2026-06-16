@@ -14,7 +14,7 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-slate-50 font-display text-slate-900 antialiased overflow-x-hidden">
       <AdminSidebar />
-      <main className="flex-1 min-w-0 ml-64 bg-slate-50">
+      <main className="flex-1 min-w-0 ml-0 md:ml-64 bg-slate-50 pb-20 md:pb-0">
         {children}
       </main>
     </div>

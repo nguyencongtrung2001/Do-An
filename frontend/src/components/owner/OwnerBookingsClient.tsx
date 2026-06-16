@@ -125,10 +125,10 @@ export default function OwnerBookingsClient() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* ===== Top Bar ===== */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Lịch đặt sân</h2>
-          <p className="text-sm text-slate-400">Theo dõi danh sách đặt sân theo thời gian thực</p>
+          <h2 className="text-lg md:text-xl font-bold text-slate-900">Lịch đặt sân</h2>
+          <p className="text-xs md:text-sm text-slate-400">Theo dõi danh sách đặt sân theo thời gian thực</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -153,7 +153,7 @@ export default function OwnerBookingsClient() {
       </header>
 
       {/* ===== TIMELINE ===== */}
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
             {/* Header row: 6:00, 6:30, 7:00, 7:30, ... */}
@@ -251,7 +251,7 @@ export default function OwnerBookingsClient() {
       </div>
 
       {/* ===== DANH SÁCH ĐẶT CHỖ ===== */}
-      <div className="px-6 pb-6">
+      <div className="px-4 md:px-6 pb-4 md:pb-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
             <div className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export default function OwnerBookingsClient() {
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     {isPending && (
                       <div className="flex gap-2">
                         <button

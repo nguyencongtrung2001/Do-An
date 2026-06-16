@@ -208,12 +208,12 @@ export default function AdminFinanceClient() {
     <div className="flex flex-col min-h-screen pb-10">
       
       {/* Top Bar */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Thống kê & Tài chính</h2>
-          <p className="text-sm text-slate-400">Báo cáo doanh thu, lợi nhuận và giao dịch hệ thống</p>
+          <h2 className="text-lg md:text-xl font-bold text-slate-900">Thống kê & Tài chính</h2>
+          <p className="text-xs md:text-sm text-slate-400">Báo cáo doanh thu, lợi nhuận và giao dịch hệ thống</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between w-full md:w-auto gap-4">
           <div className="relative">
             <button aria-label="Thông báo" className="relative w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
               <span className="material-symbols-outlined text-slate-600 text-xl">notifications</span>
@@ -227,18 +227,18 @@ export default function AdminFinanceClient() {
       </header>
 
       {/* Content */}
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         
         {/* Filters & Export */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">calendar_month</span>
               <select 
                 title="Month filter"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="appearance-none pl-9 pr-10 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer transition-all"
+                className="w-full sm:w-auto appearance-none pl-9 pr-10 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer transition-all"
               >
                 <option value="03/2026">Tháng 3/2026</option>
                 <option value="02/2026">Tháng 2/2026</option>
@@ -247,13 +247,13 @@ export default function AdminFinanceClient() {
               <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
             </div>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">location_on</span>
               <select 
                 title="Region filter"
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
-                className="appearance-none pl-9 pr-10 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer transition-all"
+                className="w-full sm:w-auto appearance-none pl-9 pr-10 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none bg-white cursor-pointer transition-all"
               >
                 <option value="all">Tất cả khu vực</option>
                 <option value="Thanh Khê">Thanh Khê</option>

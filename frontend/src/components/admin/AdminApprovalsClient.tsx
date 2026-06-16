@@ -194,12 +194,14 @@ export default function AdminApprovalsClient() {
   return (
     <div className="flex flex-col min-h-screen pb-10">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4">
-        <h2 className="text-xl font-bold text-slate-900">Kiểm duyệt</h2>
-        <p className="text-sm text-slate-400">Duyệt chủ sân và địa điểm mới</p>
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg md:text-xl font-bold text-slate-900">Kiểm duyệt</h2>
+          <p className="text-xs md:text-sm text-slate-400">Duyệt chủ sân và địa điểm mới</p>
+        </div>
       </header>
 
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
@@ -223,10 +225,10 @@ export default function AdminApprovalsClient() {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
           <button
             onClick={() => setFilter("pending")}
-            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               filter === "pending"
                 ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
                 : "bg-white text-slate-600 border border-gray-200 hover:bg-gray-50"
@@ -244,7 +246,7 @@ export default function AdminApprovalsClient() {
           </button>
           <button
             onClick={() => setFilter("approved")}
-            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
               filter === "approved"
                 ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
                 : "bg-white text-slate-600 border border-gray-200 hover:bg-gray-50"
@@ -343,14 +345,14 @@ export default function AdminApprovalsClient() {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex justify-end pt-4 border-t border-gray-100 mt-auto gap-3">
+                    <div className="flex flex-col sm:flex-row justify-end pt-4 border-t border-gray-100 mt-auto gap-3">
                       <button
                         onClick={() => {
                           setRejectingReq({ ownerId: req.ownerBasic.ma_nguoi_dung, locationIds: req.locations.map(l => l.ma_dia_diem) });
                           setRejectReason("");
                         }}
                         disabled={approvingId === req.ownerBasic.ma_nguoi_dung}
-                        className="px-6 py-2.5 text-sm font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto justify-center px-6 py-2.5 text-sm font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2"
                       >
                         <span className="material-symbols-outlined text-lg">cancel</span>
                         Từ chối
@@ -358,7 +360,7 @@ export default function AdminApprovalsClient() {
                       <button
                         onClick={() => handleApproveRequest(req.ownerBasic.ma_nguoi_dung, req.locations.map(l => l.ma_dia_diem))}
                         disabled={approvingId === req.ownerBasic.ma_nguoi_dung}
-                        className={`px-6 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-all shadow-md shadow-green-500/20 flex items-center gap-2 ${
+                        className={`w-full sm:w-auto justify-center px-6 py-2.5 text-sm font-bold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-all shadow-md shadow-green-500/20 flex items-center gap-2 ${
                           approvingId === req.ownerBasic.ma_nguoi_dung ? "opacity-50 cursor-wait" : ""
                         }`}
                       >

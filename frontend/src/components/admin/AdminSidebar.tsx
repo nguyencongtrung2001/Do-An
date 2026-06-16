@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { user, isMounted, logout } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   const navGroups = [
     {
@@ -18,24 +20,46 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-        <div className="w-10 h-10 rounded-xl bg-background-dark flex items-center justify-center">
-          <span
-            className="material-symbols-outlined text-primary text-xl!"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            location_on
-          </span>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105"
+      >
+        <span className="material-symbols-outlined">menu</span>
+      </button>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <aside className={`fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+        {/* Logo */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-background-dark flex items-center justify-center">
+              <span
+                className="material-symbols-outlined text-primary text-xl!"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                location_on
+              </span>
+            </div>
+            <div>
+              <h1 className="text-sm font-bold tracking-tight">SportLink</h1>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
+                System Admin
+              </p>
+            </div>
+          </div>
+          <button className="md:hidden" onClick={() => setIsOpen(false)}>
+            <span className="material-symbols-outlined text-slate-400 text-xl">close</span>
+          </button>
         </div>
-        <div>
-          <h1 className="text-sm font-bold tracking-tight">SportLink</h1>
-          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
-            System Admin
-          </p>
-        </div>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -103,5 +127,6 @@ export default function AdminSidebar() {
         )}
       </div>
     </aside>
+    </>
   );
 }
