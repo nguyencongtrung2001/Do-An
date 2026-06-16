@@ -104,8 +104,8 @@ export class AdminService {
         return locationRepository.approve(id);
     }
 
-    async rejectLocation(id: string) {
-        return locationRepository.reject(id);
+    async rejectLocation(id: string, mo_ta?: string) {
+        return locationRepository.reject(id, mo_ta);
     }
 }
 

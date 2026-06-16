@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminService } from "@/services/admin.service";
+import { toast } from "react-hot-toast";
 
 interface PendingOwner {
   ma_nguoi_dung: string;
@@ -55,6 +56,11 @@ export default function AdminApprovalsClient() {
   // UI states
   const [filter, setFilter] = useState<"pending" | "approved">("pending");
   const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  // Reject Modal State
+  const [rejectingReq, setRejectingReq] = useState<{ ownerId: string, locationIds: string[] } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
 
   // ── Fetch ─────────────────────────────────────────────
   useEffect(() => {
@@ -149,6 +155,30 @@ export default function AdminApprovalsClient() {
       console.error("Error approving request:", err);
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!token || !rejectingReq) return;
+    setRejecting(true);
+    try {
+      const promises = rejectingReq.locationIds.map(locId => 
+        adminService.rejectLocation(token, locId, rejectReason)
+      );
+      await Promise.all(promises);
+
+      // Remove from pending lists
+      setPendingOwners(prev => prev.filter(o => o.ma_nguoi_dung !== rejectingReq.ownerId));
+      setLocations(prev => prev.filter(l => !rejectingReq.locationIds.includes(l.ma_dia_diem)));
+      
+      toast.success("Đã từ chối yêu cầu đăng ký");
+      setRejectingReq(null);
+      setRejectReason("");
+    } catch (err) {
+      console.error("Lỗi từ chối:", err);
+      toast.error("Có lỗi xảy ra khi từ chối");
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -313,7 +343,18 @@ export default function AdminApprovalsClient() {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex justify-end pt-4 border-t border-gray-100 mt-auto">
+                    <div className="flex justify-end pt-4 border-t border-gray-100 mt-auto gap-3">
+                      <button
+                        onClick={() => {
+                          setRejectingReq({ ownerId: req.ownerBasic.ma_nguoi_dung, locationIds: req.locations.map(l => l.ma_dia_diem) });
+                          setRejectReason("");
+                        }}
+                        disabled={approvingId === req.ownerBasic.ma_nguoi_dung}
+                        className="px-6 py-2.5 text-sm font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-lg">cancel</span>
+                        Từ chối
+                      </button>
                       <button
                         onClick={() => handleApproveRequest(req.ownerBasic.ma_nguoi_dung, req.locations.map(l => l.ma_dia_diem))}
                         disabled={approvingId === req.ownerBasic.ma_nguoi_dung}
@@ -381,6 +422,45 @@ export default function AdminApprovalsClient() {
           )
         )}
       </div>
+
+      {/* Reject Modal */}
+      {rejectingReq && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden fade-in">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-500">cancel</span>
+                Từ chối yêu cầu
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">Vui lòng nhập lý do từ chối để chủ sân có thể điều chỉnh.</p>
+            </div>
+            <div className="p-6">
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Ví dụ: Địa điểm chưa cung cấp đủ hình ảnh, giấy tờ không hợp lệ..."
+                className="w-full h-32 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none resize-none transition-all text-sm"
+              ></textarea>
+            </div>
+            <div className="p-6 pt-0 flex justify-end gap-3 bg-gray-50/50">
+              <button
+                onClick={() => setRejectingReq(null)}
+                className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-gray-100 transition-colors text-sm"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleRejectSubmit}
+                disabled={rejecting || !rejectReason.trim()}
+                className="px-5 py-2.5 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-red-500/20 text-sm"
+              >
+                {rejecting && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                Xác nhận từ chối
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

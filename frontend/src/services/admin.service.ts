@@ -46,7 +46,7 @@ export const adminService = {
     return apiPut<ApiResponse>(`/admin/locations/${id}/approve`, {}, token);
   },
 
-  async rejectLocation(token: string, id: string): Promise<ApiResponse> {
-    return apiPut<ApiResponse>(`/admin/locations/${id}/reject`, {}, token);
+  async rejectLocation(token: string, id: string, reason?: string): Promise<ApiResponse> {
+    return apiPut<ApiResponse>(`/admin/locations/${id}/reject`, { mo_ta: reason }, token);
   },
 };

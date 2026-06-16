@@ -72,7 +72,8 @@ export const approveLocation = async (req: Request<{ id: string }>, res: Respons
 
 export const rejectLocation = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    const location = await adminService.rejectLocation(req.params.id);
+    const { mo_ta } = req.body || {};
+    const location = await adminService.rejectLocation(req.params.id, mo_ta);
     res.status(200).json({ success: true, message: 'Đã từ chối địa điểm', location });
   } catch (err) { next(err); }
 };

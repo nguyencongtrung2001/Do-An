@@ -83,10 +83,13 @@ export class LocationRepository {
     });
   }
 
-  async reject(id: string) {
+  async reject(id: string, mo_ta?: string) {
     return prisma.diadiem.update({
       where: { ma_dia_diem: id },
-      data: { trang_thai_duyet: false }
+      data: { 
+        trang_thai_duyet: false,
+        ...(mo_ta ? { mo_ta } : {})
+      }
     });
   }
 
