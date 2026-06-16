@@ -74,11 +74,21 @@ export class OwnerService {
   async addCourt(userId: string, data: any, images: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
+    // Check if owner is approved
+    const user = await userRepository.findById(userId);
+    if (!user || !user.trang_thai) {
+      throw new ApiError(403, "Tài khoản của bạn chưa được duyệt, không thể thêm sân.");
+    }
+
     // 1. Find owner's location
     const location = await locationRepository.findFirstByOwnerId(userId);
 
     if (!location) {
       throw new ApiError(404, "Không tìm thấy địa điểm của bạn. Vui lòng liên hệ admin.");
+    }
+    
+    if (!location.trang_thai_duyet) {
+      throw new ApiError(403, "Địa điểm của bạn chưa được duyệt, không thể thêm sân.");
     }
 
     // 2. Generate next court ID

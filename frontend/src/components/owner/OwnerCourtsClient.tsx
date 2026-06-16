@@ -20,8 +20,8 @@ export default function OwnerCourtsClient() {
   const { courts, loading, fetchCourts, deleteCourt } = useOwnerCourts();
   const { token, user } = useAuth();
   
-  // Chỉ cần trạng thái tài khoản chủ sân được duyệt là có thể thêm sân
-  const canAddCourt = user?.trang_thai === true;
+  // Trạng thái tài khoản chủ sân và địa điểm phải được duyệt thì mới có thể thêm sân
+  const canAddCourt = user?.trang_thai === true && user?.diadiem?.[0]?.trang_thai_duyet === true;
 
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<CourtType>("all");

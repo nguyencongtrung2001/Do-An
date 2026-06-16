@@ -11,7 +11,8 @@ export class UserRepository {
     return prisma.nguoidung.findFirst({
       where: {
         OR: [{ email }, { so_dien_thoai }]
-      }
+      },
+      include: { diadiem: true }
     });
   }
 
