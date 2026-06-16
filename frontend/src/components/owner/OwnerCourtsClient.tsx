@@ -18,7 +18,10 @@ const SPORT_LABELS: Record<string, string> = {
 
 export default function OwnerCourtsClient() {
   const { courts, loading, fetchCourts } = useOwnerCourts();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  
+  const canAddCourt = user?.trang_thai === true && user?.diadiem?.[0]?.trang_thai_duyet === true;
+
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<CourtType>("all");
   const [submitting, setSubmitting] = useState(false);
@@ -197,8 +200,20 @@ export default function OwnerCourtsClient() {
           <p className="text-sm text-slate-400">Thêm mới, chỉnh sửa thông tin và giá cả các sân</p>
         </div>
         <button
-          onClick={() => handleOpenModal("add")}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-red-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-lg shadow-primary/30 hover:shadow-xl active:scale-[0.98]"
+          onClick={() => {
+            if (!canAddCourt) {
+              alert("Bạn chưa thể thêm sân mới. Vui lòng chờ Admin duyệt tài khoản và địa điểm của bạn.");
+              return;
+            }
+            handleOpenModal("add");
+          }}
+          disabled={!canAddCourt}
+          className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 ${
+            canAddCourt 
+              ? "bg-primary hover:bg-red-600 text-white shadow-lg shadow-primary/30 hover:shadow-xl active:scale-[0.98]" 
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+          title={!canAddCourt ? "Cần được Admin duyệt để thêm sân" : ""}
         >
           <span className="material-symbols-outlined text-lg">add</span>
           Thêm sân mới

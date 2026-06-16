@@ -11,6 +11,8 @@ export interface UserData {
   vai_tro: string;
   anh_dai_dien: string | null;
   so_vi_du?: number;
+  trang_thai?: boolean;
+  diadiem?: Array<{ trang_thai_duyet: boolean | null }>;
 }
 
 interface AuthContextType {

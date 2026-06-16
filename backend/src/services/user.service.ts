@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { generateToken } from '../utils/jwt.js';
 import { userRepository } from '../repositories/user.repository.js';
 import cloudinary from '../config/cloudinary.config.js';
+import prisma from '../config/prisma.js';
 
 export class UserService {
   async createUser(data: User.UserClient) {
@@ -72,7 +73,10 @@ export class UserService {
   }
 
   async getProfile(userId: string) {
-    const user = await userRepository.findById(userId);
+    const user = await prisma.nguoidung.findUnique({
+      where: { ma_nguoi_dung: userId },
+      include: { diadiem: true }
+    });
     if (!user) {
       throw new ApiError(404, "Không tìm thấy người dùng");
     }
@@ -87,6 +91,8 @@ export class UserService {
       anh_dai_dien: user.anh_dai_dien,
       so_vi_du: user.so_vi_du,
       ngay_tao: user.ngay_tao,
+      trang_thai: user.trang_thai,
+      diadiem: user.diadiem,
     };
   }
 
