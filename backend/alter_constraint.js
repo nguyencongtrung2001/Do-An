@@ -7,9 +7,8 @@ const client = new Client({
 
 async function run() {
   await client.connect();
-  await client.query(`ALTER TABLE san DROP CONSTRAINT san_trang_thai_san_check;`);
-  await client.query(`ALTER TABLE san ADD CONSTRAINT san_trang_thai_san_check CHECK (((trang_thai_san)::text = ANY ((ARRAY['Đang hoạt động'::character varying, 'Đã khóa'::character varying, 'Đang bảo trì'::character varying, 'Đã xóa'::character varying])::text[])));`);
-  console.log("Constraint updated successfully.");
+  const res = await client.query(`SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'giaodich_trang_thai_giao_dich_check';`);
+  console.log("Constraint:", res.rows[0]);
   await client.end();
 }
 

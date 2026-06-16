@@ -67,7 +67,7 @@ export const initWalletTransferCron = () => {
               ma_dat_san: booking.ma_dat_san,
               ma_nguoi_dung: ownerId,
               so_tien_tt: tongTienCoc,
-              trang_thai_giao_dich: "Hoàn thành",
+              trang_thai_giao_dich: "Thành công",
               noi_dung_thanh_toan: "Chuyển tiền cọc cho chủ sân",
             }
           });

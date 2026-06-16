@@ -9,6 +9,12 @@ export interface UserProfile {
   anh_dai_dien: string | null;
   so_vi_du: number;
   ngay_tao: string | null;
+  trang_thai?: boolean;
+  diadiem?: Array<{
+    ma_dia_diem: string;
+    ten_dia_diem: string;
+    trang_thai_duyet: boolean | null;
+  }>;
 }
 
 interface ProfileResponse {

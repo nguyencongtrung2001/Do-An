@@ -6,22 +6,22 @@ import { useOwnerCourts } from "@/hooks/useOwnerCourts";
 import { courtService } from "@/services/court.service";
 import type { OwnerCourt } from "@/types/court.types";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOwnerApprovalStatus } from "@/hooks/useOwnerApprovalStatus";
 
-type CourtType = "all" | "bong-da" | "cau-long" | "pickleball" | "bong-ro";
+type CourtType = "all" | "bong-da" | "cau-long" | "tennis" | "pickleball" | "bong-ro";
 
 const SPORT_LABELS: Record<string, string> = {
   "bong-da": "⚽ Bóng đá",
   "cau-long": "🏸 Cầu lông",
   "pickleball": "🏓 Pickleball",
   "bong-ro": "🏀 Bóng rổ",
+  "tennis": "🎾 Tennis",
 };
 
 export default function OwnerCourtsClient() {
   const { courts, loading, fetchCourts, deleteCourt } = useOwnerCourts();
-  const { token, user } = useAuth();
-  
-  // Trạng thái tài khoản chủ sân và địa điểm phải được duyệt thì mới có thể thêm sân
-  const canAddCourt = user?.trang_thai === true && user?.diadiem?.[0]?.trang_thai_duyet === true;
+  const { token } = useAuth();
+  const { canAddCourt, isAccountApproved, isLocationApproved } = useOwnerApprovalStatus();
 
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<CourtType>("all");
@@ -227,6 +227,20 @@ export default function OwnerCourtsClient() {
           Thêm sân mới
         </button>
       </header>
+
+      {/* Banner cảnh báo nếu chưa được duyệt */}
+      {!canAddCourt && (
+        <div className="px-8 pt-5">
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-4 py-3 text-sm font-medium">
+            <span className="material-symbols-outlined text-amber-500">hourglass_top</span>
+            {!isAccountApproved
+              ? "Tài khoản của bạn đang chờ Admin duyệt. Bạn sẽ có thể thêm sân sau khi được duyệt."
+              : !isLocationApproved
+              ? "Địa điểm của bạn đang chờ Admin duyệt. Bạn sẽ có thể thêm sân sau khi địa điểm được duyệt."
+              : null}
+          </div>
+        </div>
+      )}
 
       {/* ── Filter Bar ── */}
       <div className="px-8 pt-5 pb-2 flex items-center gap-3 flex-wrap">
