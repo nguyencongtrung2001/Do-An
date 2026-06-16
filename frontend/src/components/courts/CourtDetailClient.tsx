@@ -54,26 +54,20 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   const grouped: GroupedSlot[] = [];
   let currentGroup: GroupedSlot | null = null;
 
-  const addThirtyMin = (time: string): string => {
-    const [h, m] = time.split(':').map(Number);
-    const d = new Date(0, 0, 0, h, m + 30);
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  };
-
   for (const marker of sorted) {
     if (!currentGroup) {
-      // Marker đầu tiên — giờ kết thúc = marker + 30 phút
+      // Marker đầu tiên — giờ kết thúc tạm = chính gio_bat_dau của marker này
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), 
+        gio_ket_thuc: marker.gio_bat_dau, 
         slots: [marker],
-        gia_thue: marker.gia_thue 
+        gia_thue: 0 
       };
     } else {
       // Kiểm tra marker này có liên tiếp 30p sau marker trước không
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
+        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -85,19 +79,19 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Marker liên tiếp — cập nhật giờ kết thúc = marker mới + 30 phút
-        currentGroup.gio_ket_thuc = addThirtyMin(marker.gio_bat_dau);
+        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
+        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.slots.push(marker);
-        // Cập nhật tổng giá thuê = tất cả khung chơi × giá 30p
-        currentGroup.gia_thue = currentGroup.slots.length * currentGroup.slots[0].gia_thue;
+        // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
+        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
       } else {
         // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), 
+          gio_ket_thuc: marker.gio_bat_dau, 
           slots: [marker],
-          gia_thue: marker.gia_thue
+          gia_thue: 0
         };
       }
     }
@@ -201,9 +195,10 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
       if (paymentMethod === "cash" || paymentMethod === "wallet") {
         setPaymentStatus("Đang xử lý đơn hàng...");
         
-        // Convert markers to 30-min slots for backend
+        // Convert markers back to 30-min slots for backend, exclude the boundary marker
         const slotsForBackend = groupedSlots.flatMap(group => {
-          return group.slots.map(marker => {
+          const playableSlots = group.slots.slice(0, -1);
+          return playableSlots.map(marker => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;

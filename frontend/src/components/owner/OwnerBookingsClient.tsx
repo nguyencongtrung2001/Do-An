@@ -205,7 +205,7 @@ export default function OwnerBookingsClient() {
                       const startDate = new Date(booking.gio_bat_dau);
                       const endDate = new Date(booking.gio_ket_thuc);
                       const startMinutes = (startDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + startDate.getUTCMinutes();
-                      const endMinutes = (endDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + endDate.getUTCMinutes() + 30;
+                      const endMinutes = (endDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + endDate.getUTCMinutes();
                       const totalMinutes = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
 
                       const leftPct = (startMinutes / totalMinutes) * 100;

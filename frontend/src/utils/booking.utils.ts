@@ -22,10 +22,10 @@ export function formatTimeFromISO(isoString: string): string {
 /**
  * Gộp các mốc chọn giờ (markers) thành các nhóm liên tiếp.
  * 
- * MÔ HÌNH: Mỗi marker đại diện cho 1 khung chơi 30 phút.
- * Ví dụ: chọn 06:00, 06:30, 07:00, 07:30
+ * MÔ HÌNH: Marker cuối cùng trong nhóm đóng vai trò là MỐC KẾT THÚC,
+ * không tính là khung chơi. Ví dụ: chọn 06:00, 06:30, 07:00, 07:30, 08:00
  * → gio_bat_dau = 06:00, gio_ket_thuc = 08:00, chơi 2 tiếng (4 khung × 30p).
- * Số khung chơi thực tế = slots.length.
+ * Số khung chơi thực tế = slots.length - 1.
  */
 export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   if (markers.length === 0) return [];
@@ -39,24 +39,18 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   const grouped: GroupedSlot[] = [];
   let currentGroup: GroupedSlot | null = null;
 
-  const addThirtyMin = (time: string): string => {
-    const [h, m] = time.split(':').map(Number);
-    const d = new Date(0, 0, 0, h, m + 30);
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  };
-
   for (const marker of sorted) {
     if (!currentGroup) {
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), 
+        gio_ket_thuc: marker.gio_bat_dau, 
         slots: [marker],
-        gia_thue: marker.gia_thue 
+        gia_thue: 0 
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
+        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -68,19 +62,19 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Marker liên tiếp — cập nhật giờ kết thúc = marker mới + 30 phút
-        currentGroup.gio_ket_thuc = addThirtyMin(marker.gio_bat_dau);
+        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
+        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.slots.push(marker);
-        // Cập nhật tổng giá thuê = tất cả khung chơi × giá 30p
-        currentGroup.gia_thue = currentGroup.slots.length * currentGroup.slots[0].gia_thue;
+        // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
+        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
       } else {
         // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: addThirtyMin(marker.gio_bat_dau), 
+          gio_ket_thuc: marker.gio_bat_dau, 
           slots: [marker],
-          gia_thue: marker.gia_thue
+          gia_thue: 0
         };
       }
     }
