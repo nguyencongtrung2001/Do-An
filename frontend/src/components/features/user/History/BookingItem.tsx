@@ -120,7 +120,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
             <div className="flex items-center gap-3 bg-emerald-50 px-4 py-3 rounded-2xl border border-emerald-100/50">
               <Wallet className="w-4 h-4 text-emerald-600" />
               <div className="flex flex-col">
-                <span className="text-[9px] font-black text-emerald-600/60 uppercase tracking-widest">ĐÃ ĐẶT CỌC</span>
+                <span className="text-[9px] font-black text-emerald-600/60 uppercase tracking-widest">TIỀN CỌC</span>
                 <span className="text-xs font-black text-emerald-700">{formatVND(tienCoc)}</span>
               </div>
             </div>
