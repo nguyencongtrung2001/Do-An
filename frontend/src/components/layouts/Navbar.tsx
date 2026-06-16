@@ -10,6 +10,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -112,8 +113,62 @@ export default function Navbar() {
           ) : (
             <div className="h-10 w-40"></div>
           )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            className="md:hidden flex items-center justify-center p-2 text-slate-700 dark:text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <span className="material-symbols-outlined text-3xl">
+              {isMobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <nav className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 shadow-lg py-4 px-6 flex flex-col gap-4">
+          <ul className="flex flex-col gap-4">
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href));
+              return (
+                <li key={link.href}>
+                  <Link 
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block text-base font-bold transition-colors ${
+                      isActive ? "text-primary" : "text-slate-600 dark:text-slate-300 hover:text-primary"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          
+          {/* Mobile Auth Links (if not authenticated) */}
+          {mounted && !isAuthenticated && (
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <Link 
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-slate-600 dark:text-slate-300 text-center text-sm font-bold px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Đăng nhập
+              </Link>
+              <Link 
+                href="/login?tab=signup"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-center rounded-xl h-11 px-6 bg-primary hover:bg-primary/90 text-white text-sm font-bold transition-all shadow-lg shadow-primary/30"
+              >
+                Đăng ký
+              </Link>
+            </div>
+          )}
+        </nav>
+      )}
     </header>
   );
 }
