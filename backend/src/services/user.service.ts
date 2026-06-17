@@ -7,11 +7,11 @@ import cloudinary from '../config/cloudinary.config.js';
 import prisma from '../config/prisma.js';
 
 export class UserService {
-  async createUser(data: User.UserClient) {
+  async DangKyNguoiDung(data: User.UserClient) {
     const { ho_ten, email, so_dien_thoai, mat_khau } = data;
 
     
-    const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
+    const existingUser = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
 
     if (existingUser) {
       if (existingUser.email === email) {
@@ -23,14 +23,14 @@ export class UserService {
     }
 
     
-    const newId = await userRepository.generateNextUserId();
+    const newId = await userRepository.TaoMaNguoiDungTiepTheo();
 
     
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(mat_khau, salt);
 
     
-    const user = await userRepository.create({
+    const user = await userRepository.TaoMoi({
       ma_nguoi_dung: newId,
       ho_ten,
       email,
@@ -43,11 +43,11 @@ export class UserService {
     return { user, token };
   }
 
-  async loginUser(data: User.LoginUserClient) {
+  async DangNhapNguoiDung(data: User.LoginUserClient) {
     const { so_dien_thoai, email, mat_khau } = data;
     console.log("Login attempt for email:", email);
 
-    const user = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
+    const user = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
 
     if (!user) {
       throw new ApiError(404, "User not found");
@@ -72,7 +72,7 @@ export class UserService {
     return { user, token };
   }
 
-  async getProfile(userId: string) {
+  async LayThongTinCaNhan(userId: string) {
     const user = await prisma.nguoidung.findUnique({
       where: { ma_nguoi_dung: userId },
       include: { diadiem: true }
@@ -96,8 +96,8 @@ export class UserService {
     };
   }
 
-  async updateAvatar(userId: string, avatarUrl: string, cloudinaryId: string) {
-    const user = await userRepository.findById(userId);
+  async CapNhatAnhDaiDien(userId: string, avatarUrl: string, cloudinaryId: string) {
+    const user = await userRepository.TimTheoId(userId);
     if (!user) {
       throw new ApiError(404, "Không tìm thấy người dùng");
     }
@@ -112,7 +112,7 @@ export class UserService {
     }
 
     
-    const updatedUser = await userRepository.update(userId, {
+    const updatedUser = await userRepository.CapNhat(userId, {
       anh_dai_dien: avatarUrl,
       anh_cloudinary: cloudinaryId,
     });

@@ -4,7 +4,7 @@ export const ratingService = {
   /**
    * Tạo một đánh giá mới
    */
-  async createRating(data: {
+  async TaoDanhGia(data: {
     ma_nguoi_dung: string;
     ma_dat_san_chi_tiet: string;
     so_sao: number;
@@ -63,7 +63,7 @@ export const ratingService = {
   /**
    * Lấy điểm đánh giá trung bình của một địa điểm (dựa trên tất cả các sân thuộc địa điểm đó)
    */
-  async getAverageRatingForLocation(ma_dia_diem: string) {
+  async LayDiemDanhGiaDiaDiem(ma_dia_diem: string) {
     const ratings = await prisma.danhgia.findMany({
       where: {
         datsanchitiet: {
@@ -93,7 +93,7 @@ export const ratingService = {
   /**
    * Lấy điểm đánh giá trung bình của một sân cụ thể
    */
-  async getAverageRatingForCourt(ma_san: string) {
+  async LayDiemDanhGiaSan(ma_san: string) {
     const ratings = await prisma.danhgia.findMany({
       where: {
         datsanchitiet: {
@@ -121,7 +121,7 @@ export const ratingService = {
   /**
    * Lấy đánh giá của một người dùng cho một chi tiết đặt sân
    */
-  async getRatingByUserAndBooking(ma_nguoi_dung: string, ma_dat_san_chi_tiet: string) {
+  async LayDanhGiaCuaToi(ma_nguoi_dung: string, ma_dat_san_chi_tiet: string) {
     return prisma.danhgia.findFirst({
       where: {
         ma_nguoi_dung,

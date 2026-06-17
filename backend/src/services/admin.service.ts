@@ -7,64 +7,64 @@ import { locationRepository } from '../repositories/location.repository.js';
 export class AdminService {
     
 
-    async getAllUsers() {
-        return userRepository.findAll();
+    async LayTatCaNguoiDung() {
+        return userRepository.LayTatCa();
     }
 
-    async getUserById(id: string) {
-        const user = await userRepository.findById(id);
+    async LayNguoiDungTheoId(id: string) {
+        const user = await userRepository.TimTheoId(id);
         if (!user) {
             throw new ApiError(404, "User not found");
         }
         return user;
     }
 
-    async toggleUserStatus(id: string) {
-        const user = await userRepository.findById(id);
+    async DoiTrangThaiNguoiDung(id: string) {
+        const user = await userRepository.TimTheoId(id);
         if (!user) {
             throw new ApiError(404, "Không tìm thấy người dùng");
         }
         const newStatus = !user.trang_thai;
         
-        const updatedUser = await userRepository.updateStatus(id, newStatus);
+        const updatedUser = await userRepository.CapNhatTrangThai(id, newStatus);
 
         
         if (!newStatus && user.vai_tro === 'Chủ sân') {
-            await locationRepository.updateStatusByOwnerId(id, false);
+            await locationRepository.CapNhatTrangThaiTheoChuSan(id, false);
         }
 
         return updatedUser;
     }
 
-    async deleteUser(id: string) {
-        const user = await userRepository.findById(id);
+    async XoaNguoiDung(id: string) {
+        const user = await userRepository.TimTheoId(id);
         if (!user) {
             throw new ApiError(404, "Không tìm thấy người dùng");
         }
-        return userRepository.delete(id);
+        return userRepository.Xoa(id);
     }
 
     
 
-    async getPendingOwners() {
-        return userRepository.findOwnersPending();
+    async LayChuSanChoDuyet() {
+        return userRepository.TimChuSanChoDuyet();
     }
 
-    async approveOwner(id: string) {
-        const user = await userRepository.findById(id);
+    async DuyetChuSan(id: string) {
+        const user = await userRepository.TimTheoId(id);
         if (!user) {
             throw new ApiError(404, "Không tìm thấy người dùng");
         }
         if (user.vai_tro !== 'Chủ sân') {
             throw new ApiError(400, "Người dùng này không phải chủ sân");
         }
-        return userRepository.approveOwner(id);
+        return userRepository.DuyetChuSan(id);
     }
 
-    async createOwner(data: CreateOwner) {
+    async TaoChuSan(data: CreateOwner) {
         const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau } = data;
 
-        const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
+        const existingUser = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
         if (existingUser) {
             if (existingUser.email === email) {
                 throw new ApiError(400, "Email đã tồn tại trong hệ thống");
@@ -74,11 +74,11 @@ export class AdminService {
             }
         }
 
-        const newId = await userRepository.generateNextUserId();
+        const newId = await userRepository.TaoMaNguoiDungTiepTheo();
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(mat_khau, salt);
 
-        return userRepository.create({
+        return userRepository.TaoMoi({
             ma_nguoi_dung: newId,
             ho_ten,
             email,
@@ -92,20 +92,20 @@ export class AdminService {
 
     
 
-    async getAllLocations() {
-        return locationRepository.findAll();
+    async LayTatCaDiaDiem() {
+        return locationRepository.LayTatCa();
     }
 
-    async getPendingLocations() {
-        return locationRepository.findPending();
+    async LayDiaDiemChoDuyet() {
+        return locationRepository.TimChoDuyet();
     }
 
-    async approveLocation(id: string) {
-        return locationRepository.approve(id);
+    async DuyetDiaDiem(id: string) {
+        return locationRepository.Duyet(id);
     }
 
-    async rejectLocation(id: string, mo_ta?: string) {
-        return locationRepository.reject(id, mo_ta);
+    async TuChoiDiaDiem(id: string, mo_ta?: string) {
+        return locationRepository.TuChoi(id, mo_ta);
     }
 }
 

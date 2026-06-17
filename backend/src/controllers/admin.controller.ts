@@ -3,77 +3,77 @@ import { adminService } from '../services/admin.service.js';
 
 
 
-export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const LayTatCaNguoiDung = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await adminService.getAllUsers();
+    const users = await adminService.LayTatCaNguoiDung();
     res.status(200).json({ success: true, users });
   } catch (err) { next(err); }
 };
 
-export const getUserById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const LayNguoiDungTheoId = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    const user = await adminService.getUserById(req.params.id);
+    const user = await adminService.LayNguoiDungTheoId(req.params.id);
     res.status(200).json({ success: true, user });
   } catch (err) { next(err); }
 };
 
-export const toggleUserStatus = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const DoiTrangThaiNguoiDung = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    const user = await adminService.toggleUserStatus(req.params.id);
+    const user = await adminService.DoiTrangThaiNguoiDung(req.params.id);
     res.status(200).json({ success: true, message: `Tài khoản đã ${user.trang_thai ? 'mở khóa' : 'bị khóa'}`, user });
   } catch (err) { next(err); }
 };
 
-export const deleteUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const XoaNguoiDung = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    await adminService.deleteUser(req.params.id);
+    await adminService.XoaNguoiDung(req.params.id);
     res.status(200).json({ success: true, message: 'Đã xóa người dùng thành công' });
   } catch (err) { next(err); }
 };
 
 // ── Owner Approval ────────────────────────────────────
 
-export const getPendingOwners = async (_req: Request, res: Response, next: NextFunction) => {
+export const LayChuSanChoDuyet = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const owners = await adminService.getPendingOwners();
+    const owners = await adminService.LayChuSanChoDuyet();
     res.status(200).json({ success: true, owners });
   } catch (err) { next(err); }
 };
 
-export const approveOwner = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const DuyetChuSan = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    const user = await adminService.approveOwner(req.params.id);
+    const user = await adminService.DuyetChuSan(req.params.id);
     res.status(200).json({ success: true, message: 'Đã duyệt chủ sân thành công', user });
   } catch (err) { next(err); }
 };
 
 // ── Location Approval ─────────────────────────────────
 
-export const getAllLocations = async (_req: Request, res: Response, next: NextFunction) => {
+export const LayTatCaDiaDiem = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const locations = await adminService.getAllLocations();
+    const locations = await adminService.LayTatCaDiaDiem();
     res.status(200).json({ success: true, locations });
   } catch (err) { next(err); }
 };
 
-export const getPendingLocations = async (_req: Request, res: Response, next: NextFunction) => {
+export const LayDiaDiemChoDuyet = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const locations = await adminService.getPendingLocations();
+    const locations = await adminService.LayDiaDiemChoDuyet();
     res.status(200).json({ success: true, locations });
   } catch (err) { next(err); }
 };
 
-export const approveLocation = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const DuyetDiaDiem = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
-    const location = await adminService.approveLocation(req.params.id);
+    const location = await adminService.DuyetDiaDiem(req.params.id);
     res.status(200).json({ success: true, message: 'Đã duyệt địa điểm thành công', location });
   } catch (err) { next(err); }
 };
 
-export const rejectLocation = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const TuChoiDiaDiem = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
   try {
     const { mo_ta } = req.body || {};
-    const location = await adminService.rejectLocation(req.params.id, mo_ta);
+    const location = await adminService.TuChoiDiaDiem(req.params.id, mo_ta);
     res.status(200).json({ success: true, message: 'Đã từ chối địa điểm', location });
   } catch (err) { next(err); }
 };

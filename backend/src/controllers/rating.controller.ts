@@ -3,7 +3,7 @@ import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { ratingService } from "../services/rating.service.js";
 import { ApiError } from "../utils/ApiError.js";
 
-export const createRating = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const TaoDanhGia = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const ma_nguoi_dung = req.user?.id; 
         const { ma_dat_san_chi_tiet, so_sao } = req.body;
@@ -20,7 +20,7 @@ export const createRating = async (req: AuthRequest, res: Response, next: NextFu
             throw new ApiError(400, "Số sao phải từ 1 đến 5");
         }
 
-        const rating = await ratingService.createRating({
+        const rating = await ratingService.TaoDanhGia({
             ma_nguoi_dung,
             ma_dat_san_chi_tiet,
             so_sao
@@ -36,7 +36,7 @@ export const createRating = async (req: AuthRequest, res: Response, next: NextFu
     }
 }
 
-export const getAverageRatingForLocation = async (req: Request, res: Response, next: NextFunction) => {
+export const LayDiemDanhGiaDiaDiem = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const ma_dia_diem = req.params.ma_dia_diem as string;
         
@@ -44,14 +44,14 @@ export const getAverageRatingForLocation = async (req: Request, res: Response, n
             throw new ApiError(400, "Thiếu mã địa điểm");
         }
 
-        const stats = await ratingService.getAverageRatingForLocation(ma_dia_diem);
+        const stats = await ratingService.LayDiemDanhGiaDiaDiem(ma_dia_diem);
         res.status(200).json({ success: true, data: stats });
     } catch (error) {
         next(error);
     }
 }
 
-export const getAverageRatingForCourt = async (req: Request, res: Response, next: NextFunction) => {
+export const LayDiemDanhGiaSan = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const ma_san = req.params.ma_san as string;
         
@@ -59,14 +59,14 @@ export const getAverageRatingForCourt = async (req: Request, res: Response, next
             throw new ApiError(400, "Thiếu mã sân");
         }
 
-        const stats = await ratingService.getAverageRatingForCourt(ma_san);
+        const stats = await ratingService.LayDiemDanhGiaSan(ma_san);
         res.status(200).json({ success: true, data: stats });
     } catch (error) {
         next(error);
     }
 }
 
-export const getMyRatingForBooking = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const LayDanhGiaCuaToi = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const ma_nguoi_dung = req.user?.id;
         const ma_dat_san_chi_tiet = req.params.ma_dat_san_chi_tiet as string;
@@ -75,7 +75,7 @@ export const getMyRatingForBooking = async (req: AuthRequest, res: Response, nex
             throw new ApiError(401, "Chưa đăng nhập");
         }
 
-        const rating = await ratingService.getRatingByUserAndBooking(ma_nguoi_dung, ma_dat_san_chi_tiet);
+        const rating = await ratingService.LayDanhGiaCuaToi(ma_nguoi_dung, ma_dat_san_chi_tiet);
         res.status(200).json({ success: true, data: rating });
     } catch (error) {
         next(error);

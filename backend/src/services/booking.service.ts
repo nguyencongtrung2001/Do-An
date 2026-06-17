@@ -113,7 +113,7 @@ function parseTimeUTC(timeStr: string): Date {
 // Service
 // ==============================
 export class BookingService {
-  async createBooking(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }, ipAddr: string = '127.0.0.1') {
+  async TaoDonDatSan(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }, ipAddr: string = '127.0.0.1') {
     const { ma_nguoi_dung, phuong_thuc_thanh_toan, selectedSlots } = data;
 
     if (!selectedSlots || selectedSlots.length === 0) {
@@ -134,7 +134,7 @@ export class BookingService {
     }));
 
     // 2. Concurrency Check (kiểm tra trùng lịch trước khi gộp)
-    const overlaps = await bookingRepository.checkSlotsAvailability(formattedSlots);
+    const overlaps = await bookingRepository.KiemTraKhungGioTrong(formattedSlots);
     if (overlaps && overlaps.length > 0) {
       throw new ApiError(409, "Một số khung giờ bạn chọn đã có người đặt hoặc đang chờ xử lý. Vui lòng tải lại trang và chọn giờ khác.");
     }
@@ -201,7 +201,7 @@ export class BookingService {
         walletDeduction = { userId: ma_nguoi_dung, amount: tongTienCoc };
       }
 
-      const booking = await bookingRepository.createBooking(bookingData, detailsData, walletDeduction);
+      const booking = await bookingRepository.TaoDonDatSan(bookingData, detailsData, walletDeduction);
       
       if (mappedPayment === "VNPay") {
         try {
@@ -242,7 +242,7 @@ export class BookingService {
   }
 
   // Hàm xử lý kết quả trả về ngầm (IPN) hoặc từ Return URL
-  async processVNPayCallback(vnp_Params: Record<string, string>) {
+  async XuLyCallbackVNPay(vnp_Params: Record<string, string>) {
     // 1. Kiểm tra chữ ký bảo mật từ VNPay
     const isValid = VNPayUtil.verifyChecksum(vnp_Params);
     if (!isValid) {
@@ -317,14 +317,14 @@ export class BookingService {
     }
   }
 
-  async getUserBookings(userId: string) {
+  async LayDatSanNguoiDung(userId: string) {
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
-    return await bookingRepository.findByUserId(userId);
+    return await bookingRepository.TimTheoNguoiDung(userId);
   }
 
-  async cancelBooking(bookingId: string, userId: string) {
+  async HuyDatSan(bookingId: string, userId: string) {
     if (!bookingId || !userId) {
       throw new ApiError(400, "Booking ID and User ID are required");
     }
@@ -368,7 +368,7 @@ export class BookingService {
     );
     const refundAmount = tongTienCoc * refundPercentage;
 
-    await bookingRepository.cancelBookingWithRefund(bookingId, userId, refundAmount);
+    await bookingRepository.HuyDonVaHoanTien(bookingId, userId, refundAmount);
 
     let message = "Hủy đặt sân thành công.";
     if (refundAmount > 0) {

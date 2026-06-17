@@ -5,31 +5,31 @@ import { ApiError } from '../utils/ApiError.js';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import cloudinary from '../config/cloudinary.config.js';
 
-export const postUserClient = async (req: Request<{}, any, User.UserClient>, res: Response) => {
-  const user = await userService.createUser(req.body);
+export const DangKyNguoiDung = async (req: Request<{}, any, User.UserClient>, res: Response) => {
+  const user = await userService.DangKyNguoiDung(req.body);
   res.status(201).json(user);
 };
 
-export const loginUserClient = async (req: Request<{}, any, User.LoginUserClient>, res: Response) => {
-  const user = await userService.loginUser(req.body);
+export const DangNhapNguoiDung = async (req: Request<{}, any, User.LoginUserClient>, res: Response) => {
+  const user = await userService.DangNhapNguoiDung(req.body);
   res.status(200).json(user);
 };
 
-export const getProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const LayThongTinCaNhan = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
       throw new ApiError(401, 'Unauthorized');
     }
 
-    const user = await userService.getProfile(userId);
+    const user = await userService.LayThongTinCaNhan(userId);
     res.json({ success: true, user });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateAvatar = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const CapNhatAnhDaiDien = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -50,7 +50,7 @@ export const updateAvatar = async (req: AuthRequest, res: Response, next: NextFu
     });
 
     
-    const updatedUser = await userService.updateAvatar(userId, result.secure_url, result.public_id);
+    const updatedUser = await userService.CapNhatAnhDaiDien(userId, result.secure_url, result.public_id);
 
     res.json({
       success: true,

@@ -1,8 +1,8 @@
 import express from 'express';
-import { googleLoginController } from './google-login.controller.js';
+import { DangNhapGoogle } from './google-login.controller.js';
 
 const router = express.Router();
 
-router.post('/google', googleLoginController);
+router.post('/google', DangNhapGoogle);
 
 export default router;

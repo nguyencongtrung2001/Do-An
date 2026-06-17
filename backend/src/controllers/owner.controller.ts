@@ -4,7 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import cloudinary from '../config/cloudinary.config.js';
 
-export const registerOwner = async (req: Request, res: Response, next: NextFunction) => {
+export const DangKyChuSan = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi, kinh_do, vi_do } = req.body;
 
@@ -31,7 +31,7 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
       anh_dai_dien = avatarResult.secure_url;
     }
 
-    const result = await ownerService.registerOwner({
+    const result = await ownerService.DangKyChuSan({
       ho_ten,
       email,
       so_dien_thoai,
@@ -57,17 +57,17 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const getMyCourts = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const LaySanCuaToi = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
-    const courts = await ownerService.getMyCourts(userId);
+    const courts = await ownerService.LaySanCuaToi(userId);
     res.json({ success: true, courts });
   } catch (error) {
     next(error);
   }
 };
 
-export const addCourt = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const ThemSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
     const data = req.body;
@@ -75,14 +75,14 @@ export const addCourt = async (req: AuthRequest, res: Response, next: NextFuncti
     const files = req.files as any[];
     const images = files?.map(f => ({ url: f.path, public_id: f.filename })) || [];
 
-    const court = await ownerService.addCourt(userId, data, images);
+    const court = await ownerService.ThemSan(userId, data, images);
     res.status(201).json({ success: true, message: "Thêm sân thành công", court });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateCourt = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const CapNhatSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
     const ma_san = req.params.ma_san as string;
@@ -98,14 +98,14 @@ export const updateCourt = async (req: AuthRequest, res: Response, next: NextFun
       ? files.map(f => ({ url: (f as any).path, public_id: (f as any).filename }))
       : undefined;
 
-    const court = await ownerService.updateCourt(userId, ma_san, data, images);
+    const court = await ownerService.CapNhatSan(userId, ma_san, data, images);
     res.json({ success: true, message: "Cập nhật sân thành công", court });
   } catch (error) {
     next(error);
   }
 };
 
-export const deleteCourt = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const XoaSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
     const ma_san = req.params.ma_san as string;
@@ -114,24 +114,24 @@ export const deleteCourt = async (req: AuthRequest, res: Response, next: NextFun
       throw new ApiError(400, "Thiếu mã sân");
     }
 
-    await ownerService.deleteCourt(userId, ma_san);
+    await ownerService.XoaSan(userId, ma_san);
     res.json({ success: true, message: "Xóa sân thành công" });
   } catch (error) {
     next(error);
   }
 };
 
-export const getMyBookings = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const LayLichDatCuaToi = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
-    const bookings = await ownerService.getMyBookings(userId);
+    const bookings = await ownerService.LayLichDatCuaToi(userId);
     res.json({ success: true, bookings });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateBookingStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const CapNhatTrangThaiDatSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
     const id = req.params.id as string;
@@ -141,17 +141,17 @@ export const updateBookingStatus = async (req: AuthRequest, res: Response, next:
       throw new ApiError(400, "Thiếu thông tin cập nhật");
     }
 
-    const booking = await ownerService.updateBookingStatus(userId, id, status);
+    const booking = await ownerService.CapNhatTrangThaiDatSan(userId, id, status);
     res.json({ success: true, message: `Đã ${status.toLowerCase()} lịch đặt`, booking });
   } catch (error) {
     next(error);
   }
 };
 
-export const getPendingCount = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const LaySoLuongChoXuLy = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user.id;
-    const count = await ownerService.getPendingCount(userId);
+    const count = await ownerService.LaySoLuongChoXuLy(userId);
     res.json({ success: true, count });
   } catch (error) {
     next(error);

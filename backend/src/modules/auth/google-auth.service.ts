@@ -8,7 +8,7 @@ dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export class GoogleAuthService {
-  async loginWithGoogle(idToken: string) {
+  async DangNhapBangGoogle(idToken: string) {
     if (!idToken) {
       throw new ApiError(400, "Token is required");
     }
@@ -36,12 +36,12 @@ export class GoogleAuthService {
     const googleId = payload.sub;
 
     
-    let user = await userRepository.findByEmail(email);
+    let user = await userRepository.TimTheoEmail(email);
 
     if (!user) {
       
-      const newId = await userRepository.generateNextUserId();
-      user = await userRepository.create({
+      const newId = await userRepository.TaoMaNguoiDungTiepTheo();
+      user = await userRepository.TaoMoi({
         ma_nguoi_dung: newId,
         email: email,
         ho_ten: name,
@@ -52,7 +52,7 @@ export class GoogleAuthService {
     } else {
       
       if (user.ma_google !== googleId || user.anh_dai_dien !== picture) {
-        user = await userRepository.update(user.ma_nguoi_dung, {
+        user = await userRepository.CapNhat(user.ma_nguoi_dung, {
           ma_google: googleId,
           anh_dai_dien: picture || user.anh_dai_dien,
         });

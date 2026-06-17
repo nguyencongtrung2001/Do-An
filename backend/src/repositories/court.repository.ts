@@ -1,13 +1,13 @@
 import prisma from '../config/prisma.js';
 
 export class CourtRepository {
-  async findByLocationId(locationId: string) {
+  async TimTheoDiaDiem(locationId: string) {
     return prisma.san.findMany({
       where: { ma_dia_diem: locationId }
     });
   }
 
-  async findByIdAndOwnerId(courtId: string, userId: string) {
+  async TimTheoIdVaChuSan(courtId: string, userId: string) {
     return prisma.san.findFirst({
       where: {
         ma_san: courtId,
@@ -16,25 +16,25 @@ export class CourtRepository {
     });
   }
 
-  async findById(courtId: string) {
+  async TimTheoId(courtId: string) {
     return prisma.san.findUnique({
       where: { ma_san: courtId }
     });
   }
 
-  async findImagesByCourtId(courtId: string) {
+  async TimAnhTheoSan(courtId: string) {
     return prisma.anhsan.findMany({
       where: { ma_san: courtId }
     });
   }
 
-  async deleteImagesByCourtId(courtId: string) {
+  async XoaAnhTheoSan(courtId: string) {
     return prisma.anhsan.deleteMany({
       where: { ma_san: courtId }
     });
   }
 
-  async create(data: {
+  async TaoMoi(data: {
     ma_san: string;
     ma_dia_diem: string;
     ten_san: string;
@@ -45,7 +45,7 @@ export class CourtRepository {
     return prisma.san.create({ data });
   }
 
-  async update(courtId: string, data: {
+  async CapNhat(courtId: string, data: {
     ten_san?: string;
     loai_the_thao?: string;
     gia_thue_30p?: number;
@@ -57,11 +57,11 @@ export class CourtRepository {
     });
   }
 
-  async createCourtImages(images: { ma_anh_san: string; ma_san: string; duong_dan_anh: string; ma_cloudinary: string }[]) {
+  async TaoAnhSan(images: { ma_anh_san: string; ma_san: string; duong_dan_anh: string; ma_cloudinary: string }[]) {
     return prisma.anhsan.createMany({ data: images });
   }
 
-  async findAllWithDetails() {
+  async LayTatCaVoiChiTiet() {
     return prisma.san.findMany({
       include: {
         anhsan: true,
@@ -75,7 +75,7 @@ export class CourtRepository {
     });
   }
 
-  async generateNextCourtId(): Promise<string> {
+  async TaoMaSanTiepTheo(): Promise<string> {
     const lastSan = await prisma.san.findFirst({
       orderBy: { ma_san: 'desc' }
     });
@@ -90,7 +90,7 @@ export class CourtRepository {
     return newSanId;
   }
 
-  async generateNextImageId(): Promise<string> {
+  async TaoMaAnhTiepTheo(): Promise<string> {
     const lastImg = await prisma.anhsan.findFirst({
       orderBy: { ma_anh_san: 'desc' }
     });
@@ -105,7 +105,7 @@ export class CourtRepository {
     return newImgId;
   }
 
-  async findLocationBySlug(slug: string) {
+  async TimDiaDiemTheoSlug(slug: string) {
     const locations = await prisma.diadiem.findMany({
       where: { trang_thai_duyet: true },
       include: {

@@ -10,11 +10,11 @@ import prisma from '../config/prisma.js';
 import cloudinary from '../config/cloudinary.config.js';
 
 export class OwnerService {
-  async registerOwner(data: CreateOwner) {
+  async DangKyChuSan(data: CreateOwner) {
     const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau, ten_dia_diem, dia_chi, kinh_do, vi_do, anh_dai_dien } = data;
 
     
-    const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
+    const existingUser = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
 
     if (existingUser) {
       if (existingUser.email === email) throw new ApiError(400, "Email đã tồn tại trong hệ thống");
@@ -22,8 +22,8 @@ export class OwnerService {
     }
 
     
-    const newUserId = await userRepository.generateNextUserId();
-    const newLocationId = await locationRepository.generateNextLocationId();
+    const newUserId = await userRepository.TaoMaNguoiDungTiepTheo();
+    const newLocationId = await locationRepository.TaoMaDiaDiemTiepTheo();
 
     
     const salt = await bcrypt.genSalt(10);
@@ -65,23 +65,23 @@ export class OwnerService {
     return { user: result.user, location: result.location, token };
   }
 
-  async getMyCourts(userId: string) {
-    const locations = await locationRepository.findByOwnerId(userId);
+  async LaySanCuaToi(userId: string) {
+    const locations = await locationRepository.TimTheoChuSan(userId);
     const allCourts = locations.flatMap(loc => loc.san);
     return allCourts;
   }
 
-  async addCourt(userId: string, data: any, images: { url: string; public_id: string }[]) {
+  async ThemSan(userId: string, data: any, images: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
     
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.TimTheoId(userId);
     if (!user || !user.trang_thai) {
       throw new ApiError(403, "Tài khoản của bạn chưa được duyệt, không thể thêm sân.");
     }
 
     
-    const location = await locationRepository.findFirstByOwnerId(userId);
+    const location = await locationRepository.TimDauTienTheoChuSan(userId);
 
     if (!location) {
       throw new ApiError(404, "Không tìm thấy địa điểm của bạn. Vui lòng liên hệ admin.");
@@ -92,7 +92,7 @@ export class OwnerService {
     }
 
     
-    const newSanId = await courtRepository.generateNextCourtId();
+    const newSanId = await courtRepository.TaoMaSanTiepTheo();
 
     
     return prisma.$transaction(async (tx) => {
@@ -130,11 +130,11 @@ export class OwnerService {
     });
   }
 
-  async updateCourt(userId: string, maSan: string, data: any, images?: { url: string; public_id: string }[]) {
+  async CapNhatSan(userId: string, maSan: string, data: any, images?: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
     // Check if court belongs to this owner
-    const court = await courtRepository.findByIdAndOwnerId(maSan, userId);
+    const court = await courtRepository.TimTheoIdVaChuSan(maSan, userId);
 
     if (!court) {
       throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền chỉnh sửa.");
@@ -143,7 +143,7 @@ export class OwnerService {
     // If new images uploaded, fetch old ones so we can delete them from Cloudinary
     let oldImages: { ma_cloudinary: string }[] = [];
     if (images && images.length > 0) {
-      oldImages = await courtRepository.findImagesByCourtId(maSan);
+      oldImages = await courtRepository.TimAnhTheoSan(maSan);
     }
 
     // Update court fields + replace images in a single transaction
@@ -195,8 +195,8 @@ export class OwnerService {
     return updatedCourt;
   }
 
-  async deleteCourt(userId: string, maSan: string) {
-    const court = await courtRepository.findByIdAndOwnerId(maSan, userId);
+  async XoaSan(userId: string, maSan: string) {
+    const court = await courtRepository.TimTheoIdVaChuSan(maSan, userId);
     if (!court) {
       throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền xóa.");
     }
@@ -213,26 +213,26 @@ export class OwnerService {
       throw new ApiError(400, "Không thể xóa sân đang có đơn đặt chưa hoàn thành.");
     }
 
-    return courtRepository.update(maSan, { trang_thai_san: "Đã xóa" });
+    return courtRepository.CapNhat(maSan, { trang_thai_san: "Đã xóa" });
   }
 
-  async getMyBookings(userId: string) {
-    return bookingRepository.findByOwnerId(userId);
+  async LayLichDatCuaToi(userId: string) {
+    return bookingRepository.TimTheoChuSan(userId);
   }
 
-  async updateBookingStatus(userId: string, bookingDetailId: string, status: string) {
+  async CapNhatTrangThaiDatSan(userId: string, bookingDetailId: string, status: string) {
     // Check if booking belongs to this owner
-    const booking = await bookingRepository.findByIdAndOwnerId(bookingDetailId, userId);
+    const booking = await bookingRepository.TimTheoIdVaChuSan(bookingDetailId, userId);
 
     if (!booking) {
       throw new ApiError(404, "Không tìm thấy lịch đặt hoặc bạn không có quyền.");
     }
 
-    return bookingRepository.updateStatus(bookingDetailId, status);
+    return bookingRepository.CapNhatTrangThai(bookingDetailId, status);
   }
 
-  async getPendingCount(userId: string) {
-    return bookingRepository.countPendingByOwnerId(userId);
+  async LaySoLuongChoXuLy(userId: string) {
+    return bookingRepository.DemChoXuLyTheoChuSan(userId);
   }
 }
 

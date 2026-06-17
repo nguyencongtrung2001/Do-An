@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
 export class BookingRepository {
-  async findByOwnerId(userId: string) {
+  async TimTheoChuSan(userId: string) {
     return prisma.datsanchitiet.findMany({
       where: {
         san: {
@@ -24,7 +24,7 @@ export class BookingRepository {
     });
   }
 
-  async findByIdAndOwnerId(bookingDetailId: string, userId: string) {
+  async TimTheoIdVaChuSan(bookingDetailId: string, userId: string) {
     return prisma.datsanchitiet.findFirst({
       where: {
         ma_dat_san_chi_tiet: bookingDetailId,
@@ -37,14 +37,14 @@ export class BookingRepository {
     });
   }
 
-  async updateStatus(bookingDetailId: string, status: string) {
+  async CapNhatTrangThai(bookingDetailId: string, status: string) {
     return prisma.datsanchitiet.update({
       where: { ma_dat_san_chi_tiet: bookingDetailId },
       data: { trang_thai_dat: status }
     });
   }
 
-  async countPendingByOwnerId(userId: string) {
+  async DemChoXuLyTheoChuSan(userId: string) {
     return prisma.datsanchitiet.count({
       where: {
         trang_thai_dat: { in: ["Chờ xử lý", "Đã hủy"] },
@@ -57,7 +57,7 @@ export class BookingRepository {
     });
   }
 
-  async checkSlotsAvailability(slots: { ma_san: string; ngay_dat: Date; gio_bat_dau: Date; gio_ket_thuc: Date }[]) {
+  async KiemTraKhungGioTrong(slots: { ma_san: string; ngay_dat: Date; gio_bat_dau: Date; gio_ket_thuc: Date }[]) {
     const OR = slots.map(s => ({
       ma_san: s.ma_san,
       ngay_dat: s.ngay_dat,
@@ -71,7 +71,7 @@ export class BookingRepository {
     });
   }
 
-  async createBooking(bookingData: any, detailsData: any[], walletDeduction?: { userId: string, amount: number }) {
+  async TaoDonDatSan(bookingData: any, detailsData: any[], walletDeduction?: { userId: string, amount: number }) {
     return prisma.$transaction(async (tx) => {
       
       if (walletDeduction) {
@@ -109,7 +109,7 @@ export class BookingRepository {
     });
   }
 
-  async findByUserId(userId: string) {
+  async TimTheoNguoiDung(userId: string) {
     return prisma.datsan.findMany({
       where: { ma_nguoi_dung: userId },
       include: {
@@ -130,7 +130,7 @@ export class BookingRepository {
     });
   }
 
-  async cancelBookingWithRefund(bookingId: string, userId: string, refundAmount: number) {
+  async HuyDonVaHoanTien(bookingId: string, userId: string, refundAmount: number) {
     return prisma.$transaction(async (tx) => {
       
       await tx.datsanchitiet.updateMany({

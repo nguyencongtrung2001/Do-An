@@ -1,13 +1,13 @@
 import prisma from '../config/prisma.js';
 
 export class UserRepository {
-  async findById(id: string) {
+  async TimTheoId(id: string) {
     return prisma.nguoidung.findUnique({
       where: { ma_nguoi_dung: id }
     });
   }
 
-  async findByEmailOrPhone(email: string, so_dien_thoai: string) {
+  async TimTheoEmailHoacSdt(email: string, so_dien_thoai: string) {
     return prisma.nguoidung.findFirst({
       where: {
         OR: [{ email }, { so_dien_thoai }]
@@ -16,17 +16,17 @@ export class UserRepository {
     });
   }
 
-  async findByEmail(email: string) {
+  async TimTheoEmail(email: string) {
     return prisma.nguoidung.findUnique({
       where: { email }
     });
   }
 
-  async findAll() {
+  async LayTatCa() {
     return prisma.nguoidung.findMany();
   }
 
-  async create(data: {
+  async TaoMoi(data: {
     ma_nguoi_dung: string;
     ho_ten: string;
     email: string;
@@ -42,14 +42,14 @@ export class UserRepository {
     return prisma.nguoidung.create({ data });
   }
 
-  async update(id: string, data: any) {
+  async CapNhat(id: string, data: any) {
     return prisma.nguoidung.update({
       where: { ma_nguoi_dung: id },
       data
     });
   }
 
-  async generateNextUserId(): Promise<string> {
+  async TaoMaNguoiDungTiepTheo(): Promise<string> {
     const lastUser = await prisma.nguoidung.findFirst({
       orderBy: { ma_nguoi_dung: 'desc' }
     });
@@ -64,20 +64,20 @@ export class UserRepository {
     return newId;
   }
 
-  async updateStatus(id: string, trang_thai: boolean) {
+  async CapNhatTrangThai(id: string, trang_thai: boolean) {
     return prisma.nguoidung.update({
       where: { ma_nguoi_dung: id },
       data: { trang_thai }
     });
   }
 
-  async delete(id: string) {
+  async Xoa(id: string) {
     return prisma.nguoidung.delete({
       where: { ma_nguoi_dung: id }
     });
   }
 
-  async findOwnersPending() {
+  async TimChuSanChoDuyet() {
     return prisma.nguoidung.findMany({
       where: {
         vai_tro: 'Chủ sân',
@@ -86,7 +86,7 @@ export class UserRepository {
     });
   }
 
-  async approveOwner(id: string) {
+  async DuyetChuSan(id: string) {
     return prisma.nguoidung.update({
       where: { ma_nguoi_dung: id },
       data: { trang_thai: true }

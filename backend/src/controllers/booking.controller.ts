@@ -4,14 +4,14 @@ import { ApiError } from '../utils/ApiError.js';
 import { VNPayUtil } from '../utils/vnpay.util.js';
 import prisma from '../config/prisma.js';
 
-export const createBookingHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const TaoDonDatSan = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const ipAddr = Array.isArray(req.headers['x-forwarded-for']) 
       ? req.headers['x-forwarded-for'][0] 
       : req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     console.log("📦 Booking Payload:", req.body);
     const bookingData = req.body;
-    const result = await bookingService.createBooking(bookingData, ipAddr as string);
+    const result = await bookingService.TaoDonDatSan(bookingData, ipAddr as string);
     
     res.status(201).json({
       message: result.message || "Đặt sân thành công",
@@ -24,13 +24,13 @@ export const createBookingHandler = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const getUserBookingsHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const LayDatSanNguoiDung = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
     if (typeof userId !== 'string') {
       throw new ApiError(400, "User ID is invalid");
     }
-    const bookings = await bookingService.getUserBookings(userId);
+    const bookings = await bookingService.LayDatSanNguoiDung(userId);
     
     res.status(200).json({
       status: "success",
@@ -41,7 +41,7 @@ export const getUserBookingsHandler = async (req: Request, res: Response, next: 
   }
 };
 
-export const cancelBookingHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const HuyDatSan = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bookingId } = req.params;
     const { userId } = req.body;
@@ -50,7 +50,7 @@ export const cancelBookingHandler = async (req: Request, res: Response, next: Ne
       throw new ApiError(401, "User ID is required to cancel booking");
     }
 
-    const result = await bookingService.cancelBooking(String(bookingId), String(userId));
+    const result = await bookingService.HuyDatSan(String(bookingId), String(userId));
     
     res.status(200).json({
       status: "success",
@@ -62,7 +62,7 @@ export const cancelBookingHandler = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const vnpayReturn = async (req: Request, res: Response) => {
+export const VNPayTraVe = async (req: Request, res: Response) => {
   
   const vnp_Params = req.query as Record<string, string>;
  
@@ -93,11 +93,11 @@ export const vnpayReturn = async (req: Request, res: Response) => {
   );
 };
 
-export const handleVNPayCallback = async (req: Request, res: Response, next: NextFunction) => {
+export const XuLyCallbackVNPay = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Chuyển req.query về dạng Record<string, string>
     const params = req.query as Record<string, string>;
-    const result = await bookingService.processVNPayCallback(params);
+    const result = await bookingService.XuLyCallbackVNPay(params);
     
     return res.status(200).json({
       success: true,
@@ -108,7 +108,7 @@ export const handleVNPayCallback = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const vnpayIPN = async (req: Request, res: Response) => {
+export const VNPayThongBao = async (req: Request, res: Response) => {
   const vnp_Params = req.body || req.query;
 
   try {

@@ -1,20 +1,20 @@
 import express from "express";
 import { 
-    createRating, 
-    getAverageRatingForLocation, 
-    getAverageRatingForCourt,
-    getMyRatingForBooking
+    TaoDanhGia, 
+    LayDiemDanhGiaDiaDiem, 
+    LayDiemDanhGiaSan,
+    LayDanhGiaCuaToi
 } from "../controllers/rating.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 
-router.get("/location/:ma_dia_diem", getAverageRatingForLocation);
-router.get("/court/:ma_san", getAverageRatingForCourt);
+router.get("/location/:ma_dia_diem", LayDiemDanhGiaDiaDiem);
+router.get("/court/:ma_san", LayDiemDanhGiaSan);
 
 
-router.post("/", authenticate, createRating);
-router.get("/my-rating/:ma_dat_san_chi_tiet", authenticate, getMyRatingForBooking);
+router.post("/", authenticate, TaoDanhGia);
+router.get("/my-rating/:ma_dat_san_chi_tiet", authenticate, LayDanhGiaCuaToi);
 
 export default router;

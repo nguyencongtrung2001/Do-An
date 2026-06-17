@@ -2,8 +2,8 @@ import { courtRepository } from "../repositories/court.repository.js";
 import prisma from '../config/prisma.js';
 
 export class FieldService {
-  async getFields() {
-    const sans = await courtRepository.findAllWithDetails();
+  async LayDanhSachSan() {
+    const sans = await courtRepository.LayTatCaVoiChiTiet();
 
     const result = sans.map(san => {
       let totalStars = 0;
@@ -38,7 +38,7 @@ export class FieldService {
     return result;
   }
 
-  async getMapLocations(sportType: string) {
+  async LayDiaDiemTrenBanDo(sportType: string) {
     const whereClause: any = {
       trang_thai_duyet: true,
     };
@@ -102,8 +102,8 @@ export class FieldService {
     });
   }
 
-  async getLocationBySlug(slug: string) {
-    const location = await courtRepository.findLocationBySlug(slug);
+  async LayDiaDiemTheoSlug(slug: string) {
+    const location = await courtRepository.TimDiaDiemTheoSlug(slug);
 
     if (!location) return null;
 
@@ -191,7 +191,7 @@ export class FieldService {
    * Lấy danh sách khung giờ đã đặt cho một sân vào một ngày cụ thể.
    * Chỉ trả về các slot có trạng thái hợp lệ (chưa bị hủy/thất bại).
    */
-  async getBookedSlots(ma_san: string, ngay_dat: string) {
+  async LayKhungGioDaDat(ma_san: string, ngay_dat: string) {
     
     const dateObj = new Date(ngay_dat + 'T00:00:00Z');
 

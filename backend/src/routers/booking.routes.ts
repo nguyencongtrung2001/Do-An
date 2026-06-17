@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { createBookingHandler, getUserBookingsHandler, vnpayReturn, vnpayIPN, handleVNPayCallback, cancelBookingHandler } from "../controllers/booking.controller.js";
+import { TaoDonDatSan, LayDatSanNguoiDung, VNPayTraVe, VNPayThongBao, XuLyCallbackVNPay, HuyDatSan } from "../controllers/booking.controller.js";
 
 const router = Router();
 
-router.post("/", createBookingHandler);
-router.get("/user/:userId", getUserBookingsHandler);
-router.post("/cancel/:bookingId", cancelBookingHandler);
+router.post("/", TaoDonDatSan);
+router.get("/user/:userId", LayDatSanNguoiDung);
+router.post("/cancel/:bookingId", HuyDatSan);
 
-router.get("/vnpay-return", vnpayReturn);
-router.get("/vnpay-callback", handleVNPayCallback);
-router.get("/vnpay-ipn", vnpayIPN);
-router.post("/vnpay-ipn", vnpayIPN);
+router.get("/vnpay-return", VNPayTraVe);
+router.get("/vnpay-callback", XuLyCallbackVNPay);
+router.get("/vnpay-ipn", VNPayThongBao);
+router.post("/vnpay-ipn", VNPayThongBao);
 
 export default router;

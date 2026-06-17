@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
 export class LocationRepository {
-  async findByOwnerId(userId: string) {
+  async TimTheoChuSan(userId: string) {
     return prisma.diadiem.findMany({
       where: { ma_nguoi_dung: userId },
       include: {
@@ -19,13 +19,13 @@ export class LocationRepository {
     });
   }
 
-  async findFirstByOwnerId(userId: string) {
+  async TimDauTienTheoChuSan(userId: string) {
     return prisma.diadiem.findFirst({
       where: { ma_nguoi_dung: userId }
     });
   }
 
-  async create(data: {
+  async TaoMoi(data: {
     ma_dia_diem: string;
     ten_dia_diem: string;
     dia_chi: string;
@@ -36,7 +36,7 @@ export class LocationRepository {
     return prisma.diadiem.create({ data });
   }
 
-  async generateNextLocationId(): Promise<string> {
+  async TaoMaDiaDiemTiepTheo(): Promise<string> {
     const lastLocation = await prisma.diadiem.findFirst({
       orderBy: { ma_dia_diem: 'desc' }
     });
@@ -51,7 +51,7 @@ export class LocationRepository {
     return newLocationId;
   }
 
-  async findAll() {
+  async LayTatCa() {
     return prisma.diadiem.findMany({
       include: {
         nguoidung: {
@@ -63,7 +63,7 @@ export class LocationRepository {
     });
   }
 
-  async findPending() {
+  async TimChoDuyet() {
     return prisma.diadiem.findMany({
       where: { trang_thai_duyet: false },
       include: {
@@ -76,14 +76,14 @@ export class LocationRepository {
     });
   }
 
-  async approve(id: string) {
+  async Duyet(id: string) {
     return prisma.diadiem.update({
       where: { ma_dia_diem: id },
       data: { trang_thai_duyet: true }
     });
   }
 
-  async reject(id: string, mo_ta?: string) {
+  async TuChoi(id: string, mo_ta?: string) {
     return prisma.diadiem.update({
       where: { ma_dia_diem: id },
       data: { 
@@ -93,7 +93,7 @@ export class LocationRepository {
     });
   }
 
-  async updateStatusByOwnerId(userId: string, status: boolean) {
+  async CapNhatTrangThaiTheoChuSan(userId: string, status: boolean) {
     return prisma.diadiem.updateMany({
       where: { ma_nguoi_dung: userId },
       data: { trang_thai_duyet: status }
