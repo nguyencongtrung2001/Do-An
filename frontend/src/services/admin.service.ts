@@ -4,7 +4,7 @@ import { apiGet, apiPut, apiDelete } from './api';
 type ApiResponse = { success: boolean; [key: string]: any };
 
 export const adminService = {
-  // ── Users ──────────────────────────────────────────────
+  
 
   async getAllUsers(token: string): Promise<ApiResponse> {
     return apiGet<ApiResponse>('/admin/users', token);

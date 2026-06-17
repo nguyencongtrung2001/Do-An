@@ -6,7 +6,7 @@ import { apiGet, apiPost } from "@/services/api";
 import toast from "react-hot-toast";
 import { History as HistoryIcon, SearchX, Loader2 } from "lucide-react";
 
-// Sub-components
+
 import HistoryFilters from "./HistoryFilters";
 import BookingItem from "./BookingItem";
 

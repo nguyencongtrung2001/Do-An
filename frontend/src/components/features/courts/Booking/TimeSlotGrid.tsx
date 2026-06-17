@@ -43,7 +43,7 @@ function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
   return bookedSlots.some((booked) => {
     const bookedStart = timeToMinutes(booked.gio_bat_dau);
     const bookedEnd = timeToMinutes(booked.gio_ket_thuc);
-    // Overlap check: slot starts before booked ends AND slot ends after booked starts
+    
     return slotStart < bookedEnd && slotEnd > bookedStart;
   });
 }

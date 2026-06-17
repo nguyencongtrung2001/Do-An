@@ -5,7 +5,7 @@ import { userRepository } from '../repositories/user.repository.js';
 import { locationRepository } from '../repositories/location.repository.js';
 
 export class AdminService {
-    // ── Users ──────────────────────────────────────────────
+    
 
     async getAllUsers() {
         return userRepository.findAll();
@@ -28,7 +28,7 @@ export class AdminService {
         
         const updatedUser = await userRepository.updateStatus(id, newStatus);
 
-        // Nếu tài khoản bị khóa (false) và là Chủ sân, thì khóa luôn tất cả địa điểm của họ
+        
         if (!newStatus && user.vai_tro === 'Chủ sân') {
             await locationRepository.updateStatusByOwnerId(id, false);
         }
@@ -44,7 +44,7 @@ export class AdminService {
         return userRepository.delete(id);
     }
 
-    // ── Owner Approval ────────────────────────────────────
+    
 
     async getPendingOwners() {
         return userRepository.findOwnersPending();
@@ -90,7 +90,7 @@ export class AdminService {
         });
     }
 
-    // ── Location Approval ─────────────────────────────────
+    
 
     async getAllLocations() {
         return locationRepository.findAll();

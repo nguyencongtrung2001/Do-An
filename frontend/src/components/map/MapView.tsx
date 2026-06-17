@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Hàm cập nhật tâm bản đồ khi click
+
 function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   const map = useMap();
   useEffect(() => {

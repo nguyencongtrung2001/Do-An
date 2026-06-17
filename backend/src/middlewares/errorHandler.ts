@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../utils/ApiError.js';
 
-// Global error handler middleware
+
 export const errorHandler = (
   err: Error | ApiError,
   req: Request,
@@ -15,7 +15,7 @@ export const errorHandler = (
     statusCode = err.statusCode;
     message = err.message;
   } else if (err.name === "PrismaClientKnownRequestError") {
-    // Handle specific Prisma errors (e.g. duplicate key)
+    
     statusCode = 400;
     const prismaErr = err as any;
     if (prismaErr.code === 'P2002') {

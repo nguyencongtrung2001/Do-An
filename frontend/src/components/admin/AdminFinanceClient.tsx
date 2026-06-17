@@ -16,7 +16,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
 
-// Register ChartJS modules
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -58,14 +58,14 @@ export default function AdminFinanceClient() {
   const [selectedMonth, setSelectedMonth] = useState("03/2026");
   const [selectedRegion, setSelectedRegion] = useState("all");
 
-  // Line Chart Config
+  
   const lineData = {
     labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
     datasets: [
       {
         label: 'Bóng đá',
         data: [45, 52, 58, 65],
-        borderColor: '#10b981', // emerald-500
+        borderColor: '#10b981', 
         backgroundColor: '#10b981',
         tension: 0.4,
         borderWidth: 3,
@@ -77,7 +77,7 @@ export default function AdminFinanceClient() {
       {
         label: 'Cầu lông',
         data: [20, 25, 22, 28],
-        borderColor: '#3b82f6', // blue-500
+        borderColor: '#3b82f6', 
         backgroundColor: '#3b82f6',
         tension: 0.4,
         borderWidth: 3,
@@ -89,7 +89,7 @@ export default function AdminFinanceClient() {
       {
         label: 'Tennis',
         data: [10, 15, 12, 18],
-        borderColor: '#eab308', // yellow-500
+        borderColor: '#eab308', 
         backgroundColor: '#eab308',
         tension: 0.4,
         borderWidth: 3,
@@ -101,7 +101,7 @@ export default function AdminFinanceClient() {
       {
         label: 'Bóng rổ',
         data: [5, 8, 10, 12],
-        borderColor: '#f97316', // orange-500
+        borderColor: '#f97316', 
         backgroundColor: '#f97316',
         tension: 0.4,
         borderWidth: 3,

@@ -9,11 +9,11 @@ import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Public routes (không cần đăng nhập)
+
 router.get("/location/:ma_dia_diem", getAverageRatingForLocation);
 router.get("/court/:ma_san", getAverageRatingForCourt);
 
-// Protected routes (cần đăng nhập)
+
 router.post("/", authenticate, createRating);
 router.get("/my-rating/:ma_dat_san_chi_tiet", authenticate, getMyRatingForBooking);
 

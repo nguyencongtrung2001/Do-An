@@ -29,7 +29,7 @@ export default function AuthClient() {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Form states
+  
   const [loginContact, setLoginContact] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
@@ -45,22 +45,22 @@ export default function AuthClient() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
-  // Coordinates
+  
   const [kinhDo, setKinhDo] = useState<number | null>(null);
   const [viDo, setViDo] = useState<number | null>(null);
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Update URL internally if tab changes via click
+  
   const switchTab = (tab: AuthTab) => {
     setActiveTab(tab);
     setErrorMsg(null);
     
     const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", tab); // Will set ?tab=signup or ?tab=login
+    params.set("tab", tab); 
     
-    // Use Next.js router to update URL instead of history API
+    
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 

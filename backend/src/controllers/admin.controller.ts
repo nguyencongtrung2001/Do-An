@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { adminService } from '../services/admin.service.js';
 
-// ── Users ──────────────────────────────────────────────
+
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {

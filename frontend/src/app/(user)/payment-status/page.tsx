@@ -16,10 +16,10 @@ function PaymentStatusContent() {
   useEffect(() => {
     const verifyPayment = async () => {
       try {
-        // Lấy toàn bộ query string từ VNPay đẩy về
+        
         const queryString = searchParams.toString();
         
-        // Gọi lên API Backend để check Checksum và lưu DB
+        
         const res = await apiGet<any>(`/booking/vnpay-callback?${queryString}`);
         
         if (res.data?.status === 'SUCCESS') {

@@ -5,7 +5,7 @@
 
 export const TIMELINE_START_HOUR = 6;
 export const TIMELINE_END_HOUR = 22;
-export const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; // 32
+export const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; 
 
 /**
  * Generate timeline labels: ["6:00", "6:30", "7:00", ..., "21:30"]

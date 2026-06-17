@@ -14,14 +14,14 @@ export function useSignup(role: Role) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Common fields
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Owner specific fields
+  
   const [locationName, setLocationName] = useState("");
   const [address, setAddress] = useState("");
   const [cccdTruoc, setCccdTruoc] = useState<File | null>(null);

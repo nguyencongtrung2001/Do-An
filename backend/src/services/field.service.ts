@@ -81,7 +81,7 @@ export class FieldService {
 
     return locations.map(loc => {
       const sports = Array.from(new Set(loc.san.map(s => s.loai_the_thao)));
-      // Lấy ảnh đại diện từ sân đầu tiên nếu có
+      
       let image = "/images/categories/soccer.png";
       for (const s of loc.san) {
         if (s.anhsan && s.anhsan.length > 0 && s.anhsan[0]?.duong_dan_anh) {
@@ -107,7 +107,7 @@ export class FieldService {
 
     if (!location) return null;
 
-    // Collect all unique images from all courts
+    
     const allImages: string[] = [];
     const imageSet = new Set<string>();
     for (const court of location.san) {
@@ -122,7 +122,7 @@ export class FieldService {
       allImages.push("/images/categories/soccer.png");
     }
 
-    // Calculate average rating & review count across all courts
+    
     let totalStars = 0;
     let reviewCount = 0;
     for (const court of location.san) {
@@ -137,10 +137,10 @@ export class FieldService {
     }
     const avgRating = reviewCount > 0 ? Number((totalStars / reviewCount).toFixed(1)) : 0;
 
-    // Group courts by sport type
+    
     const sports = Array.from(new Set(location.san.map(s => s.loai_the_thao)));
 
-    // Build court list
+    
     const courts = location.san.map(san => {
       let courtStars = 0;
       let courtReviews = 0;
@@ -192,7 +192,7 @@ export class FieldService {
    * Chỉ trả về các slot có trạng thái hợp lệ (chưa bị hủy/thất bại).
    */
   async getBookedSlots(ma_san: string, ngay_dat: string) {
-    // Parse ngày từ chuỗi YYYY-MM-DD
+    
     const dateObj = new Date(ngay_dat + 'T00:00:00Z');
 
     const bookedDetails = await prisma.datsanchitiet.findMany({
@@ -209,8 +209,8 @@ export class FieldService {
       },
     });
 
-    // Prisma trả về gio_bat_dau/gio_ket_thuc dạng Date (1970-01-01T[HH:mm:ss]Z)
-    // Convert về chuỗi "HH:mm"
+    
+    
     const formatTime = (d: Date): string => {
       const h = d.getUTCHours().toString().padStart(2, '0');
       const m = d.getUTCMinutes().toString().padStart(2, '0');

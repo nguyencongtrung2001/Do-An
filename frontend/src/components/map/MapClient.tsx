@@ -26,7 +26,7 @@ export default function MapClient() {
         console.error("Lỗi khi tải danh sách địa điểm:", err);
       } finally {
         if (isMounted) {
-          // loading logic removed as it was unused
+          
         }
       }
     };

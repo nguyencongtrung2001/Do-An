@@ -53,7 +53,7 @@ export default function OwnerStatusClient() {
     }
   };
 
-  // Stats
+  
   const totalActive = courts.filter((c) => c.trang_thai_san === "Đang hoạt động").length;
   const totalMaintenance = courts.filter((c) => c.trang_thai_san === "Đang bảo trì").length;
   const totalLocked = courts.filter((c) => c.trang_thai_san === "Đã khóa").length;

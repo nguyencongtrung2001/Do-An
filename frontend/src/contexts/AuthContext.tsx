@@ -26,8 +26,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// --- External Store Subscription Logic ---
-// This handles synchronization with localStorage outside the React render cycle.
+
+
 const subscribe = (callback: () => void) => {
   if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", callback);
@@ -45,7 +45,7 @@ const getServerSnapshot = () => null;
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
-  // useSyncExternalStore handles hydration and synchronization automatically
+  
   const tokenRaw = useSyncExternalStore(
     subscribe,
     getSnapshot("token"),
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     getServerSnapshot
   );
 
-  // Memoize parsing to ensure stable references
+  
   const user = useMemo(() => {
     if (!userRaw) return null;
     try {
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback((newToken: string, newUser: UserData) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
-    // Trigger local update for useSyncExternalStore
+    
     window.dispatchEvent(new Event("storage"));
   }, []);
 
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     logout,
     isAuthenticated: !!tokenRaw,
-    isMounted: true, // Data exposure is handled by useSyncExternalStore's hydration logic
+    isMounted: true, 
   }), [user, tokenRaw, login, logout]);
 
   return (

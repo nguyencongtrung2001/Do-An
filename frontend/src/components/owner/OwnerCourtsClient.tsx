@@ -27,32 +27,32 @@ export default function OwnerCourtsClient() {
   const [filterType, setFilterType] = useState<CourtType>("all");
   const [submitting, setSubmitting] = useState(false);
 
-  // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [courtToDelete, setCourtToDelete] = useState<OwnerCourt | null>(null);
 
-  // Form fields
+  
   const [newCourtName, setNewCourtName] = useState("");
   const [newCourtType, setNewCourtType] = useState("");
   const [newCourtPrice, setNewCourtPrice] = useState("");
   const [editingCourtId, setEditingCourtId] = useState<string | null>(null);
 
-  // Image state
+  
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<{ duong_dan_anh: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Filtered courts
+  
   const filteredCourts = courts.filter((court) => {
     const matchSearch = court.ten_san.toLowerCase().includes(search.toLowerCase());
     const matchType = filterType === "all" || court.loai_the_thao === filterType;
     return matchSearch && matchType;
   });
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
+  
 
   const resetForm = () => {
     setNewCourtName("");
@@ -65,7 +65,7 @@ export default function OwnerCourtsClient() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // ── Modal handlers ────────────────────────────────────────────────────────────
+  
 
   const handleOpenModal = (mode: "add" | "edit", id?: string) => {
     resetForm();
@@ -92,18 +92,18 @@ export default function OwnerCourtsClient() {
     resetForm();
   };
 
-  // ── Image picker ─────────────────────────────────────────────────────────────
+  
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Revoke old object URLs to avoid memory leak
+    
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
 
     setSelectedFiles(files);
     setPreviewUrls(files.map((f) => URL.createObjectURL(f)));
-    // When new images are chosen in edit mode → replace existing (clear existing preview)
+    
     if (modalMode === "edit") {
       setExistingImages([]);
     }
@@ -121,7 +121,7 @@ export default function OwnerCourtsClient() {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────────
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +129,7 @@ export default function OwnerCourtsClient() {
     setSubmitting(true);
 
     try {
-      // Always use FormData so images can be included for both add & edit
+      
       const formData = new FormData();
       formData.append("ten_san", newCourtName);
       formData.append("loai_the_thao", newCourtType);
@@ -159,7 +159,7 @@ export default function OwnerCourtsClient() {
     }
   };
 
-  // ── Delete ────────────────────────────────────────────────────────────────────
+  
 
   const handleConfirmDelete = (court: OwnerCourt) => {
     setCourtToDelete(court);
@@ -185,7 +185,7 @@ export default function OwnerCourtsClient() {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────────
+  
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const createRating = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const ma_nguoi_dung = req.user?.id; // Lấy từ auth middleware
+        const ma_nguoi_dung = req.user?.id; 
         const { ma_dat_san_chi_tiet, so_sao } = req.body;
 
         if (!ma_nguoi_dung) {

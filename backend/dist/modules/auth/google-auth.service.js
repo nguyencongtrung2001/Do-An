@@ -1,0 +1,60 @@
+import { OAuth2Client } from 'google-auth-library';
+import { ApiError } from '../../utils/ApiError.js';
+import { generateToken } from '../../utils/jwt.js';
+import { userRepository } from '../../repositories/user.repository.js';
+import dotenv from 'dotenv';
+dotenv.config();
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+export class GoogleAuthService {
+    async loginWithGoogle(idToken) {
+        if (!idToken) {
+            throw new ApiError(400, "Token is required");
+        }
+        let payload;
+        try {
+            const ticket = await client.verifyIdToken({
+                idToken,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            payload = ticket.getPayload();
+        }
+        catch (error) {
+            console.error("Google verify token error:", error);
+            throw new ApiError(401, "Invalid Google token");
+        }
+        if (!payload || !payload.email) {
+            throw new ApiError(400, "Cannot get email from Google token");
+        }
+        const email = payload.email;
+        const name = payload.name || "Google User";
+        const picture = payload.picture ?? undefined;
+        const googleId = payload.sub;
+        let user = await userRepository.findByEmail(email);
+        if (!user) {
+            const newId = await userRepository.generateNextUserId();
+            user = await userRepository.create({
+                ma_nguoi_dung: newId,
+                email: email,
+                ho_ten: name,
+                ma_google: googleId,
+                anh_dai_dien: picture ?? undefined,
+                trang_thai: true,
+            });
+        }
+        else {
+            if (user.ma_google !== googleId || user.anh_dai_dien !== picture) {
+                user = await userRepository.update(user.ma_nguoi_dung, {
+                    ma_google: googleId,
+                    anh_dai_dien: picture || user.anh_dai_dien,
+                });
+            }
+        }
+        if (!user) {
+            throw new ApiError(500, "Failed to process user data");
+        }
+        const token = generateToken({ id: user.ma_nguoi_dung, role: user.vai_tro });
+        return { user, token };
+    }
+}
+export const googleAuthService = new GoogleAuthService();
+//# sourceMappingURL=google-auth.service.js.map

@@ -14,7 +14,7 @@ walkDir(path.join(__dirname, 'src'), function(filePath) {
     let content = fs.readFileSync(filePath, 'utf8');
     let newContent = content.replace(/(import|export)\s+(.*?)\s+from\s+['"](.*?)(\.js)['"]/g, "$1 $2 from '$3'");
     
-    // Also handle dynamic imports or require if any
+    
     newContent = newContent.replace(/import\(['"](.*?)(\.js)['"]\)/g, "import('$1')");
     
     if (content !== newContent) {

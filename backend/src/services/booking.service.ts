@@ -3,9 +3,9 @@ import { ApiError } from '../utils/ApiError.js';
 import { VNPayUtil } from '../utils/vnpay.util.js';
 import prisma from '../config/prisma.js';
 
-// ==============================
-// Types
-// ==============================
+
+
+
 interface RawSlot {
   ma_san: string;
   ngay_dat: string;
@@ -30,9 +30,9 @@ interface MergedSlot {
   tong_gia: number;
 }
 
-// ==============================
-// Utility: Merge consecutive slots
-// ==============================
+
+
+
 /**
  * Gộp các khung giờ liên tiếp trên cùng một sân thành 1 bản ghi duy nhất.
  *
@@ -46,7 +46,7 @@ interface MergedSlot {
 function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
   if (slots.length === 0) return [];
 
-  // Sắp xếp theo sân → ngày → giờ bắt đầu
+  
   const sorted = [...slots].sort((a, b) => {
     if (a.ma_san !== b.ma_san) return a.ma_san.localeCompare(b.ma_san);
     if (a.ngay_dat.getTime() !== b.ngay_dat.getTime()) return a.ngay_dat.getTime() - b.ngay_dat.getTime();
@@ -75,11 +75,11 @@ function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
     const consecutive = slot.gio_bat_dau.getTime() === current.gio_ket_thuc.getTime();
 
     if (sameCourt && sameDate && consecutive) {
-      // Gộp: mở rộng giờ kết thúc, cộng dồn giá
+      
       current.gio_ket_thuc = slot.gio_ket_thuc;
       current.tong_gia += slot.gia_thue;
     } else {
-      // Không liên tiếp → push bản ghi hiện tại, bắt đầu bản ghi mới
+      
       merged.push(current);
       current = {
         ma_san: slot.ma_san,
@@ -91,7 +91,7 @@ function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
     }
   }
 
-  // Đừng quên push bản ghi cuối cùng
+  
   merged.push(current);
 
   return merged;

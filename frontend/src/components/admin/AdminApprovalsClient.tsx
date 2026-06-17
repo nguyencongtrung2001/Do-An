@@ -48,21 +48,21 @@ interface OwnerBasicInfo {
 export default function AdminApprovalsClient() {
   const { token } = useAuth();
   
-  // Data states
+  
   const [pendingOwners, setPendingOwners] = useState<PendingOwner[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // UI states
+  
   const [filter, setFilter] = useState<"pending" | "approved">("pending");
   const [approvingId, setApprovingId] = useState<string | null>(null);
 
-  // Reject Modal State
+  
   const [rejectingReq, setRejectingReq] = useState<{ ownerId: string, locationIds: string[] } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
 
-  // ── Fetch ─────────────────────────────────────────────
+  
   useEffect(() => {
     let isMounted = true;
     const fetchApprovalData = async () => {
@@ -90,17 +90,17 @@ export default function AdminApprovalsClient() {
     };
   }, [token]);
 
-  // ── Unified Data Models ───────────────────────────────
+  
   
   const pendingRequests = useMemo(() => {
     const map = new Map<string, { ownerFull: PendingOwner | null, ownerBasic: OwnerBasicInfo, locations: Location[] }>();
     
-    // Add pending owners
+    
     pendingOwners.forEach(o => {
       map.set(o.ma_nguoi_dung, { ownerFull: o, ownerBasic: o, locations: [] });
     });
 
-    // Add pending locations
+    
     locations.filter(l => !l.trang_thai_duyet).forEach(l => {
       const ownerId = l.nguoidung.ma_nguoi_dung;
       if (map.has(ownerId)) {
@@ -125,7 +125,7 @@ export default function AdminApprovalsClient() {
     return Array.from(map.values());
   }, [locations]);
 
-  // ── Actions ───────────────────────────────────────────
+  
 
   const handleApproveRequest = async (ownerId: string, locationIds: string[]) => {
     if (!token || approvingId) return;
@@ -144,7 +144,7 @@ export default function AdminApprovalsClient() {
 
       await Promise.all(promises);
       
-      // Update local state
+      
       if (isOwnerPending) {
         setPendingOwners(prev => prev.filter(o => o.ma_nguoi_dung !== ownerId));
       }
@@ -167,7 +167,7 @@ export default function AdminApprovalsClient() {
       );
       await Promise.all(promises);
 
-      // Remove from pending lists
+      
       setPendingOwners(prev => prev.filter(o => o.ma_nguoi_dung !== rejectingReq.ownerId));
       setLocations(prev => prev.filter(l => !rejectingReq.locationIds.includes(l.ma_dia_diem)));
       
@@ -182,14 +182,14 @@ export default function AdminApprovalsClient() {
     }
   };
 
-  // ── Utils ─────────────────────────────────────────────
+  
 
   const getInitials = (name: string) => {
     const p = name.split(" ");
     return (p[0]?.[0] || "") + (p[p.length - 1]?.[0] || "");
   };
 
-  // ── Render ────────────────────────────────────────────
+  
 
   return (
     <div className="flex flex-col min-h-screen pb-10">

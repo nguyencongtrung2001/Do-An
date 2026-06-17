@@ -14,7 +14,7 @@ export function useFields() {
   const [mapItems, setMapItems] = useState<CourtMapData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Slugify helper — matches backend
+  
   const slugify = (str: string): string =>
     str
       .toLowerCase()
@@ -37,7 +37,7 @@ export function useFields() {
 
         const apiItems = data as CourtApiItem[];
 
-        // Map to grid items
+        
         const grid: CourtGridItem[] = apiItems.map(item => ({
           id: item.ma_san,
           name: item.ten_san,
@@ -49,7 +49,7 @@ export function useFields() {
           slug: item.ten_dia_diem ? slugify(item.ten_dia_diem) : String(item.ma_san),
         }));
 
-        // Map to map items
+        
         const map: CourtMapData[] = apiItems.map(item => {
           const pricePerHour = item.gia_thue_30p ? item.gia_thue_30p * 2 : 0;
           const priceFormatted = pricePerHour >= 1000 ? `${pricePerHour / 1000}K/giờ` : `${pricePerHour}đ/giờ`;

@@ -1,4 +1,4 @@
-// src/components/layout/Footer.tsx
+
 export default function Footer() {
   return (
     <footer className="bg-white dark:bg-[#2a1d1d] border-t border-gray-200 dark:border-gray-800 py-12">

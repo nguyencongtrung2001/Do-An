@@ -6,12 +6,12 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined');
 }
 
-// Đọc từ môi trường, nếu không có thì mới lấy mặc định là '7d'
+
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'; 
 
 export const generateToken = (payload: object): string => {
   return jwt.sign(payload, JWT_SECRET, { 
-    expiresIn: JWT_EXPIRES_IN as any // Ép kiểu để tránh lỗi TS nếu cần
+    expiresIn: JWT_EXPIRES_IN as any 
   });
 };
 

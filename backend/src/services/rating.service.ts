@@ -9,7 +9,7 @@ export const ratingService = {
     ma_dat_san_chi_tiet: string;
     so_sao: number;
   }) {
-    // 1. Kiểm tra xem chi tiết đặt sân có tồn tại không
+    
     const bookingDetail = await prisma.datsanchitiet.findUnique({
       where: { ma_dat_san_chi_tiet: data.ma_dat_san_chi_tiet },
       include: {
@@ -21,16 +21,16 @@ export const ratingService = {
       throw new Error("Chi tiết đặt sân không tồn tại");
     }
 
-    // 2. Kiểm tra xem người dùng này có phải là người đã đặt không
+    
     if (bookingDetail.datsan?.ma_nguoi_dung !== data.ma_nguoi_dung) {
       throw new Error("Bạn không có quyền đánh giá đơn đặt sân này");
     }
 
-    // 3. Kiểm tra trạng thái đơn đặt sân (tuỳ chọn - ví dụ phải 'Hoàn thành' mới được đánh giá)
-    // Ở đây chúng ta cho phép đánh giá nếu trạng thái đặt sân là 'Đã xác nhận' hoặc 'Hoàn thành'
-    // hoặc có thể cho phép luôn nếu đã thanh toán.
+    
+    
+    
 
-    // 4. Kiểm tra xem người dùng đã đánh giá chưa
+    
     const existingRating = await prisma.danhgia.findFirst({
       where: {
         ma_nguoi_dung: data.ma_nguoi_dung,
@@ -39,14 +39,14 @@ export const ratingService = {
     });
 
     if (existingRating) {
-      // Nếu đã có, thì cập nhật số sao
+      
       return prisma.danhgia.update({
         where: { ma_danh_gia: existingRating.ma_danh_gia },
         data: { so_sao: data.so_sao, ngay_danh_gia: new Date() }
       });
     }
 
-    // 5. Nếu chưa có, tạo mới
+    
     const ma_danh_gia = `DG_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     
     return prisma.danhgia.create({

@@ -1,4 +1,4 @@
-// src/components/home/Categories.tsx
+
 const CATEGORIES = [
   { id: 'soccer', name: 'Bóng đá', icon: 'sports_soccer' },
   { id: 'basketball', name: 'Bóng rổ', icon: 'sports_basketball' },

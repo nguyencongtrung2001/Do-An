@@ -21,18 +21,18 @@ export default function OwnerTopbar() {
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Notification dropdown state
+  
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<BookingDetail[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Initialize audio
+  
   useEffect(() => {
     audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   }, []);
 
-  // Polling for pending count
+  
   useEffect(() => {
     if (!token) return;
 
@@ -56,7 +56,7 @@ export default function OwnerTopbar() {
     return () => clearInterval(interval);
   }, [token]);
 
-  // Fetch notification bookings (Chờ xử lý + Đã hủy)
+  
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
     setLoadingNotifications(true);
@@ -76,7 +76,7 @@ export default function OwnerTopbar() {
     }
   }, [token]);
 
-  // Toggle notification panel
+  
   const handleBellClick = () => {
     const next = !showNotifications;
     setShowNotifications(next);
@@ -85,7 +85,7 @@ export default function OwnerTopbar() {
     }
   };
 
-  // Close dropdown on click outside
+  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -98,7 +98,7 @@ export default function OwnerTopbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showNotifications]);
 
-  // Format time UTC
+  
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");

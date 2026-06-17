@@ -6,7 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 
-// Fix leaflet default icon issue in Next.js
+
 // @ts-expect-error - _getIconUrl is a private property in Leaflet's Icon.Default prototype
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -21,7 +21,7 @@ interface VenueMapSelectorProps {
   defaultLng?: number;
 }
 
-const DEFAULT_CENTER: [number, number] = [16.0544, 108.2022]; // Da Nang default
+const DEFAULT_CENTER: [number, number] = [16.0544, 108.2022]; 
 
 function MapUpdater({ center }: { center: [number, number] | null }) {
   const map = useMap();
@@ -43,8 +43,8 @@ export default function VenueMapSelector({ onLocationSelect, defaultLat, default
 
   const provider = new OpenStreetMapProvider({
     params: {
-      "accept-language": "vi", // Prefer Vietnamese results
-      countrycodes: "vn", // Restrict to Vietnam
+      "accept-language": "vi", 
+      countrycodes: "vn", 
     },
   });
 

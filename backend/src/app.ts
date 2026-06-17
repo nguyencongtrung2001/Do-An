@@ -23,8 +23,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Cho phép requests không có origin (như mobile apps hoặc curl requests) 
-    // hoặc origin nằm trong danh sách allowedOrigins
+    
+    
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -36,7 +36,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
-// Bắt lỗi cú pháp JSON từ body-parser
+
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
     return res.status(400).json({ 

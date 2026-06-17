@@ -5,7 +5,7 @@ const srcDir = path.join(__dirname, 'src');
 const modulesDir = path.join(srcDir, 'modules');
 const sharedDir = path.join(srcDir, 'shared');
 
-// Ensure directories exist
+
 const dirsToCreate = [
   modulesDir,
   path.join(modulesDir, 'booking'),
@@ -26,81 +26,81 @@ dirsToCreate.forEach(dir => {
   }
 });
 
-// Mapping of files to their new destinations
+
 const fileMoves = [
-  // Booking module
+  
   ['controllers/booking.controller.ts', 'modules/booking/booking.controller.ts'],
   ['services/booking.service.ts', 'modules/booking/booking.service.ts'],
   ['repositories/booking.repository.ts', 'modules/booking/booking.repository.ts'],
   ['routers/booking.routes.ts', 'modules/booking/booking.routes.ts'],
   
-  // Court module (includes field and location)
+  
   ['controllers/field.controller.ts', 'modules/court/field.controller.ts'],
   ['services/field.service.ts', 'modules/court/field.service.ts'],
   ['repositories/court.repository.ts', 'modules/court/court.repository.ts'],
   ['repositories/location.repository.ts', 'modules/court/location.repository.ts'],
   ['routers/field.routes.ts', 'modules/court/field.routes.ts'],
 
-  // User module
+  
   ['controllers/user.controller.ts', 'modules/user/user.controller.ts'],
   ['services/user.service.ts', 'modules/user/user.service.ts'],
   ['repositories/user.repository.ts', 'modules/user/user.repository.ts'],
   ['routers/user.routes.ts', 'modules/user/user.routes.ts'],
 
-  // Admin module
+  
   ['controllers/admin.controller.ts', 'modules/admin/admin.controller.ts'],
   ['services/admin.service.ts', 'modules/admin/admin.service.ts'],
   ['routers/admin.routes.ts', 'modules/admin/admin.routes.ts'],
 
-  // Owner module
+  
   ['controllers/owner.controller.ts', 'modules/owner/owner.controller.ts'],
   ['services/owner.service.ts', 'modules/owner/owner.service.ts'],
   ['routers/owner.routes.ts', 'modules/owner/owner.routes.ts'],
 
-  // Shared Middlewares
+  
   ['middlewares/auth.middleware.ts', 'shared/middlewares/auth.middleware.ts'],
   ['middlewares/errorHandler.ts', 'shared/middlewares/errorHandler.ts'],
   ['middlewares/upload.middleware.ts', 'shared/middlewares/upload.middleware.ts'],
 
-  // Shared Utils
+  
   ['utils/ApiError.ts', 'shared/utils/ApiError.ts'],
   ['utils/jwt.ts', 'shared/utils/jwt.ts'],
 
-  // Shared Configs
+  
   ['config/cloudinary.config.ts', 'shared/config/cloudinary.config.ts'],
   ['config/prisma.ts', 'shared/config/prisma.ts']
 ];
 
-// Helper to calculate relative paths between old and new directories
+
 function fixImports(content, fileMovePath) {
   const isModulePath = fileMovePath.startsWith('modules/');
   
   if (isModulePath) {
-    // If it's a module file, it went from `src/type/file.ts` to `src/modules/name/file.ts`
-    // Depth increased by 1: from `../` to `../../`
-    // Or if importing same module file, it becomes `./`
     
-    // Replace types
+    
+    
+    
+    
     content = content.replace(/from\s+['"]\.\.\/types\/(.*?)['"]/g, 'from "../../types/$1"');
     
-    // Replace middlewares, utils, config
+    
     content = content.replace(/from\s+['"]\.\.\/middlewares\/(.*?)['"]/g, 'from "../../shared/middlewares/$1"');
     content = content.replace(/from\s+['"]\.\.\/utils\/(.*?)['"]/g, 'from "../../shared/utils/$1"');
     content = content.replace(/from\s+['"]\.\.\/config\/(.*?)['"]/g, 'from "../../shared/config/$1"');
     content = content.replace(/from\s+['"]\.\.\/\.\.\/config\/(.*?)['"]/g, 'from "../../shared/config/$1"');
     
-    // Replace same module imports (e.g. controller -> service, service -> repository)
+    
     content = content.replace(/from\s+['"]\.\.\/services\/(.*?)['"]/g, 'from "./$1"');
     content = content.replace(/from\s+['"]\.\.\/repositories\/(.*?)['"]/g, 'from "./$1"');
     content = content.replace(/from\s+['"]\.\.\/controllers\/(.*?)['"]/g, 'from "./$1"');
     content = content.replace(/from\s+['"]\.\.\/routers\/(.*?)['"]/g, 'from "./$1"');
 
-    // Cross-module imports? (e.g. user.service from booking)
-    // Actually, simple regex might fail if cross module. Let's hope there's minimal cross-module imports.
-    // We can run `tsc` later to verify.
+    
+    
+    
   } else if (fileMovePath.startsWith('shared/')) {
-    // Moved from `src/middlewares/` to `src/shared/middlewares/`
-    // Depth increased by 1
+    
+    
     content = content.replace(/from\s+['"]\.\.\/utils\/(.*?)['"]/g, 'from "../utils/$1"');
     content = content.replace(/from\s+['"]\.\.\/config\/(.*?)['"]/g, 'from "../config/$1"');
     content = content.replace(/from\s+['"]\.\.\/middlewares\/(.*?)['"]/g, 'from "../middlewares/$1"');
@@ -111,7 +111,7 @@ function fixImports(content, fileMovePath) {
   return content;
 }
 
-// Perform moves and updates
+
 fileMoves.forEach(([oldPath, newPath]) => {
   const oldFullPath = path.join(srcDir, oldPath);
   const newFullPath = path.join(srcDir, newPath);

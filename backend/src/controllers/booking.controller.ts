@@ -63,7 +63,7 @@ export const cancelBookingHandler = async (req: Request, res: Response, next: Ne
 };
 
 export const vnpayReturn = async (req: Request, res: Response) => {
-  // req.query đã được Express decode sẵn
+  
   const vnp_Params = req.query as Record<string, string>;
  
   console.log('[VNPay Return] params:', vnp_Params);

@@ -4,9 +4,9 @@
  * Matches DB constraint: 'Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành', 'Đã hủy'
  */
 
-// ==============================
-// Status Config Type
-// ==============================
+
+
+
 export interface StatusConfig {
   bg: string;
   text: string;
@@ -15,9 +15,9 @@ export interface StatusConfig {
   border: string;
 }
 
-// ==============================
-// Main Config Map
-// ==============================
+
+
+
 export const BOOKING_STATUS_CONFIG: Record<string, StatusConfig> = {
   "Chờ xử lý":   { bg: "bg-amber-50",  text: "text-amber-700",  gradient: "linear-gradient(135deg, #f59e0b, #d97706)", label: "Chờ xử lý",   border: "border-amber-200" },
   "Đã xác nhận":  { bg: "bg-green-50",  text: "text-green-700",  gradient: "linear-gradient(135deg, #22c55e, #16a34a)", label: "Đã xác nhận",  border: "border-green-200" },
@@ -34,9 +34,9 @@ export const DEFAULT_STATUS_CONFIG: StatusConfig = {
   border: "border-gray-200",
 };
 
-// ==============================
-// Status Filter Type
-// ==============================
+
+
+
 export type StatusFilter = "all" | "Chờ xử lý" | "Đã xác nhận" | "Đã nhận sân" | "Hoàn thành" | "Đã hủy";
 
 export const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -48,9 +48,9 @@ export const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "Đã hủy", label: "Đã hủy" },
 ];
 
-// ==============================
-// Helpers
-// ==============================
+
+
+
 export function getStatusConfig(status: string): StatusConfig {
   return BOOKING_STATUS_CONFIG[status] || DEFAULT_STATUS_CONFIG;
 }

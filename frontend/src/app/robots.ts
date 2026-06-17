@@ -7,15 +7,15 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          // Admin routes
+          
           '/users',
           '/approvals',
           '/finance',
-          // Owner routes
+          
           '/dashboard',
           '/status',
           '/bookings',
-          // User-private routes
+          
           '/profile',
           '/history',
           '/payment',

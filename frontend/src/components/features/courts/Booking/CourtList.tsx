@@ -22,15 +22,15 @@ export default function CourtList({
   selectedSlots,
   onSlotToggle,
 }: CourtListProps) {
-  // State lưu map: { [ma_san]: BookedSlot[] }
+  
   const [bookedSlotsMap, setBookedSlotsMap] = useState<Record<string, { gio_bat_dau: string; gio_ket_thuc: string }[]>>({});
 
-  // Fetch booked slots khi selectedDate thay đổi hoặc khi selectedCourt thay đổi
+  
   useEffect(() => {
     const fetchBookedSlots = async () => {
       const newMap: Record<string, { gio_bat_dau: string; gio_ket_thuc: string }[]> = {};
 
-      // Fetch cho tất cả sân (hoặc chỉ sân đang mở nếu muốn tối ưu)
+      
       await Promise.all(
         location.sans.map(async (court) => {
           try {

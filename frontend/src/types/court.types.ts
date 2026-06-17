@@ -9,7 +9,7 @@ export interface Court {
   }[];
 }
 
-// API response type for GET /field
+
 export interface CourtApiItem {
   ma_san: string;
   ten_san: string;
@@ -23,7 +23,7 @@ export interface CourtApiItem {
   gia_thue_30p?: number;
 }
 
-// Mapped court item used in CourtGrid
+
 export interface CourtGridItem {
   id: string | number;
   name: string;
@@ -35,7 +35,7 @@ export interface CourtGridItem {
   slug: string;
 }
 
-// Mapped court item used in MapClient
+
 export interface CourtMapData {
   id: number;
   name: string;
@@ -50,7 +50,7 @@ export interface CourtMapData {
   slug: string;
 }
 
-// Data for locations in the map
+
 export interface LocationMapData {
   ma_dia_diem: string;
   ten_dia_diem: string;
@@ -61,7 +61,7 @@ export interface LocationMapData {
   image: string;
 }
 
-// Owner court type from API
+
 export interface OwnerCourt {
   ma_san: string;
   ten_san: string;
@@ -75,7 +75,7 @@ export interface OwnerCourt {
   }[];
 }
 
-// API response types
+
 export type FieldListResponse = CourtApiItem[];
 
 export interface OwnerCourtsResponse {
@@ -95,7 +95,7 @@ export interface UpdateCourtResponse {
   court: unknown;
 }
 
-// Detail court within a location
+
 export interface DetailCourt {
   ma_san: string;
   ten_san: string;
@@ -111,7 +111,7 @@ export interface DetailCourt {
   }[];
 }
 
-// Location detail response from GET /field/slug/:slug
+
 export interface LocationDetail {
   ma_dia_diem: string;
   ten_dia_diem: string;

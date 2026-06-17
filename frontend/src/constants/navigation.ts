@@ -1,5 +1,5 @@
-// ── Navigation Constants ──
-// Centralized navigation data, shared between Navbar and other components.
+
+
 
 import type { NavLink } from "@/types";
 

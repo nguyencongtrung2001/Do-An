@@ -19,16 +19,16 @@ export function useOwnerBookings() {
       const data = await bookingService.getOwnerBookings(token);
       if (data.success) {
         setBookings(data.bookings);
-        // Extract unique courts for the timeline
+        
         const uniqueCourts = Array.from(
           new Set(data.bookings.map(b => JSON.stringify({ ma_san: b.san.ma_san, ten_san: b.san.ten_san })))
         ).map(s => {
           const parsed = JSON.parse(s as string);
           return {
             ...parsed,
-            loai_the_thao: "Bóng đá", // Mocked as required by interface
-            trang_thai_san: "Đang hoạt động", // Mocked as required by interface
-            gia_thue_30p: 100000, // Mocked as required by interface
+            loai_the_thao: "Bóng đá", 
+            trang_thai_san: "Đang hoạt động", 
+            gia_thue_30p: 100000, 
           } as OwnerCourt;
         });
 

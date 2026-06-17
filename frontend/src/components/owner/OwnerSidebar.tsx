@@ -24,19 +24,19 @@ export default function OwnerSidebar() {
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Notification dropdown state
+  
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<BookingDetail[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Initialize audio
+  
   useEffect(() => {
     audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   }, []);
 
-  // Polling for pending count
+  
   useEffect(() => {
     if (!token) return;
 
@@ -68,7 +68,7 @@ export default function OwnerSidebar() {
     return () => clearInterval(interval);
   }, [token]);
 
-  // Fetch notification bookings (Chờ xử lý + Đã hủy)
+  
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
     setLoadingNotifications(true);
@@ -88,13 +88,13 @@ export default function OwnerSidebar() {
     }
   }, [token]);
 
-  // Toggle notification panel
+  
   const handleBellClick = () => {
     const next = !showNotifications;
     setShowNotifications(next);
     if (next) {
       fetchNotifications();
-      // Hide badge by marking current count as seen
+      
       setLastSeenCount(pendingCount);
       localStorage.setItem("owner_last_seen_count", pendingCount.toString());
     }
@@ -102,7 +102,7 @@ export default function OwnerSidebar() {
 
   const displayBadgeCount = Math.max(0, pendingCount - lastSeenCount);
 
-  // Close dropdown on click outside
+  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -115,7 +115,7 @@ export default function OwnerSidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showNotifications]);
 
-  // Format time UTC
+  
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");

@@ -639,7 +639,7 @@ function CourtCard({ court, isSelected, onSelect, selectedDate, selectedSlots, o
                   onClick={() => onSlotToggle(slot)}
                   className={`px-1 py-2 text-xs font-medium transition-all ${radiusClass} ${borderClass} ${
                     isActive
-                      ? "bg-blue-700 text-white shadow-sm z-10 relative" // Đổi màu xanh đậm
+                      ? "bg-blue-700 text-white shadow-sm z-10 relative" 
                       : "bg-white text-slate-600 hover:bg-primary/5 hover:border-primary/30 border-gray-200 m-0.5 rounded-lg z-0"
                   }`}
                 >

@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useOwnerBookings } from "@/hooks/useOwnerBookings";
 import type { BookingDetail } from "@/types/booking.types";
 
-// ==============================
-// Status Config — khớp với DB constraint
-// ==============================
+
+
+
 const STATUS_CONFIG: Record<string, { bg: string; text: string; gradient: string; label: string; border: string }> = {
   "Chờ xử lý":   { bg: "bg-amber-50",  text: "text-amber-700",  gradient: "linear-gradient(135deg, #f59e0b, #d97706)", label: "Chờ xử lý",   border: "border-amber-200" },
   "Đã xác nhận":  { bg: "bg-green-50",  text: "text-green-700",  gradient: "linear-gradient(135deg, #22c55e, #16a34a)", label: "Đã xác nhận",  border: "border-green-200" },
@@ -17,12 +17,12 @@ const STATUS_CONFIG: Record<string, { bg: string; text: string; gradient: string
 
 const DEFAULT_STATUS = { bg: "bg-gray-50", text: "text-gray-700", gradient: "linear-gradient(135deg, #94a3b8, #64748b)", label: "Không rõ", border: "border-gray-200" };
 
-// Khoảng giờ timeline: 6:00 → 22:00 (mỗi cột = 30 phút)
+
 const TIMELINE_START_HOUR = 6;
 const TIMELINE_END_HOUR = 22;
-const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; // 32 cột
+const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; 
 
-// Tạo mảng nhãn header: 6:00, 6:30, 7:00, 7:30, ...
+
 const TIMELINE_LABELS: string[] = [];
 for (let h = TIMELINE_START_HOUR; h < TIMELINE_END_HOUR; h++) {
   TIMELINE_LABELS.push(`${h}:00`);

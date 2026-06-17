@@ -1,4 +1,4 @@
-// src/components/shared/CourtCard.tsx
+
 import Image from "next/image";
 import Link from "next/link";
 import { StaticImageData } from "next/image";

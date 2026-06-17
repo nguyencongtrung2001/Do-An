@@ -13,7 +13,7 @@ export class GoogleAuthService {
       throw new ApiError(400, "Token is required");
     }
 
-    // Verify Google ID Token
+    
     let payload;
     try {
       const ticket = await client.verifyIdToken({
@@ -35,11 +35,11 @@ export class GoogleAuthService {
     const picture = payload.picture ?? undefined;
     const googleId = payload.sub;
 
-    // Find user by email
+    
     let user = await userRepository.findByEmail(email);
 
     if (!user) {
-      // Create new user if not exists
+      
       const newId = await userRepository.generateNextUserId();
       user = await userRepository.create({
         ma_nguoi_dung: newId,
@@ -50,7 +50,7 @@ export class GoogleAuthService {
         trang_thai: true,
       });
     } else {
-      // Update ma_google and anh_dai_dien if they are missing/different
+      
       if (user.ma_google !== googleId || user.anh_dai_dien !== picture) {
         user = await userRepository.update(user.ma_nguoi_dung, {
           ma_google: googleId,
@@ -63,7 +63,7 @@ export class GoogleAuthService {
       throw new ApiError(500, "Failed to process user data");
     }
 
-    // Generate JWT
+    
     const token = generateToken({ id: user.ma_nguoi_dung, role: user.vai_tro });
 
     return { user, token };

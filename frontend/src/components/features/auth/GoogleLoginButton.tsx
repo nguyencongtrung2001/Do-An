@@ -7,14 +7,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { UserData } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
-// Kiểu dữ liệu trả về từ backend /auth/google
+
 interface GoogleAuthResponse {
   success: boolean;
   data?: {
     token: string;
     user: UserData;
   };
-  // Một số backend trả thẳng token/user ở root (không lồng trong data)
+  
   token?: string;
   user?: UserData;
 }
@@ -35,7 +35,7 @@ export default function GoogleLoginButton() {
         idToken: credentialResponse.credential,
       });
 
-      // Hỗ trợ cả 2 cấu trúc response: { data: { token, user } } hoặc { token, user }
+      
       const token = res?.data?.token ?? res?.token;
       const user = res?.data?.user ?? res?.user;
 

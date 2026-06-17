@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AuthTab, Role } from "@/types/auth.types";
 
-// Sub-components
+
 import RoleSelector from "./RoleSelector";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";

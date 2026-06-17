@@ -4,9 +4,9 @@
  * Also absorbs sport.utils.ts normalizeSport function.
  */
 
-// ==============================
-// Sport Labels (Vietnamese display names)
-// ==============================
+
+
+
 export const SPORT_LABELS: Record<string, string> = {
   "bong-da": "Bóng đá",
   "cau-long": "Cầu lông",
@@ -16,9 +16,9 @@ export const SPORT_LABELS: Record<string, string> = {
   "bida": "Bi-da",
 };
 
-// ==============================
-// Sport Labels with Icons (for UI filter pills / court cards)
-// ==============================
+
+
+
 export const SPORT_LABELS_WITH_ICONS: Record<string, string> = {
   "bong-da": "⚽ Bóng đá",
   "cau-long": "🏸 Cầu lông",
@@ -28,9 +28,9 @@ export const SPORT_LABELS_WITH_ICONS: Record<string, string> = {
   "bida": "🎱 Bi-da",
 };
 
-// ==============================
-// Sport Icons (emoji only)
-// ==============================
+
+
+
 export const SPORT_ICONS: Record<string, string> = {
   "bong-da": "⚽",
   "cau-long": "🏸",
@@ -40,9 +40,9 @@ export const SPORT_ICONS: Record<string, string> = {
   "bida": "🎱",
 };
 
-// ==============================
-// Filter options for sport selection UI
-// ==============================
+
+
+
 export const SPORT_FILTERS = [
   { value: "all", label: "Tất cả", icon: "🏟️" },
   { value: "bong-da", label: "Bóng đá", icon: "⚽" },
@@ -54,10 +54,10 @@ export const SPORT_FILTERS = [
 
 export type SportFilterValue = (typeof SPORT_FILTERS)[number]["value"];
 
-// ==============================
-// Normalize Vietnamese sport name → slug
-// Absorbed from utils/sport.utils.ts
-// ==============================
+
+
+
+
 export function normalizeSport(sport: string): string {
   const normalized = sport?.toLowerCase() || "";
   if (normalized.includes("đá")) return "bong-da";

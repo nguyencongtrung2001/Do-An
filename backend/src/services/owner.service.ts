@@ -13,7 +13,7 @@ export class OwnerService {
   async registerOwner(data: CreateOwner) {
     const { ho_ten, email, so_dien_thoai, mat_khau, anh_cccd_truoc, anh_cccd_sau, ten_dia_diem, dia_chi, kinh_do, vi_do, anh_dai_dien } = data;
 
-    // 1. Check if email or phone already exists
+    
     const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
 
     if (existingUser) {
@@ -21,15 +21,15 @@ export class OwnerService {
       if (existingUser.so_dien_thoai === so_dien_thoai) throw new ApiError(400, "Số điện thoại đã tồn tại trong hệ thống");
     }
 
-    // 2. Generate next IDs
+    
     const newUserId = await userRepository.generateNextUserId();
     const newLocationId = await locationRepository.generateNextLocationId();
 
-    // 3. Hash password
+    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(mat_khau, salt);
 
-    // 4. Transaction: Save User and Location atomically
+    
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.nguoidung.create({
         data: {
@@ -39,7 +39,7 @@ export class OwnerService {
           so_dien_thoai,
           mat_khau: hashedPassword,
           vai_tro: "Chủ sân",
-          trang_thai: false, // Wait for admin approval
+          trang_thai: false, 
           anh_cccd_truoc,
           anh_cccd_sau,
           anh_dai_dien: anh_dai_dien || null
@@ -60,7 +60,7 @@ export class OwnerService {
       return { user, location };
     });
 
-    // 5. Return token and user info
+    
     const token = generateToken({ id: result.user.ma_nguoi_dung, role: result.user.vai_tro });
     return { user: result.user, location: result.location, token };
   }
@@ -74,13 +74,13 @@ export class OwnerService {
   async addCourt(userId: string, data: any, images: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
-    // Check if owner is approved
+    
     const user = await userRepository.findById(userId);
     if (!user || !user.trang_thai) {
       throw new ApiError(403, "Tài khoản của bạn chưa được duyệt, không thể thêm sân.");
     }
 
-    // 1. Find owner's location
+    
     const location = await locationRepository.findFirstByOwnerId(userId);
 
     if (!location) {
@@ -91,10 +91,10 @@ export class OwnerService {
       throw new ApiError(403, "Địa điểm của bạn chưa được duyệt, không thể thêm sân.");
     }
 
-    // 2. Generate next court ID
+    
     const newSanId = await courtRepository.generateNextCourtId();
 
-    // 3. Create court and images in transaction
+    
     return prisma.$transaction(async (tx) => {
       const san = await tx.san.create({
         data: {
@@ -108,7 +108,7 @@ export class OwnerService {
       });
 
       if (images && images.length > 0) {
-        // Generate sequential IDs (IMG001, IMG002, ...)
+        
         const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
         let nextNum = 1;
         if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {

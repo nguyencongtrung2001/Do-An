@@ -16,7 +16,6 @@ model anhsan {
   san           san?      @relation(fields: [ma_san], references: [ma_san], onDelete: NoAction, onUpdate: NoAction)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model danhgia {
   ma_danh_gia         String         @id @db.VarChar(50)
   ma_nguoi_dung       String?        @db.VarChar(50)
@@ -27,7 +26,6 @@ model danhgia {
   nguoidung           nguoidung?     @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model datsan {
   ma_dat_san             String          @id @db.VarChar(50)
   ma_nguoi_dung          String?         @db.VarChar(50)
@@ -39,7 +37,6 @@ model datsan {
   giaodich               giaodich[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model datsanchitiet {
   ma_dat_san_chi_tiet String    @id @db.VarChar(50)
   ma_dat_san          String?   @db.VarChar(50)
@@ -69,7 +66,6 @@ model diadiem {
   san              san[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model giaodich {
   ma_giao_dich         String     @id @db.VarChar(50)
   ma_dat_san           String?    @db.VarChar(50)
@@ -88,7 +84,6 @@ model giaodich {
   nguoidung            nguoidung? @relation(fields: [ma_nguoi_dung], references: [ma_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model nguoidung {
   ma_nguoi_dung  String     @id @db.VarChar(50)
   ho_ten         String     @db.VarChar(255)
@@ -110,7 +105,6 @@ model nguoidung {
   giaodich       giaodich[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model san {
   ma_san         String          @id @db.VarChar(50)
   ma_dia_diem    String?         @db.VarChar(50)

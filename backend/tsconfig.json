@@ -8,7 +8,6 @@
     "target": "esnext",
     "types": ["node"],
     
-    // ✅ Đã sửa: Xóa baseUrl + chỉnh paths cho đúng
     "paths": {
       "@/*": ["./src/*"]
     },

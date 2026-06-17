@@ -7,9 +7,9 @@ import { apiGet, apiPost } from "@/services/api";
 import { toast } from "react-hot-toast";
 import RatingModal from "./RatingModal";
 
-// ==============================
-// Types
-// ==============================
+
+
+
 interface BookingDetail {
   ma_dat_san_chi_tiet: string;
   ngay_dat: string;
@@ -35,9 +35,9 @@ interface Booking {
   datsanchitiet: BookingDetail[];
 }
 
-// ==============================
-// Component
-// ==============================
+
+
+
 export default function HistoryClient() {
   const { user, token } = useAuth() || {};
   const [bookings, setBookings] = useState<Booking[]>([]);

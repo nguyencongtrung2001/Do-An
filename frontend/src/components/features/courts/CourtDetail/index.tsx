@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 import { useBooking } from "@/hooks/useBooking";
 
-// Sub-components
+
 import CourtGallery from "./CourtGallery";
 import CourtHeader from "./CourtHeader";
 import CourtList from "../Booking/CourtList";

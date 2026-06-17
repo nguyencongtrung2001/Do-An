@@ -8,7 +8,7 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
   try {
     const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi, kinh_do, vi_do } = req.body;
 
-    // Extract files from Multer
+    
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const cccdTruocFile = files?.['anh_cccd_truoc']?.[0];
     const cccdSauFile = files?.['anh_cccd_sau']?.[0];
@@ -18,13 +18,13 @@ export const registerOwner = async (req: Request, res: Response, next: NextFunct
       throw new ApiError(400, "Thiếu ảnh CCCD");
     }
 
-    // Upload CCCD images to Cloudinary
+    
     const [cccdTruocResult, cccdSauResult] = await Promise.all([
       cloudinary.uploader.upload(cccdTruocFile.path, { folder: 'bookingsport/cccd' }),
       cloudinary.uploader.upload(cccdSauFile.path, { folder: 'bookingsport/cccd' }),
     ]);
 
-    // Upload avatar if provided
+    
     let anh_dai_dien: string | undefined;
     if (avatarFile) {
       const avatarResult = await cloudinary.uploader.upload(avatarFile.path, { folder: 'bookingsport/avatars' });
@@ -92,7 +92,7 @@ export const updateCourt = async (req: AuthRequest, res: Response, next: NextFun
       throw new ApiError(400, "Thiếu mã sân");
     }
 
-    // Extract uploaded images (if any). Undefined if no files uploaded.
+    
     const files = req.files as Express.Multer.File[] | undefined;
     const images = files && files.length > 0
       ? files.map(f => ({ url: (f as any).path, public_id: (f as any).filename }))

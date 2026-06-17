@@ -73,7 +73,7 @@ export class BookingRepository {
 
   async createBooking(bookingData: any, detailsData: any[], walletDeduction?: { userId: string, amount: number }) {
     return prisma.$transaction(async (tx) => {
-      // 1. Deduct wallet if provided
+      
       if (walletDeduction) {
         const user = await tx.nguoidung.findUnique({
           where: { ma_nguoi_dung: walletDeduction.userId }
@@ -92,12 +92,12 @@ export class BookingRepository {
         });
       }
 
-      // 2. Create booking
+      
       const newBooking = await tx.datsan.create({
         data: bookingData
       });
 
-      // 3. Create details
+      
       await tx.datsanchitiet.createMany({
         data: detailsData.map(d => ({
           ...d,
@@ -132,20 +132,20 @@ export class BookingRepository {
 
   async cancelBookingWithRefund(bookingId: string, userId: string, refundAmount: number) {
     return prisma.$transaction(async (tx) => {
-      // 1. Update all details to "Đã hủy"
+      
       await tx.datsanchitiet.updateMany({
         where: { ma_dat_san: bookingId },
         data: { trang_thai_dat: "Đã hủy" }
       });
 
-      // 2. Increment wallet if refund > 0
+      
       if (refundAmount > 0) {
         await tx.nguoidung.update({
           where: { ma_nguoi_dung: userId },
           data: { so_vi_du: { increment: refundAmount } }
         });
 
-        // 3. Create a transaction record for the refund
+        
         await tx.giaodich.create({
           data: {
             ma_giao_dich: `RF_${Date.now()}_${Math.floor(Math.random() * 1000)}`,

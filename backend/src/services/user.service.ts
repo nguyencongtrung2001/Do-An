@@ -10,7 +10,7 @@ export class UserService {
   async createUser(data: User.UserClient) {
     const { ho_ten, email, so_dien_thoai, mat_khau } = data;
 
-    // 1. Check if email or phone already exists
+    
     const existingUser = await userRepository.findByEmailOrPhone(email, so_dien_thoai);
 
     if (existingUser) {
@@ -22,14 +22,14 @@ export class UserService {
       }
     }
 
-    // 2. Generate next user ID
+    
     const newId = await userRepository.generateNextUserId();
 
-    // 3. Hash password
+    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(mat_khau, salt);
 
-    // 4. Save to database via repository
+    
     const user = await userRepository.create({
       ma_nguoi_dung: newId,
       ho_ten,
@@ -53,7 +53,7 @@ export class UserService {
       throw new ApiError(404, "User not found");
     }
 
-    // Check if account was created via Google and has no password
+    
     if (user.ma_google && !user.mat_khau) {
       throw new ApiError(400, "Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google");
     }
@@ -81,7 +81,7 @@ export class UserService {
       throw new ApiError(404, "Không tìm thấy người dùng");
     }
 
-    // Return safe user profile data (exclude password)
+    
     return {
       ma_nguoi_dung: user.ma_nguoi_dung,
       ho_ten: user.ho_ten,
@@ -102,7 +102,7 @@ export class UserService {
       throw new ApiError(404, "Không tìm thấy người dùng");
     }
 
-    // Delete old avatar from Cloudinary if it exists
+    
     if (user.anh_cloudinary) {
       try {
         await cloudinary.uploader.destroy(user.anh_cloudinary);
@@ -111,7 +111,7 @@ export class UserService {
       }
     }
 
-    // Update user avatar in database
+    
     const updatedUser = await userRepository.update(userId, {
       anh_dai_dien: avatarUrl,
       anh_cloudinary: cloudinaryId,

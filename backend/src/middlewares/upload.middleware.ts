@@ -2,7 +2,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../config/cloudinary.config.js';
 
-// Storage for CCCD images (ID cards)
+
 const cccdStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -11,7 +11,7 @@ const cccdStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage for avatar images
+
 const avatarStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -20,7 +20,7 @@ const avatarStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage for court images
+
 const courtStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {

@@ -41,7 +41,7 @@ export const updateAvatar = async (req: AuthRequest, res: Response, next: NextFu
       throw new ApiError(400, 'Vui lòng chọn ảnh đại diện');
     }
 
-    // Upload to Cloudinary
+    
     const result = await cloudinary.uploader.upload(file.path, {
       folder: 'bookingsport/avatars',
       transformation: [
@@ -49,7 +49,7 @@ export const updateAvatar = async (req: AuthRequest, res: Response, next: NextFu
       ]
     });
 
-    // Update user in database
+    
     const updatedUser = await userService.updateAvatar(userId, result.secure_url, result.public_id);
 
     res.json({

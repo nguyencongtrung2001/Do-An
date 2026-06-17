@@ -17,9 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useOwnerBookings } from "@/hooks/useOwnerBookings";
 import { useAuth } from "@/contexts/AuthContext";
 
-// ==============================
-// Types
-// ==============================
+
+
+
 interface StatCardProps {
   title: string;
   value: string;
@@ -30,9 +30,9 @@ interface StatCardProps {
   color: string;
 }
 
-// ==============================
-// Component
-// ==============================
+
+
+
 export default function OwnerDashboardClient() {
   const { bookings, courts, loading } = useOwnerBookings();
   const { user } = useAuth();
@@ -46,9 +46,9 @@ export default function OwnerDashboardClient() {
     });
   });
 
-  // ==============================
-  // Computed Stats từ dữ liệu thực
-  // ==============================
+  
+  
+  
   const stats = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
 
@@ -74,7 +74,7 @@ export default function OwnerDashboardClient() {
     const todayPending = todayBookings.filter(b => b.trang_thai_dat === "Chờ xử lý").length;
     const todayConfirmed = todayBookings.filter(b => b.trang_thai_dat === "Đã xác nhận").length;
 
-    // Unique customers
+    
     const uniqueCustomers = new Set(
       bookings.map(b => b.datsan?.nguoidung?.ho_ten).filter(Boolean)
     ).size;
@@ -96,14 +96,14 @@ export default function OwnerDashboardClient() {
     };
   }, [bookings, courts]);
 
-  // Recent bookings (5 gần nhất)
+  
   const recentBookings = useMemo(() => {
     return [...bookings]
       .sort((a, b) => new Date(b.datsan?.ngay_tao).getTime() - new Date(a.datsan?.ngay_tao).getTime())
       .slice(0, 5);
   }, [bookings]);
 
-  // Format time UTC
+  
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");
