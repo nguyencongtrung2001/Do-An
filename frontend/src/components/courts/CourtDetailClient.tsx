@@ -57,15 +57,11 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   for (const marker of sorted) {
     if (!currentGroup) {
       // Marker đầu tiên — giờ kết thúc tạm = chính gio_bat_dau của marker này
-      const [h, m] = marker.gio_bat_dau.split(':').map(Number);
-      const endDate = new Date(0, 0, 0, h, m + 30);
-      const endTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
-
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: endTime, 
+        gio_ket_thuc: marker.gio_bat_dau, 
         slots: [marker],
-        gia_thue: marker.gia_thue 
+        gia_thue: 0 
       };
     } else {
       // Kiểm tra marker này có liên tiếp 30p sau marker trước không
@@ -83,28 +79,17 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
-        const [mh, mm] = marker.gio_bat_dau.split(':').map(Number);
-        const mEndDate = new Date(0, 0, 0, mh, mm + 30);
-        const mEndTime = `${String(mEndDate.getHours()).padStart(2, '0')}:${String(mEndDate.getMinutes()).padStart(2, '0')}`;
-        
-        currentGroup.gio_ket_thuc = mEndTime;
+        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.slots.push(marker);
-        // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
-        currentGroup.gia_thue = currentGroup.slots.length * currentGroup.slots[0].gia_thue;
+        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
       } else {
         // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
-        
-        const [mh, mm] = marker.gio_bat_dau.split(':').map(Number);
-        const mEndDate = new Date(0, 0, 0, mh, mm + 30);
-        const mEndTime = `${String(mEndDate.getHours()).padStart(2, '0')}:${String(mEndDate.getMinutes()).padStart(2, '0')}`;
-
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: mEndTime, 
+          gio_ket_thuc: marker.gio_bat_dau, 
           slots: [marker],
-          gia_thue: marker.gia_thue
+          gia_thue: 0
         };
       }
     }
@@ -210,7 +195,8 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         
         // Convert markers back to 30-min slots for backend, exclude the boundary marker
         const slotsForBackend = groupedSlots.flatMap(group => {
-          return group.slots.map(marker => {
+          const playableSlots = group.slots.slice(0, -1);
+          return playableSlots.map(marker => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
@@ -649,20 +635,13 @@ function CourtCard({ court, isSelected, onSelect, selectedDate, selectedSlots, o
                 <button
                   key={slot}
                   onClick={() => onSlotToggle(slot)}
-                  className={`px-1 py-1.5 transition-all flex flex-col items-center justify-center gap-0.5 ${radiusClass} ${borderClass} ${
+                  className={`px-1 py-2 text-xs font-medium transition-all ${radiusClass} ${borderClass} ${
                     isActive
                       ? "bg-blue-700 text-white shadow-sm z-10 relative" 
                       : "bg-white text-slate-600 hover:bg-primary/5 hover:border-primary/30 border-gray-200 m-0.5 rounded-lg z-0"
                   }`}
                 >
-                  <span className="text-xs font-semibold">{slot}</span>
-                  <span className={`text-[9px] ${isActive ? "text-blue-200" : "text-slate-400"}`}>
-                    - {(() => {
-                      const [h, m] = slot.split(':').map(Number);
-                      const d = new Date(0, 0, 0, h, m + 30);
-                      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    })()}
-                  </span>
+                  {slot}
                 </button>
               );
             })}

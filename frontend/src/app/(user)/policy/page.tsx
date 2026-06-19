@@ -2,9 +2,9 @@ export default function PolicyPage() {
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-green-600 px-8 py-6">
+        <div className="bg-gray-400 px-8 py-6">
           <h1 className="text-3xl font-bold text-white">Chính sách & Quy định</h1>
-          <p className="text-green-100 mt-2">Các điều khoản, chính sách và quy định áp dụng tại SportLink</p>
+          <p className="text-black mt-2">Các điều khoản, chính sách và quy định áp dụng tại SportLink</p>
         </div>
         
         <div className="p-8 space-y-8 text-gray-700">
@@ -27,6 +27,7 @@ export default function PolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3 pb-2 border-b">Chính sách hoàn tiền & huỷ lịch</h2>
             <ul className="list-disc pl-5 space-y-2 text-gray-600">
+              <li>Trường hợp quý khách huỷ sân <strong>trước 30 phút</strong> kể từ lúc đặt: Hoàn lại <strong>100%</strong> số tiền đã thanh toán.</li>
               <li>Trường hợp quý khách huỷ sân <strong>sau 30 phút</strong> kể từ lúc đặt: Hoàn lại <strong>50%</strong> số tiền đã thanh toán.</li>
               <li>Trường hợp quý khách huỷ sân <strong>sau 1 tiếng</strong> kể từ lúc đặt: <strong>Không hoàn tiền</strong>.</li>
             </ul>
