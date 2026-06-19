@@ -109,13 +109,16 @@ export default function OwnerBookingsClient() {
     return getStatusConfig(status).label;
   };
 
-  // Filter bookings for the selected date
+  // Filter bookings for the selected date (exclude cancelled by default)
   const filteredByDate = bookings.filter(b => {
     const bDate = new Date(b.ngay_dat).toISOString().split("T")[0];
     return bDate === dateStr;
   });
 
-  // Filter bookings by status tab
+  // Bookings excluding cancelled for timeline
+  const activeBookings = filteredByDate.filter(b => b.trang_thai_dat !== "Đã hủy");
+
+  // Filter bookings by status tab for the list below (keep all, including cancelled)
   const filteredBookings = statusFilter === "all"
     ? filteredByDate
     : filteredByDate.filter(b => b.trang_thai_dat === statusFilter);
@@ -183,7 +186,7 @@ export default function OwnerBookingsClient() {
             ) : courts.length === 0 ? (
               <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
             ) : courts.map(court => {
-              const courtBookings = filteredByDate.filter(b => b.ma_san === court.ma_san);
+              const courtBookings = activeBookings.filter(b => b.ma_san === court.ma_san);
 
               return (
                 <div key={court.ma_san} className="tl-row min-w-[1400px]">
