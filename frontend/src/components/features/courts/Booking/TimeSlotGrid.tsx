@@ -109,9 +109,9 @@ export default function TimeSlotGrid({
                   <button
                     key={slot}
                     disabled
-                    className="px-1 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
+                    className="px-1 py-2 font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
                   >
-                    <span>{slot}</span>
+                    <span className="text-xs">{slot}</span>
                     <span className="text-[10px] text-red-400 font-semibold">Đã đặt</span>
                   </button>
                 );
@@ -140,13 +140,20 @@ export default function TimeSlotGrid({
                 <button
                   key={slot}
                   onClick={() => onSlotToggle(slot)}
-                  className={`px-1 py-2 text-xs font-medium transition-all ${radiusClass} ${borderClass} ${
+                  className={`px-1 py-1.5 transition-all flex flex-col items-center justify-center gap-0.5 ${radiusClass} ${borderClass} ${
                     isActive
                       ? "bg-blue-700 text-white shadow-sm z-10 relative"
                       : "bg-white text-slate-600 hover:bg-primary/5 hover:border-primary/30 border-gray-200 m-0.5 rounded-lg z-0"
                   }`}
                 >
-                  {slot}
+                  <span className="text-xs font-semibold">{slot}</span>
+                  <span className={`text-[9px] ${isActive ? "text-blue-200" : "text-slate-400"}`}>
+                    - {(() => {
+                      const [h, m] = slot.split(':').map(Number);
+                      const d = new Date(0, 0, 0, h, m + 30);
+                      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    })()}
+                  </span>
                 </button>
               );
             })}
