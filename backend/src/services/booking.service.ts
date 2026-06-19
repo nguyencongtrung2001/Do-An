@@ -33,16 +33,7 @@ interface MergedSlot {
 
 
 
-/**
- * Gộp các khung giờ liên tiếp trên cùng một sân thành 1 bản ghi duy nhất.
- *
- * Ví dụ: [06:00-06:30, 06:30-07:00, 07:00-07:30, 09:00-09:30]
- *   → [06:00-07:30, 09:00-09:30]
- *
- * Quy tắc:
- *   - Cùng ma_san VÀ cùng ngay_dat
- *   - gio_ket_thuc của slot trước === gio_bat_dau của slot sau
- */
+
 function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
   if (slots.length === 0) return [];
 
@@ -97,10 +88,7 @@ function mergeSlots(slots: FormattedSlot[]): MergedSlot[] {
   return merged;
 }
 
-/**
- * Chuyển chuỗi "HH:mm" thành Date dạng UTC 1970-01-01T[HH:mm:ss]Z
- * Giúp Prisma lưu đúng giá trị Time mà không bị lệch múi giờ.
- */
+
 function parseTimeUTC(timeStr: string): Date {
   if (!timeStr || !/^\d{2}:\d{2}$/.test(timeStr)) {
     throw new ApiError(400, "Định dạng giờ không hợp lệ");
@@ -109,9 +97,7 @@ function parseTimeUTC(timeStr: string): Date {
   return new Date(`1970-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00Z`);
 }
 
-// ==============================
-// Service
-// ==============================
+
 export class BookingService {
   async TaoDonDatSan(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }, ipAddr: string = '127.0.0.1') {
     const { ma_nguoi_dung, phuong_thuc_thanh_toan, selectedSlots } = data;
@@ -124,7 +110,6 @@ export class BookingService {
       throw new ApiError(401, "Bạn chưa đăng nhập.");
     }
 
-    // 1. Parse raw strings → Date objects
     const formattedSlots: FormattedSlot[] = selectedSlots.map((s) => ({
       ma_san: s.ma_san,
       ngay_dat: new Date(s.ngay_dat),
@@ -133,22 +118,14 @@ export class BookingService {
       gia_thue: Number(s.gia_thue),
     }));
 
-    // 2. Concurrency Check (kiểm tra trùng lịch trước khi gộp)
     const overlaps = await bookingRepository.KiemTraKhungGioTrong(formattedSlots);
     if (overlaps && overlaps.length > 0) {
       throw new ApiError(409, "Một số khung giờ bạn chọn đã có người đặt hoặc đang chờ xử lý. Vui lòng tải lại trang và chọn giờ khác.");
     }
 
-    // 3. Gộp các slot liên tiếp trên cùng sân thành 1 bản ghi
     const mergedSlots = mergeSlots(formattedSlots);
-
-    // 4. Tính tổng tiền từ các slot đã gộp
     const tongTien = mergedSlots.reduce((sum, slot) => sum + slot.tong_gia, 0);
 
-    // 5. Trạng thái & mapping phương thức thanh toán
-    // - Ví nội bộ: tự động "Đã xác nhận", không cần chủ sân xác nhận
-    // - Tiền mặt: "Chờ xử lý", cần chủ sân xác nhận
-    // Check constraint: 'Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành', 'Đã hủy'
     const status = phuong_thuc_thanh_toan === "wallet" ? "Đã xác nhận" : "Chờ xử lý";
 
     const paymentMap: Record<string, string> = {
@@ -156,7 +133,7 @@ export class BookingService {
       wallet: "Ví nội bộ",
       vnpay: "VNPay",
     };
-    // Đảm bảo chữ thường để map chính xác
+    
     const normalizedPayment = phuong_thuc_thanh_toan.toLowerCase();
     const mappedPayment = paymentMap[normalizedPayment] || phuong_thuc_thanh_toan;
 
@@ -174,7 +151,6 @@ export class BookingService {
       phuong_thuc_thanh_toan: mappedPayment,
     };
 
-    // 6. Tạo chi tiết từ các slot ĐÃ GỘP (không phải từ slot thô)
     const detailsData = mergedSlots.map((s, idx) => {
       const tienCoc = s.tong_gia * 0.3;
       const tienConLai = s.tong_gia - tienCoc;
@@ -191,9 +167,7 @@ export class BookingService {
       };
     });
 
-    // 7. Lưu vào DB (trong transaction)
     try {
-      // Tính tổng tiền cọc (30%) cho tất cả các phương thức thanh toán cần
       const tongTienCoc = detailsData.reduce((sum, d) => sum + d.tien_coc, 0);
 
       let walletDeduction;
@@ -241,20 +215,18 @@ export class BookingService {
     }
   }
 
-  // Hàm xử lý kết quả trả về ngầm (IPN) hoặc từ Return URL
   async XuLyCallbackVNPay(vnp_Params: Record<string, string>) {
-    // 1. Kiểm tra chữ ký bảo mật từ VNPay
     const isValid = VNPayUtil.verifyChecksum(vnp_Params);
     if (!isValid) {
       throw new ApiError(400, 'Chữ ký giao dịch không hợp lệ (Invalid Checksum)');
     }
 
-    const orderId = vnp_Params['vnp_TxnRef']; // Mã đặt sân hệ thống
-    const responseCode = vnp_Params['vnp_ResponseCode']; // Mã phản hồi kết quả
-    const vnpayTranNo = vnp_Params['vnp_TransactionNo']; // Mã giao dịch của VNPay
-    const amount = Number(vnp_Params['vnp_Amount']) / 100; // Chia 100 để về tiền gốc
+    const orderId = vnp_Params['vnp_TxnRef']; 
+    const responseCode = vnp_Params['vnp_ResponseCode']; 
+    const vnpayTranNo = vnp_Params['vnp_TransactionNo']; 
+    const amount = Number(vnp_Params['vnp_Amount']) / 100; 
 
-    // 2. Tìm đơn đặt sân trong DB
+  
     const booking = await prisma.datsan.findUnique({
       where: { ma_dat_san: orderId },
       include: { datsanchitiet: true },
@@ -264,29 +236,24 @@ export class BookingService {
       throw new ApiError(404, 'Không tìm thấy đơn đặt sân tương ứng');
     }
 
-    // Nếu đơn hàng đã được xử lý trước đó rồi thì bỏ qua (tránh trùng lặp IPN)
     const isAlreadyPaid = booking.datsanchitiet.every((detail: any) => detail.trang_thai_dat === 'Đã xác nhận');
     if (isAlreadyPaid) {
       return { success: true, message: 'Đơn hàng đã được xử lý trước đó', status: 'SUCCESS' };
     }
 
-    // 3. Nếu thanh toán thành công (Mã '00')
     if (responseCode === '00') {
-      // Dùng $transaction để đảm bảo đồng bộ: Cập nhật trạng thái sân & Tạo bản ghi giao dịch
       await prisma.$transaction(async (tx: any) => {
-        // Cập nhật trạng thái đơn đặt sân chi tiết
         await tx.datsanchitiet.updateMany({
           where: { ma_dat_san: orderId },
           data: { trang_thai_dat: 'Đã xác nhận' },
         });
 
-        // Kiểm tra xem đã lưu giao dịch chưa
         const existingTx = await tx.giaodich.findFirst({
           where: { ma_dat_san: orderId, trang_thai_giao_dich: 'Thành công' },
         });
 
         if (!existingTx) {
-          // Lưu lịch sử vào bảng giao dịch
+          
           await tx.giaodich.create({
             data: {
               ma_giao_dich: `GD_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
@@ -307,7 +274,6 @@ export class BookingService {
 
       return { success: true, status: 'SUCCESS' };
     } else {
-      // Nếu khách hàng hủy hoặc lỗi thanh toán
       await prisma.datsanchitiet.updateMany({
         where: { ma_dat_san: orderId },
         data: { trang_thai_dat: 'Đã hủy' },
@@ -347,7 +313,6 @@ export class BookingService {
       throw new ApiError(400, "Đơn đặt sân này đã được hủy trước đó");
     }
 
-    // Calculate time difference in minutes
     const now = new Date();
     const createdAt = booking.ngay_tao ? new Date(booking.ngay_tao) : now;
     const diffMs = now.getTime() - createdAt.getTime();
@@ -355,14 +320,13 @@ export class BookingService {
 
     let refundPercentage = 0;
     if (diffMins <= 30) {
-      refundPercentage = 1; // 100%
+      refundPercentage = 1; 
     } else if (diffMins > 30 && diffMins <= 60) {
-      refundPercentage = 0.5; // 50%
+      refundPercentage = 0.5; 
     } else {
-      refundPercentage = 0; // 0%
+      refundPercentage = 0; 
     }
 
-    // Tính tổng tiền cọc đã trừ (30% tổng tiền) — vì ví chỉ bị trừ tiền cọc
     const tongTienCoc = booking.datsanchitiet.reduce(
       (sum, d) => sum + Number(d.tien_coc), 0
     );

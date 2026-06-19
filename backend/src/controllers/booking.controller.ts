@@ -19,7 +19,7 @@ export const TaoDonDatSan = async (req: Request, res: Response, next: NextFuncti
       paymentUrl: result.paymentUrl
     });
   } catch (error: any) {
-    console.error("❌ Booking Error Detail:", error);
+    console.error(" Booking Error Detail:", error);
     next(error);
   }
 };
@@ -87,7 +87,6 @@ export const VNPayTraVe = async (req: Request, res: Response) => {
     );
   }
  
-  // Trả về responseCode để frontend/debug biết lý do thất bại
   return res.redirect(
     `${process.env.FRONTEND_URL}/payment-status?status=failed&code=${responseCode}&vnp_TxnRef=${txnRef}`,
   );
@@ -95,7 +94,6 @@ export const VNPayTraVe = async (req: Request, res: Response) => {
 
 export const XuLyCallbackVNPay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Chuyển req.query về dạng Record<string, string>
     const params = req.query as Record<string, string>;
     const result = await bookingService.XuLyCallbackVNPay(params);
     

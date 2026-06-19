@@ -24,5 +24,4 @@ walkDir(path.join(__dirname, 'src'), function(filePath) {
   }
 });
 
-// Also update app.ts and server.ts specifically if needed
 console.log("Xong! Đã xóa toàn bộ đuôi .js trong các câu lệnh import.");

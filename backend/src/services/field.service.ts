@@ -187,10 +187,7 @@ export class FieldService {
     };
   }
 
-  /**
-   * Lấy danh sách khung giờ đã đặt cho một sân vào một ngày cụ thể.
-   * Chỉ trả về các slot có trạng thái hợp lệ (chưa bị hủy/thất bại).
-   */
+ 
   async LayKhungGioDaDat(ma_san: string, ngay_dat: string) {
     
     const dateObj = new Date(ngay_dat + 'T00:00:00Z');

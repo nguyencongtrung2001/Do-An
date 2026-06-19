@@ -1,17 +1,11 @@
 import { SelectedSlot, GroupedSlot } from "@/types/court.types";
 
-/**
- * Chuyển chuỗi "HH:mm" thành Date dạng UTC 1970-01-01T[HH:mm:ss]Z
- * Giúp Prisma lưu đúng giá trị Time mà không bị lệch múi giờ.
- */
 export function parseTimeUTC(timeStr: string): Date {
   const [h, m] = timeStr.split(':').map(Number);
   return new Date(`1970-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00Z`);
 }
 
-/**
- * Format time từ ISO string — sử dụng UTC để tránh lệch múi giờ
- */
+
 export function formatTimeFromISO(isoString: string): string {
   const date = new Date(isoString);
   const h = String(date.getUTCHours()).padStart(2, "0");
@@ -19,14 +13,7 @@ export function formatTimeFromISO(isoString: string): string {
   return `${h}:${m}`;
 }
 
-/**
- * Gộp các mốc chọn giờ (markers) thành các nhóm liên tiếp.
- * 
- * MÔ HÌNH: Marker cuối cùng trong nhóm đóng vai trò là MỐC KẾT THÚC,
- * không tính là khung chơi. Ví dụ: chọn 06:00, 06:30, 07:00, 07:30, 08:00
- * → gio_bat_dau = 06:00, gio_ket_thuc = 08:00, chơi 2 tiếng (4 khung × 30p).
- * Số khung chơi thực tế = slots.length - 1.
- */
+
 export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   if (markers.length === 0) return [];
   
@@ -62,13 +49,13 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
+      
         currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.slots.push(marker);
-        // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
+        
         currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
       } else {
-        // Không liên tiếp — push group cũ, bắt đầu group mới
+  
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 

@@ -1,9 +1,7 @@
 import prisma from '../config/prisma.js';
 
 export const ratingService = {
-  /**
-   * Tạo một đánh giá mới
-   */
+  
   async TaoDanhGia(data: {
     ma_nguoi_dung: string;
     ma_dat_san_chi_tiet: string;
@@ -60,9 +58,7 @@ export const ratingService = {
     });
   },
 
-  /**
-   * Lấy điểm đánh giá trung bình của một địa điểm (dựa trên tất cả các sân thuộc địa điểm đó)
-   */
+
   async LayDiemDanhGiaDiaDiem(ma_dia_diem: string) {
     const ratings = await prisma.danhgia.findMany({
       where: {
@@ -90,9 +86,7 @@ export const ratingService = {
     };
   },
 
-  /**
-   * Lấy điểm đánh giá trung bình của một sân cụ thể
-   */
+
   async LayDiemDanhGiaSan(ma_san: string) {
     const ratings = await prisma.danhgia.findMany({
       where: {
@@ -117,10 +111,7 @@ export const ratingService = {
       count: ratings.length
     };
   },
-  
-  /**
-   * Lấy đánh giá của một người dùng cho một chi tiết đặt sân
-   */
+
   async LayDanhGiaCuaToi(ma_nguoi_dung: string, ma_dat_san_chi_tiet: string) {
     return prisma.danhgia.findFirst({
       where: {

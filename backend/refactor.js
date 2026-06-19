@@ -124,7 +124,7 @@ fileMoves.forEach(([oldPath, newPath]) => {
   }
 });
 
-// Update app.ts and server.ts
+
 const appTsPath = path.join(srcDir, 'app.ts');
 if (fs.existsSync(appTsPath)) {
   let appContent = fs.readFileSync(appTsPath, 'utf-8');
@@ -135,7 +135,7 @@ if (fs.existsSync(appTsPath)) {
   appContent = appContent.replace(/from\s+['"]\.\/routers\/booking\.routes\.js['"]/g, 'from "./modules/booking/booking.routes.js"');
   appContent = appContent.replace(/from\s+['"]\.\/middlewares\/errorHandler\.js['"]/g, 'from "./shared/middlewares/errorHandler.js"');
   
-  // Add auth route
+  
   if (!appContent.includes('authRoutes')) {
     appContent = appContent.replace(/import bookingRoutes from ['"].\/modules\/booking\/booking\.routes\.js['"];/, 'import bookingRoutes from "./modules/booking/booking.routes.js";\nimport authRoutes from "./modules/auth/auth.routes.js";');
     appContent = appContent.replace(/import bookingRoutes from ['"].\/routers\/booking\.routes\.js['"];/, 'import bookingRoutes from "./modules/booking/booking.routes.js";\nimport authRoutes from "./modules/auth/auth.routes.js";');
@@ -154,7 +154,7 @@ if (fs.existsSync(serverTsPath)) {
   console.log('Updated server.ts imports');
 }
 
-// Clean up old directories if empty
+
 const dirsToClean = ['controllers', 'services', 'repositories', 'routers', 'middlewares', 'utils', 'config'];
 dirsToClean.forEach(dir => {
   const fullPath = path.join(srcDir, dir);

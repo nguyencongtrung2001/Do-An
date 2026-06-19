@@ -31,7 +31,6 @@ export const XoaNguoiDung = async (req: Request<{ id: string }>, res: Response, 
   } catch (err) { next(err); }
 };
 
-// ── Owner Approval ────────────────────────────────────
 
 export const LayChuSanChoDuyet = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -47,7 +46,6 @@ export const DuyetChuSan = async (req: Request<{ id: string }>, res: Response, n
   } catch (err) { next(err); }
 };
 
-// ── Location Approval ─────────────────────────────────
 
 export const LayTatCaDiaDiem = async (_req: Request, res: Response, next: NextFunction) => {
   try {

@@ -133,20 +133,19 @@ export class OwnerService {
   async CapNhatSan(userId: string, maSan: string, data: any, images?: { url: string; public_id: string }[]) {
     const { ten_san, loai_the_thao, gia_thue_30p, trang_thai_san } = data;
 
-    // Check if court belongs to this owner
+
     const court = await courtRepository.TimTheoIdVaChuSan(maSan, userId);
 
     if (!court) {
       throw new ApiError(404, "Không tìm thấy sân hoặc bạn không có quyền chỉnh sửa.");
     }
 
-    // If new images uploaded, fetch old ones so we can delete them from Cloudinary
     let oldImages: { ma_cloudinary: string }[] = [];
     if (images && images.length > 0) {
       oldImages = await courtRepository.TimAnhTheoSan(maSan);
     }
 
-    // Update court fields + replace images in a single transaction
+
     const updatedCourt = await prisma.$transaction(async (tx) => {
       const updated = await tx.san.update({
         where: { ma_san: maSan },
@@ -159,10 +158,10 @@ export class OwnerService {
       });
 
       if (images && images.length > 0) {
-        // Remove old image rows
+
         await tx.anhsan.deleteMany({ where: { ma_san: maSan } });
 
-        // Generate next sequential IDs
+
         const lastImg = await tx.anhsan.findFirst({ orderBy: { ma_anh_san: 'desc' } });
         let nextNum = 1;
         if (lastImg && lastImg.ma_anh_san.startsWith("IMG")) {
@@ -183,12 +182,12 @@ export class OwnerService {
       return updated;
     });
 
-    // Delete old images from Cloudinary (best-effort, outside transaction)
+   
     if (oldImages.length > 0) {
       await Promise.all(
         oldImages
           .filter(img => img.ma_cloudinary && img.ma_cloudinary !== "manual_upload")
-          .map(img => cloudinary.uploader.destroy(img.ma_cloudinary).catch(() => null))
+          .map(img =>cloudinary.uploader.destroy(img.ma_cloudinary).catch(() => null))
       );
     }
 
@@ -221,7 +220,7 @@ export class OwnerService {
   }
 
   async CapNhatTrangThaiDatSan(userId: string, bookingDetailId: string, status: string) {
-    // Check if booking belongs to this owner
+   
     const booking = await bookingRepository.TimTheoIdVaChuSan(bookingDetailId, userId);
 
     if (!booking) {

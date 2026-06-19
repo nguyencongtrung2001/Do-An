@@ -1,7 +1,3 @@
-/**
- * Normalize sport name from Vietnamese to a URL-safe slug.
- * Used across CourtGrid, MapClient, and related components.
- */
 export function normalizeSport(sport: string): string {
   const normalized = sport?.toLowerCase() || "";
   if (normalized.includes("đá")) return "bong-da";

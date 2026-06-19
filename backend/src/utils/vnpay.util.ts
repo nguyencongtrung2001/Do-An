@@ -28,7 +28,7 @@ export class VNPayUtil {
     return v;
   }
 
-  /** Sort object by key and encode according to VNPay standards */
+  
   private static sortObject(obj: Record<string, unknown>): Record<string, string> {
     const sorted: Record<string, string> = {};
     const str: string[] = [];
@@ -46,7 +46,7 @@ export class VNPayUtil {
     return sorted;
   }
 
-  /** HMAC-SHA512 */
+  
   private static hmac(data: string): string {
     return crypto
       .createHmac('sha512', this.vnp_HashSecret)
