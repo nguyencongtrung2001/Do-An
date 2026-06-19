@@ -10,7 +10,7 @@ const CATEGORIES = [
 
 export default function Categories() {
   return (
-    <div className="w-full max-w-[960px] bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 mb-12 overflow-x-auto scrollbar-hide">
+    <div className="w-full max-w-[960px] mx-auto bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 mb-12 overflow-x-auto scrollbar-hide">
       <div className="flex items-center justify-between min-w-[600px] gap-4">
         {CATEGORIES.map((item) => (
           <button 
