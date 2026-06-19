@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LocationDetail, DetailCourt } from "@/types/court.types";
+import { LocationDetail, DetailCourt, SelectedSlot } from "@/types/court.types";
 import { courtService } from "@/services/court.service";
 import TimeSlotGrid from "./TimeSlotGrid";
 
@@ -10,7 +10,7 @@ interface CourtListProps {
   selectedDate: string;
   selectedCourt: string | null;
   onCourtSelect: (id: string) => void;
-  selectedSlots: any[];
+  selectedSlots: SelectedSlot[];
   onSlotToggle: (court: DetailCourt, slot: string) => void;
 }
 
