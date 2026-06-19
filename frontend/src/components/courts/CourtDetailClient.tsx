@@ -57,11 +57,15 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   for (const marker of sorted) {
     if (!currentGroup) {
       // Marker đầu tiên — giờ kết thúc tạm = chính gio_bat_dau của marker này
+      const [h, m] = marker.gio_bat_dau.split(':').map(Number);
+      const endDate = new Date(0, 0, 0, h, m + 30);
+      const endTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: marker.gio_bat_dau, 
+        gio_ket_thuc: endTime, 
         slots: [marker],
-        gia_thue: 0 
+        gia_thue: marker.gia_thue 
       };
     } else {
       // Kiểm tra marker này có liên tiếp 30p sau marker trước không
@@ -80,18 +84,27 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         marker.gio_bat_dau === expectedTime
       ) {
         // Marker liên tiếp — cập nhật giờ kết thúc = gio_bat_dau của marker mới
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        const [mh, mm] = marker.gio_bat_dau.split(':').map(Number);
+        const mEndDate = new Date(0, 0, 0, mh, mm + 30);
+        const mEndTime = `${String(mEndDate.getHours()).padStart(2, '0')}:${String(mEndDate.getMinutes()).padStart(2, '0')}`;
+        
+        currentGroup.gio_ket_thuc = mEndTime;
         currentGroup.slots.push(marker);
         // Cập nhật tổng giá thuê = số lượng khung chơi (số marker - 1) * giá 30p
-        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
+        currentGroup.gia_thue = currentGroup.slots.length * currentGroup.slots[0].gia_thue;
       } else {
         // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
+        
+        const [mh, mm] = marker.gio_bat_dau.split(':').map(Number);
+        const mEndDate = new Date(0, 0, 0, mh, mm + 30);
+        const mEndTime = `${String(mEndDate.getHours()).padStart(2, '0')}:${String(mEndDate.getMinutes()).padStart(2, '0')}`;
+
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: marker.gio_bat_dau, 
+          gio_ket_thuc: mEndTime, 
           slots: [marker],
-          gia_thue: 0
+          gia_thue: marker.gia_thue
         };
       }
     }
@@ -197,8 +210,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         
         // Convert markers back to 30-min slots for backend, exclude the boundary marker
         const slotsForBackend = groupedSlots.flatMap(group => {
-          const playableSlots = group.slots.slice(0, -1);
-          return playableSlots.map(marker => {
+          return group.slots.map(marker => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
@@ -603,7 +615,7 @@ function CourtCard({ court, isSelected, onSelect, selectedDate, selectedSlots, o
         </div>
       </button>
 
-      {/* Time slots — shown when court is selected */}
+     
       {isSelected && (
         <div className="px-6 pb-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
