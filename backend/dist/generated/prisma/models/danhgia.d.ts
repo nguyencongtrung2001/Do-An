@@ -2,7 +2,7 @@ import type * as runtime from "@prisma/client/runtime/client";
 import type * as Prisma from "../internal/prismaNamespace.js";
 /**
  * Model danhgia
- * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ *
  */
 export type danhgiaModel = runtime.Types.Result.DefaultSelection<Prisma.$danhgiaPayload>;
 export type AggregateDanhgia = {

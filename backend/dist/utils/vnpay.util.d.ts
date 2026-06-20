@@ -7,9 +7,7 @@ export declare class VNPayUtil {
     static get vnp_HashSecret(): string;
     static get vnp_Url(): string;
     static get vnp_ReturnUrl(): string;
-    /** Sort object by key and encode according to VNPay standards */
     private static sortObject;
-    /** HMAC-SHA512 */
     private static hmac;
     private static getCreateDate;
     static normalizeIp(ip: string): string;

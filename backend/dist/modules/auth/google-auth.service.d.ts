@@ -1,13 +1,12 @@
 export declare class GoogleAuthService {
-    loginWithGoogle(idToken: string): Promise<{
+    DangNhapBangGoogle(idToken: string): Promise<{
         user: {
-            ngay_tao: Date | null;
             ma_nguoi_dung: string;
-            ho_ten: string;
             email: string;
             so_dien_thoai: string | null;
-            mat_khau: string | null;
             ma_google: string | null;
+            ho_ten: string;
+            mat_khau: string | null;
             anh_dai_dien: string | null;
             anh_cloudinary: string | null;
             vai_tro: string;
@@ -15,6 +14,7 @@ export declare class GoogleAuthService {
             anh_cccd_truoc: string | null;
             anh_cccd_sau: string | null;
             trang_thai: boolean | null;
+            ngay_tao: Date | null;
         };
         token: string;
     }>;

@@ -1,5 +1,5 @@
 export declare class FieldService {
-    getFields(): Promise<{
+    LayDanhSachSan(): Promise<{
         ma_san: string;
         ten_san: string;
         so_sao: number;
@@ -11,7 +11,7 @@ export declare class FieldService {
         vi_do: number | null;
         gia_thue_30p: number;
     }[]>;
-    getMapLocations(sportType: string): Promise<{
+    LayDiaDiemTrenBanDo(sportType: string): Promise<{
         ma_dia_diem: string;
         ten_dia_diem: string;
         dia_chi: string;
@@ -20,7 +20,7 @@ export declare class FieldService {
         sports: string[];
         image: string;
     }[]>;
-    getLocationBySlug(slug: string): Promise<{
+    LayDiaDiemTheoSlug(slug: string): Promise<{
         ma_dia_diem: string;
         ten_dia_diem: string;
         dia_chi: string;
@@ -48,6 +48,10 @@ export declare class FieldService {
             }[];
         }[];
     } | null>;
+    LayKhungGioDaDat(ma_san: string, ngay_dat: string): Promise<{
+        gio_bat_dau: string;
+        gio_ket_thuc: string;
+    }[]>;
 }
 export declare const fieldService: FieldService;
 //# sourceMappingURL=field.service.d.ts.map

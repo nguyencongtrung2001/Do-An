@@ -14,7 +14,6 @@
  * model files in the `model` directory!
  */
 import * as runtime from "@prisma/client/runtime/client";
-import {} from "./class.js";
 /**
  * Prisma Errors
  */

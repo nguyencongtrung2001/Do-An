@@ -1,7 +1,7 @@
 import { googleAuthService } from './google-auth.service.js';
-export const googleLoginController = async (req, res) => {
+export const DangNhapGoogle = async (req, res) => {
     const { idToken } = req.body;
-    const result = await googleAuthService.loginWithGoogle(idToken);
+    const result = await googleAuthService.DangNhapBangGoogle(idToken);
     res.status(200).json({
         success: true,
         data: result

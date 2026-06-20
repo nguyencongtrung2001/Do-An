@@ -2,7 +2,7 @@ import type * as runtime from "@prisma/client/runtime/client";
 import type * as Prisma from "../internal/prismaNamespace.js";
 /**
  * Model datsan
- * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ *
  */
 export type datsanModel = runtime.Types.Result.DefaultSelection<Prisma.$datsanPayload>;
 export type AggregateDatsan = {

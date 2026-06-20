@@ -1,5 +1,4 @@
 import { ApiError } from '../utils/ApiError.js';
-// Global error handler middleware
 export const errorHandler = (err, req, res, next) => {
     let statusCode = 500;
     let message = "Internal Server Error";
@@ -8,7 +7,6 @@ export const errorHandler = (err, req, res, next) => {
         message = err.message;
     }
     else if (err.name === "PrismaClientKnownRequestError") {
-        // Handle specific Prisma errors (e.g. duplicate key)
         statusCode = 400;
         const prismaErr = err;
         if (prismaErr.code === 'P2002') {
@@ -20,13 +18,14 @@ export const errorHandler = (err, req, res, next) => {
         console.error("❌ [Prisma Error]:", err);
     }
     else {
-        // Log unexpected errors
         console.error("❌ [Server Error]:", err);
+        message = err.message || "Lỗi không xác định ở Server";
     }
     res.status(statusCode).json({
         status: "error",
         statusCode,
-        message
+        message,
+        stack: err.stack
     });
 };
 //# sourceMappingURL=errorHandler.js.map

@@ -1,7 +1,6 @@
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../config/cloudinary.config.js';
-// Storage for CCCD images (ID cards)
 const cccdStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -9,7 +8,6 @@ const cccdStorage = new CloudinaryStorage({
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     },
 });
-// Storage for avatar images
 const avatarStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -17,7 +15,6 @@ const avatarStorage = new CloudinaryStorage({
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     },
 });
-// Storage for court images
 const courtStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -37,4 +34,7 @@ export const uploadOwnerFiles = multer({
     { name: 'anh_cccd_sau', maxCount: 1 }
 ]);
 export const uploadCourt = multer({ storage: courtStorage }).array('images', 5);
+export const uploadAvatar = multer({
+    storage: multer.diskStorage({}),
+}).single('anh_dai_dien');
 //# sourceMappingURL=upload.middleware.js.map

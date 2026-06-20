@@ -1,8 +1,8 @@
-import { courtRepository } from "../repositories/court.repository.js";
+import { courtRepository } from "../repositories/san.repository.js";
 import prisma from '../config/prisma.js';
 export class FieldService {
-    async getFields() {
-        const sans = await courtRepository.findAllWithDetails();
+    async LayDanhSachSan() {
+        const sans = await courtRepository.LayTatCaVoiChiTiet();
         const result = sans.map(san => {
             let totalStars = 0;
             let reviewCount = 0;
@@ -31,7 +31,7 @@ export class FieldService {
         });
         return result;
     }
-    async getMapLocations(sportType) {
+    async LayDiaDiemTrenBanDo(sportType) {
         const whereClause = {
             trang_thai_duyet: true,
         };
@@ -47,10 +47,10 @@ export class FieldService {
             const dbSportName = sportMap[sportType] || sportType;
             whereClause.san = {
                 some: {
-                    loai_the_thao: {
-                        contains: dbSportName,
-                        mode: 'insensitive'
-                    }
+                    OR: [
+                        { loai_the_thao: { contains: sportType, mode: 'insensitive' } },
+                        { loai_the_thao: { contains: dbSportName, mode: 'insensitive' } }
+                    ]
                 },
             };
         }
@@ -70,7 +70,6 @@ export class FieldService {
         });
         return locations.map(loc => {
             const sports = Array.from(new Set(loc.san.map(s => s.loai_the_thao)));
-            // Lấy ảnh đại diện từ sân đầu tiên nếu có
             let image = "/images/categories/soccer.png";
             for (const s of loc.san) {
                 if (s.anhsan && s.anhsan.length > 0 && s.anhsan[0]?.duong_dan_anh) {
@@ -89,11 +88,10 @@ export class FieldService {
             };
         });
     }
-    async getLocationBySlug(slug) {
-        const location = await courtRepository.findLocationBySlug(slug);
+    async LayDiaDiemTheoSlug(slug) {
+        const location = await courtRepository.TimDiaDiemTheoSlug(slug);
         if (!location)
             return null;
-        // Collect all unique images from all courts
         const allImages = [];
         const imageSet = new Set();
         for (const court of location.san) {
@@ -107,7 +105,6 @@ export class FieldService {
         if (allImages.length === 0) {
             allImages.push("/images/categories/soccer.png");
         }
-        // Calculate average rating & review count across all courts
         let totalStars = 0;
         let reviewCount = 0;
         for (const court of location.san) {
@@ -121,9 +118,7 @@ export class FieldService {
             }
         }
         const avgRating = reviewCount > 0 ? Number((totalStars / reviewCount).toFixed(1)) : 0;
-        // Group courts by sport type
         const sports = Array.from(new Set(location.san.map(s => s.loai_the_thao)));
-        // Build court list
         const courts = location.san.map(san => {
             let courtStars = 0;
             let courtReviews = 0;
@@ -166,6 +161,31 @@ export class FieldService {
             hinh_anh: allImages,
             sans: courts
         };
+    }
+    async LayKhungGioDaDat(ma_san, ngay_dat) {
+        const dateObj = new Date(ngay_dat + 'T00:00:00Z');
+        const bookedDetails = await prisma.datsanchitiet.findMany({
+            where: {
+                ma_san: ma_san,
+                ngay_dat: dateObj,
+                trang_thai_dat: {
+                    in: ['Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành'],
+                },
+            },
+            select: {
+                gio_bat_dau: true,
+                gio_ket_thuc: true,
+            },
+        });
+        const formatTime = (d) => {
+            const h = d.getUTCHours().toString().padStart(2, '0');
+            const m = d.getUTCMinutes().toString().padStart(2, '0');
+            return `${h}:${m}`;
+        };
+        return bookedDetails.map(detail => ({
+            gio_bat_dau: formatTime(detail.gio_bat_dau),
+            gio_ket_thuc: formatTime(detail.gio_ket_thuc),
+        }));
     }
 }
 export const fieldService = new FieldService();

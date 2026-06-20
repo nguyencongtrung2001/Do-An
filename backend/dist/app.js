@@ -1,25 +1,56 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import userRoutes from "./routers/user.routes.js";
+import userRoutes from "./routers/nguoidung.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import adminRoutes from "./routers/admin.routes.js";
-import fieldRoutes from "./routers/field.routes.js";
-import ownerRoutes from "./routers/owner.routes.js";
-import bookingRoutes from "./routers/booking.routes.js";
+import adminRoutes from "./routers/quantrivien.routes.js";
+import fieldRoutes from "./routers/san.routes.js";
+import ownerRoutes from "./routers/chusan.routes.js";
+import bookingRoutes from "./routers/datsan.js";
+import thanhToanRoutes from "./routers/thanhtoan.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import ratingRoutes from "./routers/danhgia.routes.js";
 dotenv.config();
 const app = express();
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : [
+        "https://do-an-blue.vercel.app",
+        "https://do-g3jixpcwc-nguyencongtrung2001s-projects.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:3001"
+    ];
 app.use(cors({
-    origin: ["https://do-an-blue.vercel.app", "http://localhost:3000", "*"],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Authorization", "Content-Type"],
     credentials: true,
 }));
 app.use(express.json());
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
+        return res.status(400).json({
+            success: false,
+            message: "Dữ liệu JSON không hợp lệ"
+        });
+    }
+    next(err);
+});
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/field", fieldRoutes);
 app.use("/owner", ownerRoutes);
 app.use("/booking", bookingRoutes);
+app.use("/thanhtoan", thanhToanRoutes);
+app.use("/auth", authRoutes);
+app.use("/rating", ratingRoutes);
 app.use(errorHandler);
 export default app;
 //# sourceMappingURL=app.js.map

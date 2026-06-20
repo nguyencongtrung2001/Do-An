@@ -25,7 +25,6 @@ export class VNPayUtil {
             throw new Error('Thiếu VNP_RETURNURL trong .env');
         return v;
     }
-    /** Sort object by key and encode according to VNPay standards */
     static sortObject(obj) {
         const sorted = {};
         const str = [];
@@ -43,7 +42,6 @@ export class VNPayUtil {
         }
         return sorted;
     }
-    /** HMAC-SHA512 */
     static hmac(data) {
         return crypto
             .createHmac('sha512', this.vnp_HashSecret)

@@ -1,0 +1,159 @@
+import type { Request, Response, NextFunction } from 'express';
+import { ownerService } from '../services/chusan.service.js';
+import { ApiError } from '../utils/ApiError.js';
+import type { AuthRequest } from '../middlewares/auth.middleware.js';
+import cloudinary from '../config/cloudinary.config.js';
+
+export const DangKyChuSan = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { ho_ten, email, so_dien_thoai, mat_khau, ten_dia_diem, dia_chi, kinh_do, vi_do } = req.body;
+
+    
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const cccdTruocFile = files?.['anh_cccd_truoc']?.[0];
+    const cccdSauFile = files?.['anh_cccd_sau']?.[0];
+    const avatarFile = files?.['anh_dai_dien']?.[0];
+
+    if (!cccdTruocFile || !cccdSauFile) {
+      throw new ApiError(400, "Thiếu ảnh CCCD");
+    }
+
+    
+    const [cccdTruocResult, cccdSauResult] = await Promise.all([
+      cloudinary.uploader.upload(cccdTruocFile.path, { folder: 'bookingsport/cccd' }),
+      cloudinary.uploader.upload(cccdSauFile.path, { folder: 'bookingsport/cccd' }),
+    ]);
+
+    
+    let anh_dai_dien: string | undefined;
+    if (avatarFile) {
+      const avatarResult = await cloudinary.uploader.upload(avatarFile.path, { folder: 'bookingsport/avatars' });
+      anh_dai_dien = avatarResult.secure_url;
+    }
+
+    const result = await ownerService.DangKyChuSan({
+      ho_ten,
+      email,
+      so_dien_thoai,
+      mat_khau,
+      ten_dia_diem,
+      dia_chi,
+      kinh_do: parseFloat(kinh_do),
+      vi_do: parseFloat(vi_do),
+      anh_cccd_truoc: cccdTruocResult.secure_url,
+      anh_cccd_sau: cccdSauResult.secure_url,
+      anh_dai_dien,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.",
+      user: result.user,
+      location: result.location,
+      token: result.token
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const LaySanCuaToi = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const courts = await ownerService.LaySanCuaToi(userId);
+    res.json({ success: true, courts });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const ThemSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const data = req.body;
+
+    const files = req.files as any[];
+    const images = files?.map(f => ({ url: f.path, public_id: f.filename })) || [];
+
+    const court = await ownerService.ThemSan(userId, data, images);
+    res.status(201).json({ success: true, message: "Thêm sân thành công", court });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CapNhatSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const ma_san = req.params.ma_san as string;
+    const data = req.body;
+
+    if (!ma_san) {
+      throw new ApiError(400, "Thiếu mã sân");
+    }
+
+    
+    const files = req.files as Express.Multer.File[] | undefined;
+    const images = files && files.length > 0
+      ? files.map(f => ({ url: (f as any).path, public_id: (f as any).filename }))
+      : undefined;
+
+    const court = await ownerService.CapNhatSan(userId, ma_san, data, images);
+    res.json({ success: true, message: "Cập nhật sân thành công", court });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const XoaSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const ma_san = req.params.ma_san as string;
+
+    if (!ma_san) {
+      throw new ApiError(400, "Thiếu mã sân");
+    }
+
+    await ownerService.XoaSan(userId, ma_san);
+    res.json({ success: true, message: "Xóa sân thành công" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const LayLichDatCuaToi = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const bookings = await ownerService.LayLichDatCuaToi(userId);
+    res.json({ success: true, bookings });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CapNhatTrangThaiDatSan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const id = req.params.id as string;
+    const { status } = req.body;
+
+    if (!id || !status) {
+      throw new ApiError(400, "Thiếu thông tin cập nhật");
+    }
+
+    const booking = await ownerService.CapNhatTrangThaiDatSan(userId, id, status);
+    res.json({ success: true, message: `Đã ${status.toLowerCase()} lịch đặt`, booking });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const LaySoLuongChoXuLy = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const count = await ownerService.LaySoLuongChoXuLy(userId);
+    res.json({ success: true, count });
+  } catch (error) {
+    next(error);
+  }
+};
