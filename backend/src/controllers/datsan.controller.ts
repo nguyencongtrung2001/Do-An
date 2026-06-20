@@ -27,7 +27,7 @@ export const LayDatSanNguoiDung = async (req: Request, res: Response, next: Next
   try {
     const { userId } = req.params;
     if (typeof userId !== 'string') {
-      throw new ApiError(400, "User ID is invalid");
+      throw new ApiError(400, "Mã người dùng không hợp lệ ");
     }
     const bookings = await bookingService.LayDatSanNguoiDung(userId);
     
@@ -46,7 +46,7 @@ export const HuyDatSan = async (req: Request, res: Response, next: NextFunction)
     const { userId } = req.body;
 
     if (!userId) {
-      throw new ApiError(401, "User ID is required to cancel booking");
+      throw new ApiError(401, "Mã người dùng là bắt buộc để hủy đơn đặt sân");
     }
 
     const result = await bookingService.HuyDatSan(String(bookingId), String(userId));

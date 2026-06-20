@@ -14,14 +14,14 @@ export default function HomePage() {
       <Navbar />
       
       <main className="grow">
-        {/* Phần Hero/Banner */}
+   
         <Hero />
         
         <div className="container mx-auto px-4 py-12 space-y-16">
-          {/* Phần danh mục môn thể thao */}
+    
           <Categories />
           
-          {/* Danh sách sân nổi bật */}
+
           <section id="popular-courts" className="scroll-mt-20">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-slate-900">Sân cầu lông nổi bật</h2>

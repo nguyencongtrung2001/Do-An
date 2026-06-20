@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import type * as User from '../types/user.type.js';
+import type * as User from '../types/nguoidung.type.js';
 import { ApiError } from '../utils/ApiError.js';
 import { generateToken } from '../utils/jwt.js';
 import { userRepository } from '../repositories/nguoidung.repository.js';
@@ -15,10 +15,10 @@ export class UserService {
 
     if (existingUser) {
       if (existingUser.email === email) {
-        throw new ApiError(400, "Email đã tồn tại trong hệ thống");
+        throw new ApiError(400, "Email đã tồn tại ");
       }
       if (existingUser.so_dien_thoai === so_dien_thoai) {
-        throw new ApiError(400, "Số điện thoại đã tồn tại trong hệ thống");
+        throw new ApiError(400, "Số điện thoại đã tồn tại ");
       }
     }
 
@@ -45,12 +45,12 @@ export class UserService {
 
   async DangNhapNguoiDung(data: User.LoginUserClient) {
     const { so_dien_thoai, email, mat_khau } = data;
-    console.log("Login attempt for email:", email);
+    console.log("Đăng nhập với email: ", email);
 
     const user = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
 
     if (!user) {
-      throw new ApiError(404, "User not found");
+      throw new ApiError(404, "Người dùng không tìm thấy");
     }
 
     
@@ -64,7 +64,7 @@ export class UserService {
 
     const isMatch = await bcrypt.compare(mat_khau, user.mat_khau);
     if (!isMatch) {
-      throw new ApiError(400, "Invalid password");
+      throw new ApiError(400, "Mật khẩu không hợp lệ ");
     }
 
     const token = generateToken({ id: user.ma_nguoi_dung, role: user.vai_tro });
@@ -107,7 +107,7 @@ export class UserService {
       try {
         await cloudinary.uploader.destroy(user.anh_cloudinary);
       } catch (err) {
-        console.warn("Could not delete old avatar from Cloudinary:", err);
+        console.warn("Không thể xóa ảnh đại diện cũ trên Cloudinary:", err);
       }
     }
 

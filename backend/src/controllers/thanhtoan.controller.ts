@@ -53,6 +53,6 @@ export const VNPayThongBao = async (req: Request, res: Response) => {
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.json({ RspCode: '99', Message: 'Unknown error' });
+    res.json({ RspCode: '99', Message: 'Không xác định lỗi' });
   }
 };

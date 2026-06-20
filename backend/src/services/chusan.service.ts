@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import type { CreateOwner } from '../types/owner.type.js';
+import type { CreateOwner } from '../types/chusan.type.js';
 import { ApiError } from '../utils/ApiError.js';
 import { generateToken } from '../utils/jwt.js';
 import { userRepository } from '../repositories/nguoidung.repository.js';
@@ -17,8 +17,8 @@ export class OwnerService {
     const existingUser = await userRepository.TimTheoEmailHoacSdt(email, so_dien_thoai);
 
     if (existingUser) {
-      if (existingUser.email === email) throw new ApiError(400, "Email đã tồn tại trong hệ thống");
-      if (existingUser.so_dien_thoai === so_dien_thoai) throw new ApiError(400, "Số điện thoại đã tồn tại trong hệ thống");
+      if (existingUser.email === email) throw new ApiError(400, "Email đã tồn tại");
+      if (existingUser.so_dien_thoai === so_dien_thoai) throw new ApiError(400, "Số điện thoại đã tồn tại");
     }
 
     

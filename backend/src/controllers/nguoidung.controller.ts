@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type * as User from '../types/user.type.js';
+import type * as User from '../types/nguoidung.type.js';
 import { userService } from '../services/nguoidung.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import type { AuthRequest } from '../middlewares/auth.middleware.js';

@@ -159,8 +159,8 @@ export default function OwnerBookingsClient() {
       <div className="p-4 md:p-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
-            {/* Header row: 6:00, 6:30, 7:00, 7:30, ... */}
-            <div className="tl-header min-w-[1400px]">
+            {/* Header row: 6:00, :30, 7:00, 7:30, ... */}
+            <div className="tl-head6er min-w-[1400px]">
               <div className="tl-court-col bg-gray-50 border-r border-gray-200 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 z-10">
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
@@ -178,7 +178,6 @@ export default function OwnerBookingsClient() {
               </div>
             </div>
 
-            {/* Rows for each court */}
             {loading ? (
               <div className="min-w-[1400px] p-10 flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -190,20 +189,16 @@ export default function OwnerBookingsClient() {
 
               return (
                 <div key={court.ma_san} className="tl-row min-w-[1400px]">
-                  {/* Court name (sticky left) */}
                   <div className="tl-court-col px-4 py-3 flex items-center gap-2 border-r border-gray-100 bg-gray-50/50 sticky left-0 z-10">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     <span className="text-sm font-bold text-slate-700 truncate">{court.ten_san}</span>
                   </div>
 
-                  {/* Timeline area: grid cells + booking blocks overlaid */}
                   <div className="tl-time-cols relative">
-                    {/* Grid cells for visual grid lines */}
                     {Array.from({ length: TOTAL_HALF_HOURS }).map((_, idx) => (
                       <div key={idx} className="tl-grid-cell" />
                     ))}
 
-                    {/* Booking blocks — absolutely positioned on top of grid */}
                     {courtBookings.map(booking => {
                       const startDate = new Date(booking.gio_bat_dau);
                       const endDate = new Date(booking.gio_ket_thuc);

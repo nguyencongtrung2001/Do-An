@@ -18,11 +18,6 @@ export const ratingService = {
     if (bookingDetail.datsan?.ma_nguoi_dung !== data.ma_nguoi_dung) {
       throw new Error("Bạn không có quyền đánh giá đơn đặt sân này");
     }
-
-    
-    
-    
-
     
     const existingRating = await danhgiaRepository.TimDanhGiaCuaNguoiDung(data.ma_nguoi_dung, data.ma_dat_san_chi_tiet);
 

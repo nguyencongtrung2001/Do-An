@@ -62,14 +62,14 @@ export class ThanhToanService {
 
   async XuLyThongBaoVNPay(vnp_Params: Record<string, string>) {
     const isValid = VNPayUtil.verifyChecksum(vnp_Params);
-    if (!isValid) return { RspCode: '97', Message: 'Invalid checksum' };
+    if (!isValid) return { RspCode: '97', Message: 'Không xác định ' };
 
     const txnRef = vnp_Params['vnp_TxnRef'] || '';
     const amount = parseInt(vnp_Params['vnp_Amount'] || '0') / 100;
     const responseCode = vnp_Params['vnp_ResponseCode'] || '';
 
     if (responseCode !== '00') {
-      return { RspCode: '00', Message: 'Confirm received' };
+      return { RspCode: '00', Message: 'Xác nhận đã nhận ' };
     }
 
     const booking = await prisma.datsan.findUnique({
@@ -78,12 +78,12 @@ export class ThanhToanService {
     });
 
     if (!booking) {
-      return { RspCode: '01', Message: 'Order not found' };
+      return { RspCode: '01', Message: 'Không tìm thấy đơn đặt sân' };
     }
 
     const isAlreadyPaid = booking.datsanchitiet.every(detail => detail.trang_thai_dat === 'Đã xác nhận');
     if (isAlreadyPaid) {
-      return { RspCode: '02', Message: 'Order already processed' };
+      return { RspCode: '02', Message: 'Đơn hàng đã được xử lý trước đó' };
     }
 
     await thanhToanRepository.TaoGiaoDichThanhCong({
