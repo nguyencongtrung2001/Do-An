@@ -7,12 +7,10 @@ export class ThanhToanRepository {
     }
     async TaoGiaoDichThanhCong(data) {
         return prisma.$transaction(async (tx) => {
-            // 1. Cập nhật trạng thái chi tiết đặt sân
             await tx.datsanchitiet.updateMany({
                 where: { ma_dat_san: data.ma_dat_san },
                 data: { trang_thai_dat: 'Đã xác nhận' },
             });
-            // 2. Tạo bản ghi giao dịch
             const giaodich = await tx.giaodich.create({
                 data: {
                     ma_giao_dich: `GD_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
