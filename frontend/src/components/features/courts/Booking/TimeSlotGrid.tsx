@@ -19,23 +19,13 @@ interface TimeSlotGridProps {
   bookedSlots: BookedSlot[];
 }
 
-/**
- * Chuyển chuỗi "HH:mm" thành số phút tính từ 00:00
- * Ví dụ: "06:30" → 390
- */
+
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
 
-/**
- * Kiểm tra xem 1 slot 30 phút (bắt đầu tại `marker`) có bị trùng
- * với bất kỳ khoảng booked nào không.
- *
- * Ví dụ: marker = "06:00" → block [06:00, 06:30)
- * BookedSlot = { gio_bat_dau: "06:00", gio_ket_thuc: "07:00" }
- * → trùng vì [06:00, 06:30) nằm trong [06:00, 07:00)
- */
+
 function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
   const slotStart = timeToMinutes(marker);
   const slotEnd = slotStart + 30;
@@ -48,10 +38,7 @@ function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
   });
 }
 
-/**
- * Tính giờ kết thúc của 1 slot 30 phút từ giờ bắt đầu.
- * Ví dụ: "20:00" → "20:30", "20:30" → "21:00"
- */
+
 function getSlotEndTime(startTime: string): string {
   const [h, m] = startTime.split(":").map(Number);
   const total = h * 60 + m + 30;
@@ -115,7 +102,6 @@ export default function TimeSlotGrid({
               const isPrevActive = index > 0 && selectedSlots.includes(TIME_SLOTS[index - 1]);
               const isNextActive = index < TIME_SLOTS.length - 1 && selectedSlots.includes(TIME_SLOTS[index + 1]);
 
-              // === Slot ĐÃ ĐẶT: disabled, mờ ===
               if (booked) {
                 return (
                   <button
@@ -124,13 +110,11 @@ export default function TimeSlotGrid({
                     className="px-1 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
                   >
                     <span className="font-bold">{slot}</span>
-                    <span className="text-[9px]">→ {getSlotEndTime(slot)}</span>
                     <span className="text-[10px] text-red-400 font-semibold">Đã đặt</span>
                   </button>
                 );
               }
 
-              // === Slot CHƯA ĐẶT: logic gộp viền giữ nguyên ===
               let radiusClass = "rounded-lg";
               let borderClass = "border";
 
