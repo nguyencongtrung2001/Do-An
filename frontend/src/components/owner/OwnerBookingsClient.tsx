@@ -4,24 +4,19 @@ import { useState } from "react";
 import { useOwnerBookings } from "@/hooks/useOwnerBookings";
 import type { BookingDetail } from "@/types/booking.types";
 
-
-
-
 const STATUS_CONFIG: Record<string, { bg: string; text: string; gradient: string; label: string; border: string }> = {
   "Chờ xử lý":   { bg: "bg-amber-50",  text: "text-amber-700",  gradient: "linear-gradient(135deg, #f59e0b, #d97706)", label: "Chờ xử lý",   border: "border-amber-200" },
   "Đã xác nhận":  { bg: "bg-green-50",  text: "text-green-700",  gradient: "linear-gradient(135deg, #22c55e, #16a34a)", label: "Đã xác nhận",  border: "border-green-200" },
-  "Đã nhận sân":  { bg: "bg-violet-50", text: "text-violet-700", gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)", label: "Đã nhận sân",  border: "border-violet-200" },
+  "Đã nhận sân":  { bg: "bg-violet-50", text: "text-violet-700", gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)", label: "Đã nhận sân",   border: "border-violet-200" },
   "Hoàn thành":   { bg: "bg-blue-50",   text: "text-blue-700",   gradient: "linear-gradient(135deg, #3b82f6, #2563eb)", label: "Hoàn thành",   border: "border-blue-200" },
-  "Đã hủy":       { bg: "bg-red-50",    text: "text-red-700",    gradient: "linear-gradient(135deg, #ef4444, #dc2626)", label: "Đã hủy",       border: "border-red-200" },
+  "Đã hủy":       { bg: "bg-red-50",    text: "text-red-700",    gradient: "linear-gradient(135deg, #ef4444, #dc2626)", label: "Đã hủy",        border: "border-red-200" },
 };
 
 const DEFAULT_STATUS = { bg: "bg-gray-50", text: "text-gray-700", gradient: "linear-gradient(135deg, #94a3b8, #64748b)", label: "Không rõ", border: "border-gray-200" };
 
-
 const TIMELINE_START_HOUR = 6;
 const TIMELINE_END_HOUR = 22;
 const TOTAL_HALF_HOURS = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 2; 
-
 
 const TIMELINE_LABELS: string[] = [];
 for (let h = TIMELINE_START_HOUR; h < TIMELINE_END_HOUR; h++) {
@@ -83,7 +78,6 @@ export default function OwnerBookingsClient() {
     return Number(n).toLocaleString("vi-VN") + "đ";
   };
 
-  // Format time từ ISO string — sử dụng UTC để tránh lệch múi giờ
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");
@@ -91,12 +85,8 @@ export default function OwnerBookingsClient() {
     return `${h}:${m}`;
   };
 
-  // Tính cột grid từ giờ (cột 2 = 6:00, cột 3 = 6:30, ...)
-  // (Vị trí booking trên timeline được tính bằng % trong JSX)
-
   const getStatusConfig = (status: string) => STATUS_CONFIG[status] || DEFAULT_STATUS;
 
-  // Label chi tiết dựa trên trạng thái + phương thức thanh toán
   const getDetailedLabel = (status: string, phuongThuc?: string) => {
     if (status === "Chờ xử lý" && phuongThuc) {
       if (phuongThuc === "VNPay") return "Đang xử lý TT";
@@ -109,16 +99,13 @@ export default function OwnerBookingsClient() {
     return getStatusConfig(status).label;
   };
 
-  // Filter bookings for the selected date (exclude cancelled by default)
   const filteredByDate = bookings.filter(b => {
     const bDate = new Date(b.ngay_dat).toISOString().split("T")[0];
     return bDate === dateStr;
   });
 
-  // Bookings excluding cancelled for timeline
   const activeBookings = filteredByDate.filter(b => b.trang_thai_dat !== "Đã hủy");
 
-  // Filter bookings by status tab for the list below (keep all, including cancelled)
   const filteredBookings = statusFilter === "all"
     ? filteredByDate
     : filteredByDate.filter(b => b.trang_thai_dat === statusFilter);
@@ -155,21 +142,24 @@ export default function OwnerBookingsClient() {
         </div>
       </header>
 
-      {/* ===== TIMELINE ===== */}
+      {/* ===== TIMELINE GRAPHICS ===== */}
       <div className="p-4 md:p-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
-            {/* Header row: 6:00, :30, 7:00, 7:30, ... */}
-            <div className="tl-head6er min-w-[1400px]">
+            
+            {/* SỬA LỖI CHÍNH TẢ: tl-head6er chuyển thành tl-header và bọc grid chuẩn */}
+            <div className="tl-header min-w-[1400px]">
               <div className="tl-court-col bg-gray-50 border-r border-gray-200 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 z-10">
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
+              
+              {/* SỬA LỖI ĐỒNG BỘ: Sử dụng chung mô hình Grid giống nội dung dưới */}
               <div className="tl-time-cols bg-gray-50">
                 {TIMELINE_LABELS.map((label, idx) => (
                   <div
                     key={idx}
-                    className={`tl-time-cell px-1 py-3 text-[10px] font-bold text-center ${
-                      label.endsWith(":00") ? "text-slate-500" : "text-slate-300"
+                    className={`tl-time-cell px-1 py-3 text-[10px] font-bold text-center border-r border-gray-200 ${
+                      label.endsWith(":00") ? "text-slate-600 bg-gray-100/50" : "text-slate-400"
                     }`}
                   >
                     {label}
@@ -189,12 +179,12 @@ export default function OwnerBookingsClient() {
 
               return (
                 <div key={court.ma_san} className="tl-row min-w-[1400px]">
-                  <div className="tl-court-col px-4 py-3 flex items-center gap-2 border-r border-gray-100 bg-gray-50/50 sticky left-0 z-10">
+                  <div className="tl-court-col px-4 py-3 flex items-center gap-2 border-r border-gray-200 bg-gray-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     <span className="text-sm font-bold text-slate-700 truncate">{court.ten_san}</span>
                   </div>
 
-                  <div className="tl-time-cols relative">
+                  <div className="tl-time-cols relative bg-white">
                     {Array.from({ length: TOTAL_HALF_HOURS }).map((_, idx) => (
                       <div key={idx} className="tl-grid-cell" />
                     ))}
@@ -220,7 +210,7 @@ export default function OwnerBookingsClient() {
                             background: statusCfg.gradient,
                           }}
                         >
-                          <span className="truncate">{booking.datsan?.nguoidung?.ho_ten}</span>
+                          <span className="truncate px-1">{booking.datsan?.nguoidung?.ho_ten}</span>
                           <div className="tooltip-content">
                             <p className="font-bold text-sm mb-1">{booking.datsan?.nguoidung?.ho_ten}</p>
                             <p className="text-xs text-slate-300">📞 {booking.datsan?.nguoidung?.so_dien_thoai}</p>
@@ -248,7 +238,7 @@ export default function OwnerBookingsClient() {
         </div>
       </div>
 
-      {/* ===== DANH SÁCH ĐẶT CHỖ ===== */}
+      {/* ===== DANH SÁCH ĐẶT CHỖ PHÍA DƯỚI ===== */}
       <div className="px-4 md:px-6 pb-4 md:pb-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -256,7 +246,6 @@ export default function OwnerBookingsClient() {
               <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>notifications_active</span>
               <h3 className="text-sm font-bold text-slate-900">Danh sách đặt chỗ ({dateStr})</h3>
             </div>
-            {/* Status filter tabs — bấm để lọc danh sách */}
             <div className="flex items-center gap-2 flex-wrap text-[10px] font-bold uppercase tracking-wider">
               <button
                 onClick={() => setStatusFilter("all")}
@@ -298,7 +287,6 @@ export default function OwnerBookingsClient() {
                   key={booking.ma_dat_san_chi_tiet}
                   className="p-4 rounded-xl border border-gray-100 bg-white hover:shadow-lg transition-all group"
                 >
-                  {/* Header: Tên khách + Trạng thái */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
@@ -314,7 +302,6 @@ export default function OwnerBookingsClient() {
                     </span>
                   </div>
 
-                  {/* Chi tiết sân + giờ */}
                   <div className="bg-gray-50 rounded-lg p-3 mb-3 space-y-1.5">
                     <div className="flex items-center gap-1.5 text-xs">
                       <span className="material-symbols-outlined text-sm text-primary">sports_soccer</span>
@@ -344,7 +331,6 @@ export default function OwnerBookingsClient() {
                     )}
                   </div>
 
-                  {/* Action buttons */}
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     {isPending && (
                       <div className="flex gap-2">
@@ -392,7 +378,7 @@ export default function OwnerBookingsClient() {
 
       {/* ===== CHECK-IN MODAL ===== */}
       {checkinData && (
-        <div className="fixed inset-0 bg-black/50 z-100 flex items-center justify-center p-4 backdrop-blur-sm" onClick={handleCloseCheckin}>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={handleCloseCheckin}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-slate-900">Xác nhận nhận sân</h3>
@@ -444,46 +430,48 @@ export default function OwnerBookingsClient() {
       )}
 
       <style>{`
-        /* Row layout: fixed court column + flexible timeline area */
         .tl-header, .tl-row {
           display: flex;
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid #e2e8f0;
+          align-items: stretch;
         }
         .tl-header {
-          background: #f9fafb;
-          border-bottom: 1px solid #e5e7eb;
+          background: #f8fafc;
+          position: sticky;
+          top: 0;
+          z-index: 20;
         }
         .tl-court-col {
           width: 160px;
           min-width: 160px;
           flex-shrink: 0;
+          border-right: 1px solid #e2e8f0;
         }
-        /* Timeline area = CSS grid for cells */
         .tl-time-cols {
           flex: 1;
           display: grid;
-          grid-template-columns: repeat(${TOTAL_HALF_HOURS}, 1fr);
-          min-height: 50px;
+          grid-template-columns: repeat(${TOTAL_HALF_HOURS}, minmax(45px, 1fr));
+          position: relative;
         }
-        /* Grid cells with visible borders */
         .tl-grid-cell {
           border-right: 1px solid #f1f5f9;
-          min-height: 50px;
+          min-height: 52px;
         }
-        /* Darker border every full hour (even cells: :00 cols) */
-        .tl-grid-cell:nth-child(odd) {
-          border-right-color: #e2e8f0;
+        /* Phân tách vạch giờ đậm nhạt tự động */
+        .tl-grid-cell:nth-child(even) {
+          border-right-color: #cbd5e1;
         }
         .tl-time-cell {
-          border-right: 1px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        /* Booking block — absolute within the tl-time-cols (position: relative) */
         .booking-block {
           position: absolute;
-          top: 4px;
-          bottom: 4px;
-          border-radius: 8px;
-          padding: 0 10px;
+          top: 6px;
+          bottom: 6px;
+          border-radius: 6px;
+          padding: 0 8px;
           font-size: 11px;
           font-weight: 700;
           color: white;
@@ -492,25 +480,28 @@ export default function OwnerBookingsClient() {
           overflow: hidden;
           z-index: 5;
           cursor: pointer;
-          transition: transform 0.15s, box-shadow 0.15s;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          transition: all 0.2s ease;
         }
         .booking-block:hover {
-          transform: scaleY(1.08);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          z-index: 6;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+          z-index: 10;
         }
         .tooltip-content {
           display: none;
           position: absolute;
-          top: calc(100% + 8px);
-          left: 0;
-          background: #1e293b;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 6px;
+          background: #0f172a;
           color: white;
           padding: 12px 16px;
           border-radius: 12px;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
           z-index: 50;
-          min-width: 220px;
+          min-width: 240px;
           white-space: nowrap;
         }
         .booking-block:hover .tooltip-content {
