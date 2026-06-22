@@ -10,7 +10,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export class GoogleAuthService {
   async DangNhapBangGoogle(idToken: string) {
     if (!idToken) {
-      throw new ApiError(400, "Token is required");
+      throw new ApiError(400, "Cần phải có token");
     }
 
     
@@ -22,12 +22,12 @@ export class GoogleAuthService {
       });
       payload = ticket.getPayload();
     } catch (error) {
-      console.error("Google verify token error:", error);
-      throw new ApiError(401, "Invalid Google token");
+      console.error("Lỗi xác thực Google token:", error);
+      throw new ApiError(401, "Không hợp lệ Google token");
     }
 
     if (!payload || !payload.email) {
-      throw new ApiError(400, "Cannot get email from Google token");
+      throw new ApiError(400, "Không thể lấy email từ Google token");
     }
 
     const email = payload.email;
