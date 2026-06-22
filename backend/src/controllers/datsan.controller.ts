@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { bookingService } from '../services/datsan.service.js';
+import { datsanService } from '../services/datsan.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import prisma from '../config/prisma.js';
 
@@ -10,7 +10,7 @@ export const TaoDonDatSan = async (req: Request, res: Response, next: NextFuncti
       : req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     console.log("Booking Payload:", req.body);
     const bookingData = req.body;
-    const result = await bookingService.TaoDonDatSan(bookingData, ipAddr as string);
+    const result = await datsanService.TaoDonDatSan(bookingData, ipAddr as string);
     
     res.status(201).json({
       message: result.message || "Đặt sân thành công",
@@ -29,7 +29,7 @@ export const LayDatSanNguoiDung = async (req: Request, res: Response, next: Next
     if (typeof userId !== 'string') {
       throw new ApiError(400, "Mã người dùng không hợp lệ ");
     }
-    const bookings = await bookingService.LayDatSanNguoiDung(userId);
+    const bookings = await datsanService.LayDatSanNguoiDung(userId);
     
     res.status(200).json({
       status: "success",
@@ -49,7 +49,7 @@ export const HuyDatSan = async (req: Request, res: Response, next: NextFunction)
       throw new ApiError(401, "Mã người dùng là bắt buộc để hủy đơn đặt sân");
     }
 
-    const result = await bookingService.HuyDatSan(String(bookingId), String(userId));
+    const result = await datsanService.HuyDatSan(String(bookingId), String(userId));
     
     res.status(200).json({
       status: "success",

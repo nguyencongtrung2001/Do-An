@@ -98,7 +98,7 @@ function parseTimeUTC(timeStr: string): Date {
 }
 
 
-export class BookingService {
+export class DatsanService {
   async TaoDonDatSan(data: { ma_nguoi_dung: string; phuong_thuc_thanh_toan: string; selectedSlots: RawSlot[] }, ipAddr: string = '127.0.0.1') {
     const { ma_nguoi_dung, phuong_thuc_thanh_toan, selectedSlots } = data;
 
@@ -283,4 +283,4 @@ export class BookingService {
   }
 }
 
-export const bookingService = new BookingService();
+export const datsanService = new DatsanService();
