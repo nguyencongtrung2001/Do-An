@@ -220,15 +220,12 @@ export default function OwnerBookingsClient() {
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
               
-              <div className="tl-time-cols bg-gray-50">
+              <div className="tl-time-cols bg-gray-50 relative">
                 {TIMELINE_LABELS.map((label, idx) => (
-                  <div
-                    key={idx}
-                    className={`tl-time-cell px-1 py-3 text-[10px] font-bold text-center border-r border-gray-200 ${
-                      label.endsWith(":00") ? "text-slate-600 bg-gray-100/50" : "text-slate-400"
-                    }`}
-                  >
-                    {label}
+                  <div key={idx} className="tl-time-cell py-3 text-[10px] font-bold border-r border-gray-200 relative">
+                    <span className={`absolute ${idx === 0 ? 'left-1' : 'left-0 -translate-x-1/2'} z-10 whitespace-nowrap ${label.endsWith(":00") ? "text-slate-600" : "text-slate-400"}`}>
+                      {label}
+                    </span>
                   </div>
                 ))}
               </div>

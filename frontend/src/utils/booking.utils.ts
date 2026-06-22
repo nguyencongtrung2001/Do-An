@@ -22,6 +22,7 @@ function addThirtyMinutes(time: string): string {
 export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   if (markers.length === 0) return [];
   
+  // 1. Sắp xếp các slot tăng dần theo mã sân, ngày đặt và giờ bắt đầu
   const sorted = [...markers].sort((a, b) => {
     if (a.ma_san !== b.ma_san) return a.ma_san.localeCompare(b.ma_san);
     if (a.ngay_dat !== b.ngay_dat) return a.ngay_dat.localeCompare(b.ngay_dat);
@@ -31,6 +32,7 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   const grouped: GroupedSlot[] = [];
   let currentGroup: GroupedSlot | null = null;
 
+  // 2. Thuật toán gộp các block 30 phút liên tục khít nhau
   for (const marker of sorted) {
     if (!currentGroup) {
       currentGroup = { 
@@ -41,10 +43,9 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
-      if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
-        continue;
-      }
+      if (!lastMarker) continue;
+      
+      // Thời gian mong đợi của block tiếp theo để được tính là liên tục
       const expectedTime = addThirtyMinutes(lastMarker.gio_bat_dau);
 
       if (
@@ -52,10 +53,12 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
+        // Nếu liên tục: Cập nhật giờ kết thúc tổng và đẩy slot vào mảng
         currentGroup.gio_ket_thuc = addThirtyMinutes(marker.gio_bat_dau);
         currentGroup.slots.push(marker);
         currentGroup.gia_thue = currentGroup.slots.length * (currentGroup.slots[0]?.gia_thue ?? 0);
       } else {
+        // Nếu đứt đoạn: Đẩy nhóm cũ vào mảng kết quả và khởi tạo nhóm mới
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
@@ -66,26 +69,9 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
       }
     }
   }
+  
   if (currentGroup) grouped.push(currentGroup);
 
-  return grouped.map(group => {
-    if (group.slots.length > 1) {
-      const lastSlot = group.slots[group.slots.length - 1];
-      
-      if (lastSlot && group.gio_ket_thuc === addThirtyMinutes(lastSlot.gio_bat_dau)) {
-        const newSlots = group.slots.slice(0, -1);
-        const finalLastSlot = newSlots[newSlots.length - 1];
-        
-        if (finalLastSlot) {
-          return {
-            ...group,
-            gio_ket_thuc: addThirtyMinutes(finalLastSlot.gio_bat_dau), 
-            slots: newSlots,
-            gia_thue: newSlots.length * (newSlots[0]?.gia_thue ?? 0) 
-          };
-        }
-      }
-    }
-    return group;
-  });
+  // ĐÃ LOẠI BỎ ĐOẠN MAP CUT SLOTS GÂY LỖI
+  return grouped;
 }
