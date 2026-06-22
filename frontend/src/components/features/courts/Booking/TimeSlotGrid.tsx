@@ -60,6 +60,7 @@ function getSlotEndTime(startTime: string): string {
   return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
 }
 
+export default function TimeSlotGrid({
   court,
   selectedDate,
   selectedSlots,
