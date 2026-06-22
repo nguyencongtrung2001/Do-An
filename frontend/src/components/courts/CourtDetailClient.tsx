@@ -42,6 +42,12 @@ function calculateDuration(startTime: string, endTime: string): string {
   return result.length > 0 ? `(${result.join(' ')})` : "";
 }
 
+function addThirtyMinutes(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const endDate = new Date(0, 0, 0, h, m + 30);
+  return `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+}
+
 function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   if (markers.length === 0) return [];
   
@@ -58,35 +64,33 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
     if (!currentGroup) {
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: marker.gio_bat_dau, 
+        gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
         slots: [marker],
-        gia_thue: 0 
+        gia_thue: marker.gia_thue 
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
+        currentGroup = { ...marker, gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
         continue;
       }
-      const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
-      const expectedDate = new Date(0, 0, 0, lastH, lastM + 30);
-      const expectedTime = `${String(expectedDate.getHours()).padStart(2, '0')}:${String(expectedDate.getMinutes()).padStart(2, '0')}`;
+      const expectedTime = addThirtyMinutes(lastMarker.gio_bat_dau);
 
       if (
         currentGroup.ma_san === marker.ma_san &&
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        currentGroup.gio_ket_thuc = addThirtyMinutes(marker.gio_bat_dau);
         currentGroup.slots.push(marker);
-        currentGroup.gia_thue = (currentGroup.slots.length - 1) * (currentGroup.slots[0]?.gia_thue ?? 0);
+        currentGroup.gia_thue = currentGroup.slots.length * (currentGroup.slots[0]?.gia_thue ?? 0);
       } else {
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: marker.gio_bat_dau, 
+          gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
           slots: [marker],
-          gia_thue: 0
+          gia_thue: marker.gia_thue
         };
       }
     }

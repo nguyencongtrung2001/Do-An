@@ -48,7 +48,18 @@ function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
   });
 }
 
-export default function TimeSlotGrid({
+/**
+ * Tính giờ kết thúc của 1 slot 30 phút từ giờ bắt đầu.
+ * Ví dụ: "20:00" → "20:30", "20:30" → "21:00"
+ */
+function getSlotEndTime(startTime: string): string {
+  const [h, m] = startTime.split(":").map(Number);
+  const total = h * 60 + m + 30;
+  const newH = Math.floor(total / 60) % 24;
+  const newM = total % 60;
+  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+}
+
   court,
   selectedDate,
   selectedSlots,
@@ -103,7 +114,7 @@ export default function TimeSlotGrid({
               const isPrevActive = index > 0 && selectedSlots.includes(TIME_SLOTS[index - 1]);
               const isNextActive = index < TIME_SLOTS.length - 1 && selectedSlots.includes(TIME_SLOTS[index + 1]);
 
-              // === Slot ĐÃ ĐẶT: disabled, mờ, ghi "Đã đặt" ===
+              // === Slot ĐÃ ĐẶT: disabled, mờ ===
               if (booked) {
                 return (
                   <button
@@ -111,7 +122,8 @@ export default function TimeSlotGrid({
                     disabled
                     className="px-1 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
                   >
-                    <span>{slot}</span>
+                    <span className="font-bold">{slot}</span>
+                    <span className="text-[9px]">→ {getSlotEndTime(slot)}</span>
                     <span className="text-[10px] text-red-400 font-semibold">Đã đặt</span>
                   </button>
                 );
@@ -140,13 +152,16 @@ export default function TimeSlotGrid({
                 <button
                   key={slot}
                   onClick={() => onSlotToggle(slot)}
-                  className={`px-1 py-2 text-xs font-medium transition-all ${radiusClass} ${borderClass} ${
+                  className={`px-1 py-2 text-xs font-medium transition-all flex flex-col items-center justify-center gap-0.5 ${radiusClass} ${borderClass} ${
                     isActive
                       ? "bg-blue-700 text-white shadow-sm z-10 relative"
                       : "bg-white text-slate-600 hover:bg-primary/5 hover:border-primary/30 border-gray-200 m-0.5 rounded-lg z-0"
                   }`}
                 >
-                  {slot}
+                  <span className="font-bold">{slot}</span>
+                  <span className={`text-[9px] ${isActive ? "text-blue-200" : "text-slate-400"}`}>
+                    → {getSlotEndTime(slot)}
+                  </span>
                 </button>
               );
             })}
