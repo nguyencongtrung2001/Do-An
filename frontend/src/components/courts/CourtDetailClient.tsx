@@ -191,8 +191,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         setPaymentStatus("Đang xử lý đơn hàng...");
         
         const slotsForBackend = groupedSlots.flatMap(group => {
-          const playableSlots = group.slots.slice(0, -1);
-          return playableSlots.map(marker => {
+          return group.slots.map(marker => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
