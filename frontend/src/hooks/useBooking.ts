@@ -44,11 +44,7 @@ export function useBooking() {
   const isInvalid = invalidGroups.length > 0;
 
   const totalPrice = useMemo(() => {
-    return groupedSlots.reduce((sum, group) => {
-      const playableCount = group.slots.length - 1;
-      const groupPrice = playableCount * group.slots[0].gia_thue;
-      return sum + groupPrice;
-    }, 0);
+    return groupedSlots.reduce((sum, group) => sum + group.gia_thue, 0);
   }, [groupedSlots]);
 
   const confirmBooking = async (paymentMethod: string) => {
@@ -62,9 +58,8 @@ export function useBooking() {
     try {
       setPaymentStatus(paymentMethod === "vnpay" ? "Đang kết nối cổng thanh toán VNPAY..." : "Đang xử lý đơn hàng...");
       
-      const slotsForBackend = groupedSlots.flatMap(group => {
-        const playableSlots = group.slots.slice(0, -1);
-        return playableSlots.map((marker: SelectedSlot) => {
+      const slotsForBackend = groupedSlots.flatMap(group =>
+        group.slots.map((marker: SelectedSlot) => {
           const [h, m] = marker.gio_bat_dau.split(':').map(Number);
           const endDate = new Date(0, 0, 0, h, m + 30);
           const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
@@ -74,11 +69,11 @@ export function useBooking() {
             ten_san: group.ten_san,
             ngay_dat: group.ngay_dat,
             gio_bat_dau: marker.gio_bat_dau,
-            gio_ket_thuc: gio_ket_thuc,
-            gia_thue: marker.gia_thue
+            gio_ket_thuc,
+            gia_thue: marker.gia_thue,
           };
-        });
-      });
+        })
+      );
 
       const payload = {
         ma_nguoi_dung: user.ma_nguoi_dung,

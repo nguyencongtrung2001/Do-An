@@ -15,14 +15,22 @@ export function formatTimeFromISO(isoString: string): string {
 
 
 /**
+ * Cộng thêm 30 phút vào chuỗi "HH:mm"
+ */
+function addThirtyMinutes(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const endDate = new Date(0, 0, 0, h, m + 30);
+  return `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+}
+
+
+/**
  * Gộp các marker liên tiếp thành nhóm (GroupedSlot).
  *
- * Mô hình MARKER:
- * - Mỗi nút bấm là một "mốc" (marker).
- * - Nút cuối cùng trong chuỗi liên tiếp là MỐC KẾT THÚC, không phải khung chơi.
- * - Số khung chơi thực tế = số marker - 1.
+ * Mỗi marker đại diện cho 1 khung chơi 30 phút thực tế.
+ * gio_ket_thuc = gio_bat_dau của marker cuối + 30 phút.
  *
- * Ví dụ: chọn 08:30, 09:00, 09:30, 10:00, 10:30
+ * Ví dụ: chọn 08:30, 09:00, 09:30, 10:00
  * → gio_bat_dau = 08:30, gio_ket_thuc = 10:30
  * → 4 khung chơi (08:30-09:00, 09:00-09:30, 09:30-10:00, 10:00-10:30)
  * → gia_thue = 4 * giá_30p
@@ -43,14 +51,14 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
     if (!currentGroup) {
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: marker.gio_bat_dau, 
+        gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
         slots: [marker],
-        gia_thue: 0 
+        gia_thue: marker.gia_thue 
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
+        currentGroup = { ...marker, gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -62,16 +70,16 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        currentGroup.gio_ket_thuc = addThirtyMinutes(marker.gio_bat_dau);
         currentGroup.slots.push(marker);
-        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
+        currentGroup.gia_thue = currentGroup.slots.length * (currentGroup.slots[0]?.gia_thue ?? 0);
       } else {
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: marker.gio_bat_dau, 
+          gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
           slots: [marker],
-          gia_thue: 0
+          gia_thue: marker.gia_thue
         };
       }
     }
@@ -80,3 +88,4 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
 
   return grouped;
 }
+

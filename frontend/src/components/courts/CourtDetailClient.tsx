@@ -42,6 +42,12 @@ function calculateDuration(startTime: string, endTime: string): string {
   return result.length > 0 ? `(${result.join(' ')})` : "";
 }
 
+function addThirtyMinutes(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const endDate = new Date(0, 0, 0, h, m + 30);
+  return `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+}
+
 function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
   if (markers.length === 0) return [];
   
@@ -56,18 +62,16 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
 
   for (const marker of sorted) {
     if (!currentGroup) {
-      // Marker đầu tiên — giờ kết thúc tạm = chính gio_bat_dau của marker này
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: marker.gio_bat_dau, 
+        gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
         slots: [marker],
-        gia_thue: 0 
+        gia_thue: marker.gia_thue 
       };
     } else {
-      // Kiểm tra marker này có liên tiếp 30p sau marker trước không
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
       if (!lastMarker) {
-        currentGroup = { ...marker, gio_ket_thuc: marker.gio_bat_dau, slots: [marker], gia_thue: 0 };
+        currentGroup = { ...marker, gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), slots: [marker], gia_thue: marker.gia_thue };
         continue;
       }
       const [lastH, lastM] = lastMarker.gio_bat_dau.split(':').map(Number);
@@ -79,17 +83,16 @@ function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         currentGroup.ngay_dat === marker.ngay_dat &&
         marker.gio_bat_dau === expectedTime
       ) {
-        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
+        currentGroup.gio_ket_thuc = addThirtyMinutes(marker.gio_bat_dau);
         currentGroup.slots.push(marker);
-        currentGroup.gia_thue = (currentGroup.slots.length - 1) * currentGroup.slots[0].gia_thue;
+        currentGroup.gia_thue = currentGroup.slots.length * (currentGroup.slots[0]?.gia_thue ?? 0);
       } else {
-        // Không liên tiếp — push group cũ, bắt đầu group mới
         grouped.push(currentGroup);
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: marker.gio_bat_dau, 
+          gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
           slots: [marker],
-          gia_thue: 0
+          gia_thue: marker.gia_thue
         };
       }
     }
@@ -193,10 +196,8 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
       if (paymentMethod === "cash" || paymentMethod === "wallet") {
         setPaymentStatus("Đang xử lý đơn hàng...");
         
-        // Convert markers back to 30-min slots for backend, exclude the boundary marker
-        const slotsForBackend = groupedSlots.flatMap(group => {
-          const playableSlots = group.slots.slice(0, -1);
-          return playableSlots.map(marker => {
+        const slotsForBackend = groupedSlots.flatMap(group =>
+          group.slots.map(marker => {
             const [h, m] = marker.gio_bat_dau.split(':').map(Number);
             const endDate = new Date(0, 0, 0, h, m + 30);
             const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
@@ -206,11 +207,11 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
               ten_san: group.ten_san,
               ngay_dat: group.ngay_dat,
               gio_bat_dau: marker.gio_bat_dau,
-              gio_ket_thuc: gio_ket_thuc,
-              gia_thue: marker.gia_thue
+              gio_ket_thuc,
+              gia_thue: marker.gia_thue,
             };
-          });
-        });
+          })
+        );
 
         console.log("📤 Sending Booking Payload:", { paymentMethod, slotsCount: slotsForBackend.length });
 
