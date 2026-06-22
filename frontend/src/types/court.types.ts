@@ -140,3 +140,8 @@ export interface SelectedSlot {
 export interface GroupedSlot extends SelectedSlot {
   slots: SelectedSlot[];
 }
+
+export interface BookedSlot {
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
+}

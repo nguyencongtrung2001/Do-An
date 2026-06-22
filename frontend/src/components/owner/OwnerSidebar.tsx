@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,13 +9,20 @@ import { bookingService } from "@/services/booking.service";
 import { Bell, Clock, XCircle, CalendarCheck, ChevronRight } from "lucide-react";
 import type { BookingDetail } from "@/types/booking.types";
 
+const emptySubscribe = () => () => {};
+
 export default function OwnerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { token, user, logout } = useAuth();
   
-  // State mounted dùng để khắc phục lỗi Hydration Mismatch
-  const [isMounted, setIsMounted] = useState(false);
+  // Giải pháp Senior: Thay thế useState + useEffect bằng useSyncExternalStore 
+  // Trả về false khi ở Server (SSR) và true khi ở Client. Triệt tiêu hoàn toàn lỗi Hydration và ESLint!
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   
   const [pendingCount, setPendingCount] = useState(0);
   const [lastSeenCount, setLastSeenCount] = useState(() => {
@@ -34,9 +41,8 @@ export default function OwnerSidebar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Ép Component chỉ render giao diện chi tiết sau khi đã nạp thành công vào Trình duyệt
+  // Khởi tạo đối tượng Audio mà không kích hoạt render lại state
   useEffect(() => {
-    setIsMounted(true);
     audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   }, []);
 

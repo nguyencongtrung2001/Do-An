@@ -78,7 +78,26 @@ export default function OwnerBookingsClient() {
     return Number(n).toLocaleString("vi-VN") + "đ";
   };
 
+  // TỐI ƯU CORE: Phân tích chuỗi "HH:mm" thành số phút để loại bỏ hoàn toàn lỗi lệch múi giờ Date gốc
+  const getMinutesFromTimeString = (timeInput: string | Date | undefined | null): number => {
+    if (!timeInput) return 0;
+    
+    // Nếu là chuỗi ISO datetime từ Backend gửi qua
+    if (String(timeInput).includes("T")) {
+      const d = new Date(timeInput);
+      return d.getUTCHours() * 60 + d.getUTCMinutes();
+    }
+    
+    // Nếu là chuỗi string mỏng "HH:mm" hoặc "HH:mm:ss"
+    const parts = String(timeInput).split(":");
+    const h = parseInt(parts[0] || "0", 10);
+    const m = parseInt(parts[1] || "0", 10);
+    return h * 60 + m;
+  };
+
   const formatTime = (isoString: string) => {
+    if (!isoString) return "--:--";
+    if (!isoString.includes("T")) return isoString.slice(0, 5); // Nếu đã là chuỗi dạng "HH:mm"
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");
     const m = String(date.getUTCMinutes()).padStart(2, "0");
@@ -111,6 +130,55 @@ export default function OwnerBookingsClient() {
     : filteredByDate.filter(b => b.trang_thai_dat === statusFilter);
 
   const countByStatus = (status: string) => filteredByDate.filter(n => n.trang_thai_dat === status).length;
+
+  /**
+   * THUẬT TOÁN GỘP CA TIÊU CHUẨN SENIOR:
+   * Kết nối các block 30 phút rời rạc liên tục của cùng một ca đá thành 1 khối duy nhất.
+   * Giúp dải màu kéo dài trọn vẹn đến mốc "08:00" thay vì dừng ở "07:30".
+   */
+  const getMergedTimelineBookings = (courtBookings: BookingDetail[]): BookingDetail[] => {
+    if (courtBookings.length === 0) return [];
+    
+    // Sắp xếp các ca tăng dần theo giờ đá bắt đầu
+    const sorted = [...courtBookings].sort((a, b) => {
+      return getMinutesFromTimeString(a.gio_bat_dau) - getMinutesFromTimeString(b.gio_bat_dau);
+    });
+
+    const merged: BookingDetail[] = [];
+    let current: BookingDetail | null = null;
+
+    for (const item of sorted) {
+      if (!current) {
+        current = { ...item };
+      } else {
+        const currentEnd = getMinutesFromTimeString(current.gio_ket_thuc);
+        const itemStart = getMinutesFromTimeString(item.gio_bat_dau);
+        
+        // Điều kiện gộp: Cùng đơn đặt sân tổng (hoặc cùng một khách hàng) và thời gian liên tục khít nhau
+        const isSameOrder = item.ma_dat_san && current.ma_dat_san ? item.ma_dat_san === current.ma_dat_san : true;
+        const userA = item.datsan?.nguoidung ? `${item.datsan.nguoidung.ho_ten}-${item.datsan.nguoidung.so_dien_thoai}` : "A";
+        const userB = current.datsan?.nguoidung ? `${current.datsan.nguoidung.ho_ten}-${current.datsan.nguoidung.so_dien_thoai}` : "B";
+        const isSameUser = userA === userB;
+
+        if (isSameUser && isSameOrder && itemStart <= currentEnd) {
+          const itemEndMin = getMinutesFromTimeString(item.gio_ket_thuc);
+          const currentEndMin = getMinutesFromTimeString(current.gio_ket_thuc);
+          
+          // Kéo dài mốc giờ kết thúc tổng chạm đúng block cuối (Ví dụ: 08:00)
+          if (itemEndMin > currentEndMin) {
+            current.gio_ket_thuc = item.gio_ket_thuc;
+            current.tien_coc = Number(current.tien_coc) + Number(item.tien_coc);
+            current.tien_con_lai = Number(current.tien_con_lai) + Number(item.tien_con_lai);
+          }
+        } else {
+          merged.push(current);
+          current = { ...item };
+        }
+      }
+    }
+    if (current) merged.push(current);
+    return merged;
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -147,13 +215,11 @@ export default function OwnerBookingsClient() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
             
-            {/* SỬA LỖI CHÍNH TẢ: tl-head6er chuyển thành tl-header và bọc grid chuẩn */}
             <div className="tl-header min-w-[1400px]">
               <div className="tl-court-col bg-gray-50 border-r border-gray-200 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center sticky left-0 z-10">
                 <span className="material-symbols-outlined text-sm mr-1">stadium</span> Sân
               </div>
               
-              {/* SỬA LỖI ĐỒNG BỘ: Sử dụng chung mô hình Grid giống nội dung dưới */}
               <div className="tl-time-cols bg-gray-50">
                 {TIMELINE_LABELS.map((label, idx) => (
                   <div
@@ -176,6 +242,8 @@ export default function OwnerBookingsClient() {
               <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
             ) : courts.map(court => {
               const courtBookings = activeBookings.filter(b => b.ma_san === court.ma_san);
+              // Chạy mảng qua hàm gộp ca liên tiếp
+              const mergedBookings = getMergedTimelineBookings(courtBookings);
 
               return (
                 <div key={court.ma_san} className="tl-row min-w-[1400px]">
@@ -189,15 +257,20 @@ export default function OwnerBookingsClient() {
                       <div key={idx} className="tl-grid-cell" />
                     ))}
 
-                    {courtBookings.map(booking => {
-                      const startDate = new Date(booking.gio_bat_dau);
-                      const endDate = new Date(booking.gio_ket_thuc);
-                      const startMinutes = (startDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + startDate.getUTCMinutes();
-                      const endMinutes = (endDate.getUTCHours() - TIMELINE_START_HOUR) * 60 + endDate.getUTCMinutes();
-                      const totalMinutes = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
+                    {mergedBookings.map(booking => {
+                      const startTotalMinutes = getMinutesFromTimeString(booking.gio_bat_dau);
+                      const endTotalMinutes = getMinutesFromTimeString(booking.gio_ket_thuc);
 
-                      const leftPct = (startMinutes / totalMinutes) * 100;
-                      const widthPct = ((endMinutes - startMinutes) / totalMinutes) * 100;
+                      const timelineStartMinutes = TIMELINE_START_HOUR * 60;
+                      const startMinutes = startTotalMinutes - timelineStartMinutes;
+                      const endMinutes = endTotalMinutes - timelineStartMinutes;
+                      
+                      const totalTimelineMinutes = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
+
+                      // Phép toán phần trăm CSS mượt mà chiếm đủ chiều rộng đến điểm "08:00" kết thúc
+                      const leftPct = (startMinutes / totalTimelineMinutes) * 100;
+                      const widthPct = ((endMinutes - startMinutes) / totalTimelineMinutes) * 100;
+                      
                       const statusCfg = getStatusConfig(booking.trang_thai_dat);
 
                       return (
@@ -210,10 +283,11 @@ export default function OwnerBookingsClient() {
                             background: statusCfg.gradient,
                           }}
                         >
-                          <span className="truncate px-1">{booking.datsan?.nguoidung?.ho_ten}</span>
+                          <span className="truncate px-2 block font-semibold">{booking.datsan?.nguoidung?.ho_ten || "Khách vãng lai"}</span>
+                          
                           <div className="tooltip-content">
-                            <p className="font-bold text-sm mb-1">{booking.datsan?.nguoidung?.ho_ten}</p>
-                            <p className="text-xs text-slate-300">📞 {booking.datsan?.nguoidung?.so_dien_thoai}</p>
+                            <p className="font-bold text-sm mb-1">{booking.datsan?.nguoidung?.ho_ten || "Khách vãng lai"}</p>
+                            <p className="text-xs text-slate-300">📞 {booking.datsan?.nguoidung?.so_dien_thoai || "—"}</p>
                             <p className="text-xs text-slate-300 mt-1">
                               ⏰ {formatTime(booking.gio_bat_dau)} - {formatTime(booking.gio_ket_thuc)}
                             </p>
@@ -293,8 +367,8 @@ export default function OwnerBookingsClient() {
                         {booking.datsan?.nguoidung?.ho_ten?.charAt(0) || "?"}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">{booking.datsan?.nguoidung?.ho_ten}</p>
-                        <p className="text-[11px] text-slate-400">📞 {booking.datsan?.nguoidung?.so_dien_thoai}</p>
+                        <p className="text-sm font-bold text-slate-900">{booking.datsan?.nguoidung?.ho_ten || "Khách vãng lai"}</p>
+                        <p className="text-[11px] text-slate-400">📞 {booking.datsan?.nguoidung?.so_dien_thoai || "—"}</p>
                       </div>
                     </div>
                     <span className={`text-[9px] px-2.5 py-1 rounded-full font-bold uppercase ${statusCfg.bg} ${statusCfg.text}`}>
@@ -388,8 +462,8 @@ export default function OwnerBookingsClient() {
             <div className="bg-gray-50 rounded-xl p-4 mb-4 grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Khách hàng</p>
-                <p className="font-bold">{checkinData.datsan?.nguoidung?.ho_ten}</p>
-                <p className="text-xs text-slate-400">📞 {checkinData.datsan?.nguoidung?.so_dien_thoai}</p>
+                <p className="font-bold">{checkinData.datsan?.nguoidung?.ho_ten || "Khách vãng lai"}</p>
+                <p className="text-xs text-slate-400">📞 {checkinData.datsan?.nguoidung?.so_dien_thoai || "—"}</p>
               </div>
               <div>
                 <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Sân</p>
@@ -457,7 +531,6 @@ export default function OwnerBookingsClient() {
           border-right: 1px solid #f1f5f9;
           min-height: 52px;
         }
-        /* Phân tách vạch giờ đậm nhạt tự động */
         .tl-grid-cell:nth-child(even) {
           border-right-color: #cbd5e1;
         }
