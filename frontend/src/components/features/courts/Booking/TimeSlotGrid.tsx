@@ -160,9 +160,6 @@ export default function TimeSlotGrid({
                   }`}
                 >
                   <span className="font-bold">{slot}</span>
-                  <span className={`text-[9px] ${isActive ? "text-blue-200" : "text-slate-400"}`}>
-                    → {getSlotEndTime(slot)}
-                  </span>
                 </button>
               );
             })}
