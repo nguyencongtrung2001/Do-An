@@ -110,7 +110,7 @@ const SPORT_LABELS: Record<string, string> = {
   "bida": "Bida",
 };
 
-// Generate time slots (6:00 - 22:00, 30-min intervals)
+
 const TIME_SLOTS = Array.from({ length: 32 }, (_, i) => {
   const hour = Math.floor(i / 2) + 6;
   const minute = i % 2 === 0 ? "00" : "30";
@@ -132,7 +132,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
   
   const { user, token } = useAuth() || {};
 
-  // Checkout Modal State
+  
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -152,7 +152,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
           ten_san: court.ten_san,
           ngay_dat: selectedDate,
           gio_bat_dau: marker,
-          gio_ket_thuc: marker, // Temporary, will be merged
+          gio_ket_thuc: marker, 
           gia_thue: court.gia_thue_30p
         }];
       }
@@ -165,8 +165,8 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
 
   const groupedSlots = useMemo(() => mergeSelectedSlots(selectedSlots), [selectedSlots]);
 
-  // Ruler Logic: Each marker = 30 min.
-  // Minimum 1 hour = 2 markers.
+  
+  
   const invalidGroups = groupedSlots.filter(g => g.slots.length < 2);
   const isInvalid = invalidGroups.length > 0;
 
@@ -228,7 +228,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         }, 1500);
       } else if (paymentMethod === "vnpay") {
         setPaymentStatus("Đang kết nối cổng thanh toán VNPAY...");
-        // Giả lập gọi API lấy URL VNPAY (POST /api/payments/vnpay)
+        
         await new Promise(resolve => setTimeout(resolve, 2000));
         window.location.href = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?fake_params=123";
       }
@@ -246,11 +246,11 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* ===== PART 1: Image Gallery ===== */}
+      {}
       <section className="w-full bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] rounded-2xl overflow-hidden">
-            {/* Main large image */}
+            {}
             <div
               className="md:col-span-2 md:row-span-2 relative group cursor-pointer rounded-xl overflow-hidden"
               onClick={() => setActiveImage(0)}
@@ -264,7 +264,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
             </div>
-            {/* Thumbnail images */}
+            {}
             {location.hinh_anh.slice(1, 5).map((img, idx) => (
               <div
                 key={idx}
@@ -285,7 +285,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
               </div>
             ))}
           </div>
-          {/* Image counter */}
+          {}
           {location.hinh_anh.length > 1 && (
             <div className="flex items-center justify-center mt-3 text-sm text-slate-500">
               <span className="material-symbols-outlined text-base mr-1">photo_library</span>
@@ -295,7 +295,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         </div>
       </section>
 
-      {/* ===== PART 2: Location Header ===== */}
+      {}
       <section className="w-full bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -335,7 +335,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         </div>
       </section>
 
-      {/* ===== PART 3: Info & Description ===== */}
+      {}
       {location.mo_ta && (
         <section className="w-full bg-white border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
@@ -347,12 +347,12 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
 
 
 
-      {/* ===== PART 4: Court List & Booking ===== */}
+      {}
       <section className="w-full bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
           <h2 className="text-xl font-bold text-slate-900 mb-6">Chọn sân & đặt giờ</h2>
 
-          {/* Date Picker */}
+          {}
           <div className="flex items-center gap-4 mb-6">
             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <CalendarIcon />
@@ -367,11 +367,11 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
             />
           </div>
 
-          {/* Courts */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             <div className="lg:col-span-2 space-y-6">
               {location.sans.map(court => {
-                // Lọc ra các slot đã chọn của sân này trong ngày được chọn
+                
                 const courtSelectedSlots = selectedSlots
                   .filter(s => s.ma_san === court.ma_san && s.ngay_dat === selectedDate)
                   .map(s => s.gio_bat_dau);
@@ -390,7 +390,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
               })}
             </div>
             
-            {/* Booking Summary (Cart) */}
+            {}
             <div className="lg:col-span-1">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24 shadow-xl shadow-gray-100">
                 <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center justify-between">
@@ -452,7 +452,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
         </div>
       </section>
 
-      {/* Checkout Modal */}
+      {}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
@@ -467,7 +467,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
             </div>
             
             <div className="p-6 space-y-8 flex-1">
-              {/* Order Summary */}
+              {}
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Thông tin sân đã đặt</h3>
                 <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
@@ -491,7 +491,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
                 </div>
               </div>
 
-              {/* Payment Methods */}
+              {}
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Phương thức thanh toán</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -547,7 +547,7 @@ export default function CourtDetailClient({ location }: CourtDetailClientProps) 
   );
 }
 
-/* ===== Sub-components ===== */
+
 
 function CalendarIcon() {
   return (
@@ -575,7 +575,7 @@ function CourtCard({ court, isSelected, onSelect, selectedDate, selectedSlots, o
           : "border-gray-100 bg-white hover:border-gray-200"
       }`}
     >
-      {/* Court header */}
+      {}
       <button
         onClick={onSelect}
         className="w-full px-6 py-4 flex items-center justify-between text-left"

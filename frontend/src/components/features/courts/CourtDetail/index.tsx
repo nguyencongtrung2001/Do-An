@@ -60,7 +60,7 @@ export default function CourtDetail({ location }: CourtDetailProps) {
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
           <h2 className="text-xl font-bold text-slate-900 mb-6">Chọn sân & đặt giờ</h2>
 
-          {/* Date Picker */}
+          {}
           <div className="flex items-center gap-4 mb-8">
             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <span className="material-symbols-outlined text-base">calendar_today</span>

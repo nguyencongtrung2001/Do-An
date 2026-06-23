@@ -193,7 +193,7 @@ export default function AdminApprovalsClient() {
 
   return (
     <div className="flex flex-col min-h-screen pb-10">
-      {/* Header */}
+      {}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-slate-900">Kiểm duyệt</h2>
@@ -202,7 +202,7 @@ export default function AdminApprovalsClient() {
       </header>
 
       <div className="p-4 md:p-8">
-        {/* Stats */}
+        {}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
@@ -224,7 +224,7 @@ export default function AdminApprovalsClient() {
           </div>
         </div>
 
-        {/* Filters */}
+        {}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
           <button
             onClick={() => setFilter("pending")}
@@ -257,13 +257,13 @@ export default function AdminApprovalsClient() {
           </button>
         </div>
 
-        {/* Content */}
+        {}
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-500" />
           </div>
         ) : filter === "pending" ? (
-          /* ═══════════════ PENDING LIST ═══════════════ */
+          
           pendingRequests.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
               <span className="material-symbols-outlined text-5xl text-slate-300">check_circle</span>
@@ -274,7 +274,7 @@ export default function AdminApprovalsClient() {
               {pendingRequests.map((req) => (
                 <div key={req.ownerBasic.ma_nguoi_dung} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row">
                   
-                  {/* Left: Owner Profile */}
+                  {}
                   <div className="p-6 md:w-1/2 border-b md:border-b-0 md:border-r border-gray-100 bg-slate-50/50">
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden shrink-0">
@@ -321,7 +321,7 @@ export default function AdminApprovalsClient() {
                     )}
                   </div>
 
-                  {/* Right: Locations & Actions */}
+                  {}
                   <div className="p-6 md:w-1/2 flex flex-col justify-between">
                     <div>
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Địa điểm đăng ký ({req.locations.length})</p>
@@ -344,7 +344,7 @@ export default function AdminApprovalsClient() {
                       )}
                     </div>
 
-                    {/* Action Button */}
+                    {}
                     <div className="flex flex-col sm:flex-row justify-end pt-4 border-t border-gray-100 mt-auto gap-3">
                       <button
                         onClick={() => {
@@ -378,7 +378,7 @@ export default function AdminApprovalsClient() {
             </div>
           )
         ) : (
-          /* ═══════════════ APPROVED LIST ═══════════════ */
+          
           approvedRequests.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
               <span className="material-symbols-outlined text-5xl text-slate-300">history</span>
@@ -425,7 +425,7 @@ export default function AdminApprovalsClient() {
         )}
       </div>
 
-      {/* Reject Modal */}
+      {}
       {rejectingReq && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden fade-in">

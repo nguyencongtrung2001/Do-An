@@ -5,10 +5,7 @@ import { courtService } from "@/services/court.service";
 import { normalizeSport } from "@/lib/constants/sports";
 import type { CourtGridItem, CourtMapData, CourtApiItem } from "@/types/court.types";
 
-/**
- * Hook for fetching public field list (used by CourtGrid and MapClient).
- * Returns both grid items and map items from the same API call.
- */
+
 export function useFields() {
   const [gridItems, setGridItems] = useState<CourtGridItem[]>([]);
   const [mapItems, setMapItems] = useState<CourtMapData[]>([]);

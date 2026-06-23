@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useState } from "react";
@@ -77,7 +77,7 @@ export default function AuthClient() {
       
       login(data.token, data.user as UserData);
       
-      // Navigate based on role
+      
       if (data.user.vai_tro === "Quản trị viên") {
         router.push("/admin/users");
       } else if (data.user.vai_tro === "Chủ sân") {
@@ -154,9 +154,9 @@ export default function AuthClient() {
   return (
     <div className="flex min-h-screen w-full bg-background-light font-display text-slate-900 antialiased overflow-x-hidden">
 
-      {/* ========== LEFT PANE — Sports Background ========== */}
+      {}
       <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden">
-        {/* Background Image */}
+        {}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -164,19 +164,19 @@ export default function AuthClient() {
               'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAauiqdyNWVqjMU-Gkl5aqFLVfulhFpw0Hqha3VQhLjyid0gZJB6f0o-9T9uoScJMYUAUC97puxCjT9FeEFLFHfltL8BC6IPaNpllVu7PBjUnNTOqkC_S6L0KjIlQPqjI5r4NieQwCl1xA2jIcfW79nBwXX-y4AxZnX_3ajpINCy80E97a2zONBECkyFvSa28lnD3zxyPkc9iGaAz59dQwRUtr6Dl3DGLjRtvPH3wheVRoyK2va7IKvx47GxDXw168SjqQT9Jjt24kV")',
           }}
         />
-        {/* Dark gradient overlay */}
+        {}
         <div className="absolute inset-0 bg-linear-to-br from-black/70 via-black/50 to-primary/30" />
 
-        {/* Floating decorative dots */}
+        {}
         <div className="floating-dot" style={{ top: "15%", left: "20%", animationDelay: "0s" }} />
         <div className="floating-dot" style={{ top: "45%", left: "60%", animationDelay: "1.5s" }} />
         <div className="floating-dot" style={{ top: "70%", left: "30%", animationDelay: "3s" }} />
         <div className="floating-dot" style={{ top: "25%", left: "75%", animationDelay: "0.8s" }} />
         <div className="floating-dot" style={{ top: "80%", left: "70%", animationDelay: "2.2s" }} />
 
-        {/* Content */}
+        {}
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          {/* Logo */}
+          {}
           <button onClick={() => router.push("/")} className="flex items-center gap-3 w-fit">
             <span className="material-symbols-outlined text-primary text-3xl! font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
               location_on
@@ -184,7 +184,7 @@ export default function AuthClient() {
             <h1 className="text-white text-2xl font-bold tracking-tight">Book Sport</h1>
           </button>
 
-          {/* Center text */}
+          {}
           <div className="flex flex-col gap-6 max-w-md auth-slide-up">
             <h2 className="text-white text-4xl xl:text-5xl font-black leading-tight tracking-tight">
               Kết nối với
@@ -218,7 +218,7 @@ export default function AuthClient() {
             </div>
           </div>
 
-          {/* Bottom quote */}
+          {}
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
               <span className="material-symbols-outlined text-primary text-lg">format_quote</span>
@@ -228,10 +228,10 @@ export default function AuthClient() {
         </div>
       </div>
 
-      {/* ========== RIGHT PANE — Auth Form ========== */}
+      {}
       <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-16 bg-white overflow-y-auto">
         <div className="w-full max-w-110 auth-fade-in">
-          {/* Mobile logo (only shows on small screens) */}
+          {}
           <button onClick={() => router.push("/")} className="lg:hidden flex items-center gap-3 mb-8 justify-center w-full">
             <span className="material-symbols-outlined text-primary text-3xl! font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
               location_on
@@ -239,7 +239,7 @@ export default function AuthClient() {
             <h1 className="text-slate-900 text-2xl font-bold tracking-tight">Book Sport</h1>
           </button>
 
-          {/* Auth Tabs (Login / Sign Up) */}
+          {}
           <div className="flex border-b border-gray-200 mb-8 relative">
             <button
               className={`flex-1 pb-3 text-center text-sm font-bold transition-colors duration-200 z-10 ${
@@ -259,7 +259,7 @@ export default function AuthClient() {
             </button>
           </div>
 
-          {/* Role Selector (always visible but primarily used for Signup, so we can hide or dim it if on login tab) */}
+          {}
           <div className={`flex bg-gray-100 rounded-full p-1 mb-8 transition-opacity duration-300 ${activeTab === 'login' ? 'opacity-0 h-0 w-0 mb-0 overflow-hidden' : 'opacity-100'}`}>
             <button
               onClick={() => setRole("player")}
@@ -287,7 +287,7 @@ export default function AuthClient() {
             </div>
           )}
 
-          {/* ===== LOGIN FORM ===== */}
+          {}
           {activeTab === "login" && (
             <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5 auth-fade-in">
               <div className="flex flex-col gap-1.5">
@@ -348,14 +348,14 @@ export default function AuthClient() {
                 {!loading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
               </button>
 
-              {/* Social Divider */}
+              {}
               <div className="flex items-center gap-4 my-1">
                 <div className="flex-1 h-px bg-gray-200" />
                 <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Hoặc tiếp tục với</span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
 
-              {/* Social Login */}
+              {}
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -375,7 +375,7 @@ export default function AuthClient() {
             </form>
           )}
 
-          {/* ===== REGISTER FORM ===== */}
+          {}
           {activeTab === "register" && (
             <form onSubmit={handleSignupSubmit} className="flex flex-col gap-5 auth-fade-in">
               <div className="flex flex-col gap-1.5">
@@ -393,10 +393,10 @@ export default function AuthClient() {
                 </div>
               </div>
 
-              {/* Owner Specific Fields */}
+              {}
               {role === "owner" && (
                 <div className="flex flex-col gap-4 auth-fade-in">
-                  {/* Avatar Upload */}
+                  {}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh đại diện</label>
                     <div className="flex items-center gap-4">
@@ -427,7 +427,7 @@ export default function AuthClient() {
                     </div>
                   </div>
 
-                  {/* Location Name */}
+                  {}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Tên địa điểm / Cơ sở</label>
                     <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -443,7 +443,7 @@ export default function AuthClient() {
                     </div>
                   </div>
 
-                  {/* Address */}
+                  {}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Địa chỉ</label>
                     <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -459,7 +459,7 @@ export default function AuthClient() {
                     </div>
                   </div>
 
-                  {/* Map Selector */}
+                  {}
                   <div className="flex flex-col gap-1.5 mt-2">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Vị trí trên bản đồ</label>
                     <VenueMapSelector
@@ -473,7 +473,7 @@ export default function AuthClient() {
                     )}
                   </div>
 
-                  {/* CCCD Front */}
+                  {}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh CCCD Mặt Trước</label>
                     <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -488,7 +488,7 @@ export default function AuthClient() {
                     </div>
                   </div>
                   
-                  {/* CCCD Back */}
+                  {}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh CCCD Mặt Sau</label>
                     <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -596,14 +596,14 @@ export default function AuthClient() {
                 {!loading && <span className="material-symbols-outlined text-lg">how_to_reg</span>}
               </button>
 
-              {/* Social Divider */}
+              {}
               <div className="flex items-center gap-4 my-1">
                 <div className="flex-1 h-px bg-gray-200" />
                 <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Hoặc đăng ký với</span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
 
-              {/* Social Login */}
+              {}
               <div className="flex gap-3">
                 <button
                   type="button"

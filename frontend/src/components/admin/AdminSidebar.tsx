@@ -21,7 +21,7 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {}
       <button
         onClick={() => setIsOpen(true)}
         className="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105"
@@ -29,7 +29,7 @@ export default function AdminSidebar() {
         <span className="material-symbols-outlined">menu</span>
       </button>
 
-      {/* Mobile Overlay */}
+      {}
       {isOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
@@ -38,7 +38,7 @@ export default function AdminSidebar() {
       )}
 
       <aside className={`fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        {/* Logo */}
+        {}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-background-dark flex items-center justify-center">
@@ -61,7 +61,7 @@ export default function AdminSidebar() {
           </button>
         </div>
 
-      {/* Navigation */}
+      {}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navGroups.map((group, index) => (
           <div key={index} className={index > 0 ? "mt-6" : ""}>
@@ -97,7 +97,7 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
-      {/* User */}
+      {}
       <div className="border-t border-gray-100 p-4">
         {!isMounted ? (
           <div className="flex items-center gap-3 animate-pulse">

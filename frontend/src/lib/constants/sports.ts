@@ -1,8 +1,4 @@
-/**
- * Sports constants — centralized source of truth.
- * Replaces duplicated SPORT_LABELS across OwnerCourtsClient, CourtGrid, etc.
- * Also absorbs sport.utils.ts normalizeSport function.
- */
+
 
 
 
@@ -69,9 +65,7 @@ export function normalizeSport(sport: string): string {
   return normalized;
 }
 
-/**
- * Get display label for a sport slug, with optional icon.
- */
+
 export function getSportLabel(slug: string, withIcon = false): string {
   if (withIcon) return SPORT_LABELS_WITH_ICONS[slug] || slug;
   return SPORT_LABELS[slug] || slug;

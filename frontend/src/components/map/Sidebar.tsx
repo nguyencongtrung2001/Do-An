@@ -18,7 +18,7 @@ export default function Sidebar({ isOpen, locations, onClose, onSelect, activeId
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
         <div>
           <h3 className="font-bold text-base text-slate-900 dark:text-white">Kết quả tìm kiếm</h3>
@@ -32,7 +32,7 @@ export default function Sidebar({ isOpen, locations, onClose, onSelect, activeId
         </button>
       </div>
 
-      {/* List Content */}
+      {}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {locations.map((loc) => (
           <div

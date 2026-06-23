@@ -16,8 +16,8 @@ export default function OwnerSidebar() {
   const router = useRouter();
   const { token, user, logout } = useAuth();
   
-  // Giải pháp Senior: Thay thế useState + useEffect bằng useSyncExternalStore 
-  // Trả về false khi ở Server (SSR) và true khi ở Client. Triệt tiêu hoàn toàn lỗi Hydration và ESLint!
+  
+  
   const isMounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -41,12 +41,12 @@ export default function OwnerSidebar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Khởi tạo đối tượng Audio mà không kích hoạt render lại state
+  
   useEffect(() => {
     audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   }, []);
 
-  // Polling check ca đặt sân đang chờ xử lý
+  
   useEffect(() => {
     if (!token || !isMounted) return;
 
@@ -78,7 +78,7 @@ export default function OwnerSidebar() {
     return () => clearInterval(interval);
   }, [token, isMounted]);
 
-  // Fetch danh sách thông báo mới
+  
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
     setLoadingNotifications(true);
@@ -110,7 +110,7 @@ export default function OwnerSidebar() {
 
   const displayBadgeCount = Math.max(0, pendingCount - lastSeenCount);
 
-  // Đóng dropdown panel khi click ra ngoài vùng hiển thị
+  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -143,7 +143,7 @@ export default function OwnerSidebar() {
     return `${diffDays} ngày trước`;
   };
 
-  // NẾU CHƯA MOUNTED: Trả về bộ khung trống (Skeleton CSS) tương tự máy chủ để chống lệch Hydration
+  
   if (!isMounted) {
     return (
       <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-50 animate-pulse">
@@ -163,10 +163,10 @@ export default function OwnerSidebar() {
     );
   }
 
-  // NẾU ĐÃ MOUNTED THÀNH CÔNG: Trả về HTML hoàn chỉnh phục vụ tương tác phía Client
+  
   return (
     <>
-      {/* Mobile Menu Button */}
+      {}
       <button
         onClick={() => setIsOpen(true)}
         className="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105"
@@ -174,7 +174,7 @@ export default function OwnerSidebar() {
         <span className="material-symbols-outlined">menu</span>
       </button>
 
-      {/* Mobile Overlay */}
+      {}
       {isOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
@@ -183,7 +183,7 @@ export default function OwnerSidebar() {
       )}
 
       <aside className={`fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        {/* Logo */}
+        {}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
@@ -201,7 +201,7 @@ export default function OwnerSidebar() {
           </button>
         </div>
 
-        {/* Navigation */}
+        {}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tổng quan</p>
           {OWNER_NAV_LINKS.filter((l) => l.category === "Tổng quan").map((link) => {
@@ -244,7 +244,7 @@ export default function OwnerSidebar() {
             );
           })}
 
-          {/* Nút Thông báo */}
+          {}
           <div className="relative mt-1" ref={dropdownRef}>
             <button
               onClick={handleBellClick}
@@ -266,10 +266,10 @@ export default function OwnerSidebar() {
               )}
             </button>
 
-            {/* Notification Dropdown Panel */}
+            {}
             {showNotifications && (
               <div className="fixed left-[260px] top-[calc(50%-210px)] w-[400px] bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.12)] border border-gray-100 overflow-hidden z-100 animate-in fade-in slide-in-from-left-4 duration-200">
-                {/* Header */}
+                {}
                 <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-slate-50 to-white">
                   <div className="flex items-center gap-2">
                     <Bell size={16} className="text-primary" />
@@ -292,7 +292,7 @@ export default function OwnerSidebar() {
                   </button>
                 </div>
 
-                {/* Notification List */}
+                {}
                 <div className="max-h-[420px] overflow-y-auto">
                   {loadingNotifications ? (
                     <div className="flex justify-center py-10">
@@ -376,7 +376,7 @@ export default function OwnerSidebar() {
                   )}
                 </div>
 
-                {/* Footer */}
+                {}
                 {notifications.length > 0 && (
                   <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
                     <button
@@ -395,12 +395,12 @@ export default function OwnerSidebar() {
           </div>
         </nav>
 
-        {/* User Section */}
+        {}
         <div className="border-t border-gray-100 p-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105 overflow-hidden">
               {user?.anh_dai_dien ? (
-                // eslint-disable-next-line @next/next/no-img-element
+                
                 <img src={user.anh_dai_dien} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 user?.ho_ten?.charAt(0) || "O"

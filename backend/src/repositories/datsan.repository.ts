@@ -130,7 +130,14 @@ export class BookingRepository {
     });
   }
 
-  async HuyDonVaHoanTien(bookingId: string, userId: string, refundAmount: number) {
+  async HuyDonVaHoanTien(
+    bookingId: string, 
+    userId: string, 
+    refundAmount: number,
+    ownerId?: string,
+    ownerCompensation?: number,
+    hasTransferred?: boolean
+  ) {
     return prisma.$transaction(async (tx) => {
       
       await tx.datsanchitiet.updateMany({
@@ -153,6 +160,25 @@ export class BookingRepository {
             ma_nguoi_dung: userId,
             so_tien_tt: refundAmount,
             noi_dung_thanh_toan: "Hoàn tiền hủy đặt sân",
+            trang_thai_giao_dich: "Thành công",
+            ngay_tao: new Date()
+          }
+        });
+      }
+
+      if (ownerId && ownerCompensation && ownerCompensation > 0 && !hasTransferred) {
+        await tx.nguoidung.update({
+          where: { ma_nguoi_dung: ownerId },
+          data: { so_vi_du: { increment: ownerCompensation } }
+        });
+
+        await tx.giaodich.create({
+          data: {
+            ma_giao_dich: `CP_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            ma_dat_san: bookingId,
+            ma_nguoi_dung: ownerId,
+            so_tien_tt: ownerCompensation,
+            noi_dung_thanh_toan: "Bồi thường hủy đặt sân",
             trang_thai_giao_dich: "Thành công",
             ngay_tao: new Date()
           }

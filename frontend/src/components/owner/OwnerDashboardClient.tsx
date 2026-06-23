@@ -124,7 +124,7 @@ export default function OwnerDashboardClient() {
     }
   };
 
-  // Tính % booking theo trạng thái cho biểu đồ thanh
+  
   const statusBars = useMemo(() => {
     const total = stats.totalBookings || 1;
     return [
@@ -136,7 +136,7 @@ export default function OwnerDashboardClient() {
     ];
   }, [stats]);
 
-  // Thống kê theo sân
+  
   const courtStats = useMemo(() => {
     return courts.map(court => {
       const courtBookings = bookings.filter(b => b.ma_san === court.ma_san);
@@ -152,7 +152,7 @@ export default function OwnerDashboardClient() {
 
   return (
     <div className="p-4 md:p-6 space-y-6 bg-slate-50 min-h-screen">
-      {/* ===== Header ===== */}
+      {}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
@@ -168,7 +168,7 @@ export default function OwnerDashboardClient() {
         )}
       </div>
 
-      {/* ===== Stat Cards ===== */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Tổng doanh thu"
@@ -202,9 +202,9 @@ export default function OwnerDashboardClient() {
         />
       </div>
 
-      {/* ===== Row 2: Status Breakdown + Court Stats ===== */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Phân bổ trạng thái */}
+        {}
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-slate-700">Phân bổ trạng thái</CardTitle>
@@ -233,7 +233,7 @@ export default function OwnerDashboardClient() {
           </CardContent>
         </Card>
 
-        {/* Thống kê theo sân */}
+        {}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-slate-700">Doanh thu theo sân</CardTitle>
@@ -277,9 +277,9 @@ export default function OwnerDashboardClient() {
         </Card>
       </div>
 
-      {/* ===== Row 3: Quick Stats + Recent Bookings ===== */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Quick Summary Cards */}
+        {}
         <div className="space-y-4">
           <Card className="border-l-4 border-l-amber-500">
             <CardContent className="py-4 flex items-center gap-3">
@@ -316,7 +316,7 @@ export default function OwnerDashboardClient() {
           </Card>
         </div>
 
-        {/* Recent Bookings */}
+        {}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-slate-700">Đơn đặt gần đây</CardTitle>
@@ -361,7 +361,7 @@ export default function OwnerDashboardClient() {
         </Card>
       </div>
 
-      {/* ===== Wallet Card ===== */}
+      {}
       <Card className="bg-linear-to-r from-primary to-indigo-600 text-white border-0">
         <CardContent className="py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -381,9 +381,9 @@ export default function OwnerDashboardClient() {
   );
 }
 
-// ==============================
-// Stat Card Component
-// ==============================
+
+
+
 function StatCard({ title, value, icon, description, trend, color }: StatCardProps) {
   const colorMap: Record<string, { bg: string; iconBg: string; iconText: string }> = {
     indigo: { bg: "bg-indigo-50", iconBg: "bg-indigo-100", iconText: "text-indigo-600" },

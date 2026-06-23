@@ -28,8 +28,7 @@ export function useOwnerCourts() {
     (async () => { await fetchCourts(); })();
   }, [fetchCourts]);
 
-  /** Change court status to any of 3 values. Sends JSON (no image). */
-  const changeCourtStatus = async (court: OwnerCourt, newStatus: string) => {
+    const changeCourtStatus = async (court: OwnerCourt, newStatus: string) => {
     if (!token) return false;
     try {
       const data = await courtService.updateCourt(token, court.ma_san, {

@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-12 animate-in fade-in duration-500">
-      {/* Gallery Skeleton */}
+      {}
       <div className="relative h-[400px] lg:h-[600px] w-full bg-slate-200">
         <Skeleton className="w-full h-full rounded-none" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -13,7 +13,7 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* Header Skeleton */}
+      {}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -34,7 +34,7 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* Content Skeleton */}
+      {}
       <section className="w-full bg-white mt-8">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
           <Skeleton className="h-8 w-48 mb-8" />

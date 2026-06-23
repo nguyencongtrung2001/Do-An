@@ -23,7 +23,7 @@ export default function CourtCard({
 }: CourtProps) {
   return (
     <article className="group flex flex-col bg-white dark:bg-[#2a1d1d] rounded-[10px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
-      {/* Image Wrapper */}
+      {}
       <div className="relative w-full aspect-video overflow-hidden">
         <div className="absolute top-3 right-3 z-10 bg-white/90 dark:bg-black/60 backdrop-blur-sm text-slate-900 dark:text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
           <span className="material-symbols-outlined text-yellow-500 text-sm fill">star</span> 

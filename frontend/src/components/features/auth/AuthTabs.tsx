@@ -32,7 +32,7 @@ const [role, setRole] = useState<Role>(Role.CUSTOMER);
   return (
     <div className="flex min-h-screen w-full bg-background-light font-display text-slate-900 antialiased overflow-x-hidden">
       
-      {/* ========== LEFT PANE — Decorative ========== */}
+      {}
       <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -73,10 +73,10 @@ const [role, setRole] = useState<Role>(Role.CUSTOMER);
         </div>
       </div>
 
-      {/* ========== RIGHT PANE — Auth Forms ========== */}
+      {}
       <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-16 bg-white overflow-y-auto">
         <div className="w-full max-w-110 auth-fade-in">
-          {/* Mobile logo */}
+          {}
           <button onClick={() => router.push("/")} className="lg:hidden flex items-center gap-3 mb-8 justify-center w-full">
             <span className="material-symbols-outlined text-primary text-3xl! font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
               location_on
@@ -84,7 +84,7 @@ const [role, setRole] = useState<Role>(Role.CUSTOMER);
             <h1 className="text-slate-900 text-2xl font-bold tracking-tight">Book Sport</h1>
           </button>
 
-          {/* Auth Tabs */}
+          {}
           <div className="flex border-b border-gray-200 mb-8 relative">
             <button
               className={`flex-1 pb-3 text-center text-sm font-bold transition-colors duration-200 ${
@@ -104,7 +104,7 @@ const [role, setRole] = useState<Role>(Role.CUSTOMER);
             </button>
           </div>
 
-          {/* Role Selector (only for signup) */}
+          {}
           <RoleSelector 
             role={role} 
             setRole={setRole} 

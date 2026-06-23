@@ -30,7 +30,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         </div>
       )}
 
-      {/* Common Fields */}
+      {}
       <div className="flex flex-col gap-1.5">
         <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Họ và tên</label>
         <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -46,10 +46,10 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         </div>
       </div>
 
-      {/* Owner Specific Fields */}
+      {}
       {role === Role.OWNER && (
         <div className="flex flex-col gap-4 auth-fade-in">
-          {/* Avatar Upload */}
+          {}
           <div className="flex flex-col gap-1.5">
             <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Ảnh đại diện</label>
             <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
             </div>
           </div>
 
-          {/* Map Selector */}
+          {}
           <div className="flex flex-col gap-1.5 mt-2">
             <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Vị trí trên bản đồ</label>
             <VenueMapSelector
@@ -141,7 +141,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         </div>
       )}
 
-      {/* Common Contact Fields */}
+      {}
       <div className="flex flex-col gap-1.5">
         <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Email</label>
         <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 transition-all duration-200 bg-gray-50/50 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
@@ -173,7 +173,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         </div>
       </div>
 
-      {/* Password Fields */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Mật khẩu</label>
@@ -228,7 +228,7 @@ export default function SignupForm({ role, onSwitchToLogin }: SignupFormProps) {
         {!state.loading && <span className="material-symbols-outlined text-lg">how_to_reg</span>}
       </button>
 
-      {/* Social Divider */}
+      {}
       <div className="flex items-center gap-4 my-1">
         <div className="flex-1 h-px bg-gray-200" />
         <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Hoặc tiếp tục với</span>

@@ -34,7 +34,7 @@ export function useOwnerApprovalStatus() {
 
     syncStatus();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [token]);
 
   const isAccountApproved = user?.trang_thai === true;

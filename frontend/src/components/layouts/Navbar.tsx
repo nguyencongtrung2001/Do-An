@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import Link from "next/link";
@@ -38,7 +38,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-6 lg:px-40 py-4 shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
+        {}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="text-primary group-hover:scale-110 transition-transform">
             <span className="material-symbols-outlined fill text-3xl! font-bold">location_on</span>
@@ -46,7 +46,7 @@ export default function Navbar() {
           <h2 className="text-slate-900 dark:text-white text-xl font-black tracking-tight">Book Sport</h2>
         </Link>
 
-        {/* Desktop Menu */}
+        {}
         <nav className="hidden md:block">
           <ul className="flex items-center gap-8">
             {NAV_LINKS.map((link) => {
@@ -67,7 +67,7 @@ export default function Navbar() {
           </ul>
         </nav>
 
-        {/* Auth Buttons */}
+        {}
         <div className="flex items-center gap-3">
           {mounted && isAuthenticated ? (
             <div className="flex items-center gap-4">
@@ -114,7 +114,7 @@ export default function Navbar() {
             <div className="h-10 w-40"></div>
           )}
 
-          {/* Mobile Menu Toggle Button */}
+          {}
           <button
             className="md:hidden flex items-center justify-center p-2 text-slate-700 dark:text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -126,7 +126,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {}
       {isMobileMenuOpen && (
         <nav className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-background-dark border-b border-gray-200 dark:border-gray-800 shadow-lg py-4 px-6 flex flex-col gap-4">
           <ul className="flex flex-col gap-4">
@@ -148,7 +148,7 @@ export default function Navbar() {
             })}
           </ul>
           
-          {/* Mobile Auth Links (if not authenticated) */}
+          {}
           {mounted && !isAuthenticated && (
             <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               <Link 

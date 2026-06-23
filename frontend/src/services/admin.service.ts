@@ -1,6 +1,6 @@
 import { apiGet, apiPut, apiDelete } from './api';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type ApiResponse = { success: boolean; [key: string]: any };
 
 export const adminService = {
@@ -22,7 +22,7 @@ export const adminService = {
     return apiDelete<ApiResponse>(`/admin/users/${id}`, token);
   },
 
-  // ── Owner Approval ────────────────────────────────────
+  
 
   async getPendingOwners(token: string): Promise<ApiResponse> {
     return apiGet<ApiResponse>('/admin/owners/pending', token);
@@ -32,7 +32,7 @@ export const adminService = {
     return apiPut<ApiResponse>(`/admin/owners/${id}/approve`, {}, token);
   },
 
-  // ── Location Approval ─────────────────────────────────
+  
 
   async getAllLocations(token: string): Promise<ApiResponse> {
     return apiGet<ApiResponse>('/admin/locations', token);

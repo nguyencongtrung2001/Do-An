@@ -24,12 +24,7 @@ export const courtService = {
     return apiPost<AddCourtResponse>('/owner/add-court', data, token, false);
   },
 
-  /**
-   * Update a court. Accepts either FormData (with images) or a plain JSON object.
-   * When FormData is passed, multipart/form-data is sent and the backend
-   * upload middleware processes the images.
-   */
-  async updateCourt(
+    async updateCourt(
     token: string,
     ma_san: string,
     data: FormData | Record<string, unknown>,

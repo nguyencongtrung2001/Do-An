@@ -64,7 +64,7 @@ export default function TimeSlotGrid({
           : "border-gray-100 bg-white hover:border-gray-200"
       }`}
     >
-      {/* Court header */}
+      {}
       <button
         onClick={onSelect}
         className="w-full px-6 py-4 flex items-center justify-between text-left"
@@ -89,7 +89,7 @@ export default function TimeSlotGrid({
         </div>
       </button>
 
-      {/* Time slots — shown when court is selected */}
+      {}
       {isSelected && (
         <div className="px-6 pb-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">

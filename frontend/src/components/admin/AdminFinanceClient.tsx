@@ -168,7 +168,7 @@ export default function AdminFinanceClient() {
     interaction: { mode: 'nearest', axis: 'x', intersect: false }
   };
 
-  // Doughnut Chart Config
+  
   const doughnutData = {
     labels: ['Bóng đá', 'Cầu lông', 'Tennis', 'Bóng rổ'],
     datasets: [{
@@ -207,7 +207,7 @@ export default function AdminFinanceClient() {
   return (
     <div className="flex flex-col min-h-screen pb-10">
       
-      {/* Top Bar */}
+      {}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-slate-900">Thống kê & Tài chính</h2>
@@ -226,10 +226,10 @@ export default function AdminFinanceClient() {
         </div>
       </header>
 
-      {/* Content */}
+      {}
       <div className="p-4 md:p-8">
         
-        {/* Filters & Export */}
+        {}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
             <div className="relative w-full sm:w-auto">
@@ -270,7 +270,7 @@ export default function AdminFinanceClient() {
           </button>
         </div>
 
-        {/* Highlight Stats */}
+        {}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="stat-card fade-in-up bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
             <div className="flex justify-between items-start mb-4">
@@ -334,9 +334,9 @@ export default function AdminFinanceClient() {
           </div>
         </div>
 
-        {/* Charts & Graphs */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Main Chart */}
+          {}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 fade-in-up" style={{animationDelay: '0.4s'}}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -352,7 +352,7 @@ export default function AdminFinanceClient() {
             </div>
           </div>
 
-          {/* Doughnut Chart */}
+          {}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 fade-in-up" style={{animationDelay: '0.5s'}}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -362,7 +362,7 @@ export default function AdminFinanceClient() {
             </div>
             <div className="h-64 w-full relative">
               <Doughnut data={doughnutData} options={doughnutOptions} />
-              {/* Center Text */}
+              {}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-3xl font-black text-slate-900">100%</span>
                 <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tổng cộng</span>
@@ -371,7 +371,7 @@ export default function AdminFinanceClient() {
           </div>
         </div>
 
-        {/* Top Courts Table */}
+        {}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden fade-in-up" style={{animationDelay: '0.6s'}}>
           <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">Top sân có doanh thu cao nhất</h3>

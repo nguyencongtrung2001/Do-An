@@ -60,13 +60,13 @@ export default function OwnerStatusClient() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
+      {}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4">
         <h2 className="text-lg md:text-xl font-bold text-slate-900">Trạng thái sân</h2>
         <p className="text-xs md:text-sm text-slate-400">Quản lý trạng thái hoạt động của tất cả các sân</p>
       </header>
 
-      {/* Stats cards */}
+      {}
       <div className="px-4 md:px-8 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
@@ -97,7 +97,7 @@ export default function OwnerStatusClient() {
         </div>
       </div>
 
-      {/* Filter */}
+      {}
       <div className="px-4 md:px-8 pt-5 pb-2 flex flex-wrap items-center gap-2">
         {[
           { value: "all", label: "Tất cả", count: courts.length },
@@ -120,7 +120,7 @@ export default function OwnerStatusClient() {
         ))}
       </div>
 
-      {/* Court list */}
+      {}
       <div className="px-4 md:px-8 pb-8 pt-2">
         {loading ? (
           <div className="flex justify-center py-20">
@@ -144,7 +144,7 @@ export default function OwnerStatusClient() {
                     isUpdating ? "opacity-60 pointer-events-none" : ""
                   }`}
                 >
-                  {/* Thumbnail */}
+                  {}
                   <div className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 ${court.trang_thai_san !== "Đang hoạt động" ? "grayscale-[0.5]" : ""}`}>
                     <Image
                       src={court.anhsan?.[0]?.duong_dan_anh || "/hero-stadium.png"}
@@ -155,7 +155,7 @@ export default function OwnerStatusClient() {
                     />
                   </div>
 
-                  {/* Info */}
+                  {}
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-bold text-slate-900 truncate">{court.ten_san}</h4>
                     <div className="flex items-center gap-2 mt-1">
@@ -169,7 +169,7 @@ export default function OwnerStatusClient() {
                     </div>
                   </div>
 
-                  {/* 3 status buttons */}
+                  {}
                   <div className="flex flex-wrap gap-1.5 shrink-0 mt-2 sm:mt-0 w-full sm:w-auto">
                     {STATUS_OPTIONS.map((opt) => (
                       <button
@@ -189,7 +189,7 @@ export default function OwnerStatusClient() {
                     ))}
                   </div>
 
-                  {/* Loading indicator */}
+                  {}
                   {isUpdating && (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary shrink-0" />
                   )}

@@ -94,7 +94,7 @@ export default function HistoryClient() {
         token
       );
       toast.success(res.message || "Đã hủy đơn đặt sân thành công");
-      // Refresh data
+      
       await refreshHistory();
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error("Lỗi khi hủy đơn đặt sân");
@@ -104,8 +104,8 @@ export default function HistoryClient() {
     }
   };
 
-  // Tách mỗi datsanchitiet thành 1 item riêng để hiển thị từng sân riêng biệt
-  // Mỗi item mang theo thông tin thanh toán từ đơn cha (datsan)
+  
+  
   const flatDetails = bookings.flatMap((booking) =>
     booking.datsanchitiet.map((detail) => ({
       detail,
@@ -114,7 +114,7 @@ export default function HistoryClient() {
     }))
   );
 
-  // Lọc theo trạng thái của từng chi tiết
+  
   const filteredDetails = filter === "all"
     ? flatDetails
     : flatDetails.filter((item) => item.detail.trang_thai_dat === filter);
@@ -130,11 +130,11 @@ export default function HistoryClient() {
     }
   };
 
-  // Hiển thị label chi tiết dựa trên trạng thái + phương thức thanh toán
+  
   const getDetailedLabel = (status: string, phuongThuc: string) => {
     if (status === "Chờ xử lý") {
       if (phuongThuc === "VNPay") return "Đang xử lý thanh toán";
-      return "Chờ chủ sân duyệt"; // Tiền mặt
+      return "Chờ chủ sân duyệt"; 
     }
     if (status === "Đã xác nhận") {
       if (phuongThuc === "Ví nội bộ" || phuongThuc === "VNPay") return "Đã xác nhận (Đã TT)";
@@ -145,8 +145,8 @@ export default function HistoryClient() {
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
-    // Giờ được lưu dưới dạng UTC (1970-01-01T[HH:mm:ss]Z)
-    // → lấy giờ UTC để tránh bị lệch múi giờ
+    
+    
     const h = String(date.getUTCHours()).padStart(2, '0');
     const m = String(date.getUTCMinutes()).padStart(2, '0');
     return `${h}:${m}`;
@@ -154,13 +154,13 @@ export default function HistoryClient() {
 
   return (
     <div className="layout-container px-4 lg:px-40 py-8 min-h-[calc(100vh-200px)]">
-      {/* Page Header */}
+      {}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Lịch sử đặt sân</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Theo dõi các lần đặt sân của bạn</p>
         </div>
-        {/* Filter Tabs */}
+        {}
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilter("all")}
@@ -215,7 +215,7 @@ export default function HistoryClient() {
         </div>
       </div>
 
-      {/* Booking List */}
+      {}
       <div className="space-y-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
@@ -245,7 +245,7 @@ export default function HistoryClient() {
                 }`}
               >
                 <div className="flex flex-col md:flex-row">
-                  {/* Ảnh sân */}
+                  {}
                   <div className="md:w-48 h-32 md:h-auto relative shrink-0">
                     {court?.anhsan?.[0]?.duong_dan_anh ? (
                       <Image
@@ -267,7 +267,7 @@ export default function HistoryClient() {
                     </div>
                   </div>
 
-                  {/* Nội dung */}
+                  {}
                   <div className="flex-1 p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
@@ -287,7 +287,7 @@ export default function HistoryClient() {
                       </div>
                     </div>
 
-                    {/* Chi tiết khung giờ + tiền cọc */}
+                    {}
                     <div className="flex flex-wrap gap-3 mt-4">
                       <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
                         <span className="material-symbols-outlined text-base text-primary">calendar_today</span>
@@ -317,7 +317,7 @@ export default function HistoryClient() {
                       )}
                     </div>
 
-                    {/* Footer */}
+                    {}
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                       <p className="text-xs text-slate-400">
                         Mã: <span className="font-mono font-bold text-slate-600 dark:text-slate-300">{detail.ma_dat_san_chi_tiet}</span>
@@ -356,7 +356,7 @@ export default function HistoryClient() {
         ma_dat_san_chi_tiet={ratingModal.detailId}
         token={token || ""}
         onSuccess={() => {
-          // You could optionally refresh history or update state here
+          
         }}
       />
     </div>

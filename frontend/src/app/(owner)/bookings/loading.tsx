@@ -6,7 +6,7 @@ export default function OwnerBookingsLoading() {
         <div className="h-4 w-60 bg-slate-100 rounded-lg animate-pulse mt-2" />
       </header>
       <div className="p-8 space-y-6">
-        {/* Timeline skeleton */}
+        {}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex gap-3 animate-pulse">
             <div className="h-9 w-24 bg-slate-200 rounded-lg" />

@@ -1,6 +1,6 @@
 import app from './app.js';
 import prisma from './config/prisma.js';
-import { initWalletTransferCron } from './cron/walletTransfer.js';
+import { chuyenTienCoc } from './cron/hoantiencoc.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -9,7 +9,7 @@ const startServer = async () => {
     await prisma.$connect();
     console.log('✅ Connected to database');
 
-    initWalletTransferCron();
+    chuyenTienCoc();
     console.log('🕒 Cron jobs initialized');
 
     app.listen(PORT, () => {

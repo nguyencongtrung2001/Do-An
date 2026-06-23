@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Hero() {
   return (
     <section className="relative w-full min-h-140 flex flex-col items-center justify-center px-4 overflow-hidden">
-      {/* Background Image Optimization */}
+      {}
       <Image
         src="/hero-stadium.png"
         alt="Sân vận động hiện đại"
@@ -12,7 +12,7 @@ export default function Hero() {
         priority
         className="object-cover"
       />
-      {/* Overlay */}
+      {}
       <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/80" />
 
       <div className="relative z-10 text-center max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-1000">

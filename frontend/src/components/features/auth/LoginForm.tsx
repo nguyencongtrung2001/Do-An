@@ -115,7 +115,7 @@ export default function LoginForm({ onSwitchToRegister, onError }: LoginFormProp
         {!loading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
       </button>
 
-      {/* Social Divider */}
+      {}
       <div className="flex items-center gap-4 my-1">
         <div className="flex-1 h-px bg-gray-200" />
         <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Hoặc tiếp tục với</span>

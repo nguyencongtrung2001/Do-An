@@ -23,7 +23,7 @@ export default function DetailCard({ location, onClose }: DetailCardProps) {
 
   return (
     <div className="absolute bottom-8 left-8 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300 z-1001">
-      {/* Banner Image */}
+      {}
       <div className="h-32 bg-slate-200 dark:bg-slate-700 relative overflow-hidden">
         <Image src={location.image} alt={location.ten_dia_diem} fill sizes="(max-width: 768px) 100vw, 384px" className="object-cover" />
         <button 
@@ -34,7 +34,7 @@ export default function DetailCard({ location, onClose }: DetailCardProps) {
         </button>
       </div>
 
-      {/* Details */}
+      {}
       <div className="p-5 flex flex-col gap-3">
         <div className="flex justify-between items-start">
           <div>

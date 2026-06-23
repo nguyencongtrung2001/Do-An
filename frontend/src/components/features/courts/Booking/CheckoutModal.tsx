@@ -41,7 +41,7 @@ export default function CheckoutModal({
         </DialogHeader>
         
         <div className="p-6 space-y-8">
-          {/* Order Summary */}
+          {}
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Thông tin sân đã đặt</h3>
             <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
@@ -66,7 +66,7 @@ export default function CheckoutModal({
             </div>
           </div>
 
-          {/* Payment Methods */}
+          {}
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Phương thức thanh toán</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

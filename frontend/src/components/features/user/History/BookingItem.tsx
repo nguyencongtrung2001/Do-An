@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingItemProps {
   item: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     detail: any;
     ma_dat_san: string;
     phuong_thuc: string;
@@ -55,7 +55,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
   return (
     <div className={`group bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden ${status === "Đã hủy" ? "opacity-75 grayscale-[0.5]" : ""}`}>
       <div className="flex flex-col md:flex-row">
-        {/* Visual Section */}
+        {}
         <div className="md:w-64 h-48 md:h-auto relative shrink-0">
           {court?.anhsan?.[0]?.duong_dan_anh ? (
             <Image
@@ -77,7 +77,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
           </div>
         </div>
 
-        {/* Content Section */}
+        {}
         <div className="flex-1 p-8 space-y-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-1">
@@ -99,7 +99,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
             </div>
           </div>
 
-          {/* Metrics Grid */}
+          {}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100/50">
               <Calendar className="w-4 h-4 text-primary" />
@@ -135,7 +135,7 @@ export default function BookingItem({ item, onCancel }: BookingItemProps) {
             )}
           </div>
 
-          {/* Footer Actions */}
+          {}
           <div className="flex items-center justify-between pt-6 border-t border-slate-100">
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
               MÃ ĐƠN: <span className="text-slate-500">{detail.ma_dat_san_chi_tiet.toUpperCase()}</span>

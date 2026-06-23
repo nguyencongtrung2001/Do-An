@@ -1,8 +1,4 @@
-/**
- * Booking status configuration — centralized source of truth.
- * Used in: OwnerBookingsClient, OwnerDashboardClient, HistoryClient.
- * Matches DB constraint: 'Chờ xử lý', 'Đã xác nhận', 'Đã nhận sân', 'Hoàn thành', 'Đã hủy'
- */
+
 
 
 

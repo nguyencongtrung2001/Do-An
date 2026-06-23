@@ -17,7 +17,7 @@ export default function CourtGallery({ images, locationName }: CourtGalleryProps
     <section className="w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] rounded-2xl overflow-hidden">
-          {/* Main large image */}
+          {}
           <div
             className="md:col-span-2 md:row-span-2 relative group cursor-pointer rounded-xl overflow-hidden"
             onClick={() => setActiveImage(0)}
@@ -32,7 +32,7 @@ export default function CourtGallery({ images, locationName }: CourtGalleryProps
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
           </div>
-          {/* Thumbnail images */}
+          {}
           {images.slice(1, 5).map((img, idx) => (
             <div
               key={idx}
@@ -53,7 +53,7 @@ export default function CourtGallery({ images, locationName }: CourtGalleryProps
             </div>
           ))}
         </div>
-        {/* Image counter */}
+        {}
         {images.length > 1 && (
           <div className="flex items-center justify-center mt-3 text-sm text-slate-500">
             <span className="material-symbols-outlined text-base mr-1">photo_library</span>

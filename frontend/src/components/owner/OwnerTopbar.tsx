@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -106,7 +106,7 @@ export default function OwnerTopbar() {
     return `${h}:${m}`;
   };
 
-  // Time ago string
+  
   const timeAgo = (isoString: string) => {
     const now = new Date().getTime();
     const then = new Date(isoString).getTime();
@@ -127,7 +127,7 @@ export default function OwnerTopbar() {
         <p className="text-xs md:text-sm text-slate-400">Chào mừng quay lại, {user?.ho_ten || "Chủ sân"}!</p>
       </div>
       <div className="flex items-center gap-3 sm:gap-6">
-        {/* Notification Bell + Dropdown */}
+        {}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleBellClick}
@@ -142,10 +142,10 @@ export default function OwnerTopbar() {
             )}
           </button>
 
-          {/* Notification Dropdown */}
+          {}
           {showNotifications && (
             <div className="absolute right-[-10px] sm:right-0 top-[calc(100%+8px)] w-[320px] sm:w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              {/* Header */}
+              {}
               <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-slate-50 to-white">
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-primary" />
@@ -168,7 +168,7 @@ export default function OwnerTopbar() {
                 </button>
               </div>
 
-              {/* Notification List */}
+              {}
               <div className="max-h-[420px] overflow-y-auto">
                 {loadingNotifications ? (
                   <div className="flex justify-center py-10">
@@ -195,7 +195,7 @@ export default function OwnerTopbar() {
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          {/* Icon */}
+                          {}
                           <div className={`mt-0.5 w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                             isPending 
                               ? "bg-amber-100 text-amber-600" 
@@ -204,7 +204,7 @@ export default function OwnerTopbar() {
                             {isPending ? <CalendarCheck size={18} /> : <XCircle size={18} />}
                           </div>
 
-                          {/* Content */}
+                          {}
                           <div className="flex-1 min-w-0">
                             <p className="text-[13px] font-semibold text-slate-800 leading-tight">
                               {isPending && (
@@ -254,7 +254,7 @@ export default function OwnerTopbar() {
                 )}
               </div>
 
-              {/* Footer */}
+              {}
               {notifications.length > 0 && (
                 <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
                   <button
@@ -281,7 +281,7 @@ export default function OwnerTopbar() {
 
         <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
 
-        {/* Avatar */}
+        {}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden ring-2 ring-primary/20 transition-transform hover:scale-105">
             {user?.anh_dai_dien ? (

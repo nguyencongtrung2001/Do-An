@@ -75,7 +75,7 @@ export default function History() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 min-h-screen">
-      {/* Page Header */}
+      {}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
         <div className="flex items-center gap-6">
           <div className="w-16 h-16 rounded-[24px] bg-slate-900 text-white flex items-center justify-center shadow-2xl shadow-slate-200">
@@ -93,7 +93,7 @@ export default function History() {
         />
       </div>
 
-      {/* Main List */}
+      {}
       <div className="space-y-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">

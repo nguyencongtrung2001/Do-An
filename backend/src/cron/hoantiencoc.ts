@@ -1,18 +1,18 @@
 import cron from 'node-cron';
 import prisma from '../config/prisma.js';
 
-export const initWalletTransferCron = () => {
+export const chuyenTienCoc = () => {
   
   cron.schedule('* * * * *', async () => {
     try {
-      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const sixtyMinsAgo = new Date(Date.now() - 60 * 60 * 1000);
 
       
       const bookings = await prisma.datsan.findMany({
         where: {
           phuong_thuc_thanh_toan: "Ví nội bộ",
           ngay_tao: {
-            lte: thirtyMinsAgo
+            lte: sixtyMinsAgo
           }
         },
         include: {

@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background-light dark:bg-background-dark">
-      {/* Icon */}
+      {}
       <div className="w-28 h-28 bg-red-50 dark:bg-red-900/20 text-primary rounded-3xl flex items-center justify-center -rotate-6 mb-6 shadow-lg shadow-primary/10">
         <span
           className="material-symbols-outlined text-6xl"

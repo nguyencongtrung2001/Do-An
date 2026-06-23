@@ -231,7 +231,16 @@ export class DatsanService {
 
     const booking = await prisma.datsan.findUnique({
       where: { ma_dat_san: bookingId },
-      include: { datsanchitiet: true }
+      include: { 
+        datsanchitiet: {
+          include: {
+            san: {
+              include: { diadiem: true }
+            }
+          }
+        },
+        giaodich: true
+      }
     });
 
     if (!booking) {
@@ -266,7 +275,20 @@ export class DatsanService {
     );
     const refundAmount = tongTienCoc * refundPercentage;
 
-    await bookingRepository.HuyDonVaHoanTien(bookingId, userId, refundAmount);
+    const ownerCompensation = tongTienCoc - refundAmount;
+    const ownerId = booking.datsanchitiet[0]?.san?.diadiem?.ma_nguoi_dung ?? undefined;
+    const hasTransferred = booking.giaodich.some(
+      (gd: any) => gd.noi_dung_thanh_toan === "Chuyển tiền cọc cho chủ sân"
+    );
+
+    await bookingRepository.HuyDonVaHoanTien(
+      bookingId, 
+      userId, 
+      refundAmount, 
+      ownerId, 
+      ownerCompensation, 
+      hasTransferred
+    );
 
     let message = "Hủy đặt sân thành công.";
     if (refundAmount > 0) {

@@ -78,17 +78,17 @@ export default function OwnerBookingsClient() {
     return Number(n).toLocaleString("vi-VN") + "đ";
   };
 
-  // TỐI ƯU CORE: Phân tích chuỗi "HH:mm" thành số phút để loại bỏ hoàn toàn lỗi lệch múi giờ Date gốc
+  
   const getMinutesFromTimeString = (timeInput: string | Date | undefined | null): number => {
     if (!timeInput) return 0;
     
-    // Nếu là chuỗi ISO datetime từ Backend gửi qua
+    
     if (String(timeInput).includes("T")) {
       const d = new Date(timeInput);
       return d.getUTCHours() * 60 + d.getUTCMinutes();
     }
     
-    // Nếu là chuỗi string mỏng "HH:mm" hoặc "HH:mm:ss"
+    
     const parts = String(timeInput).split(":");
     const h = parseInt(parts[0] || "0", 10);
     const m = parseInt(parts[1] || "0", 10);
@@ -97,7 +97,7 @@ export default function OwnerBookingsClient() {
 
   const formatTime = (isoString: string) => {
     if (!isoString) return "--:--";
-    if (!isoString.includes("T")) return isoString.slice(0, 5); // Nếu đã là chuỗi dạng "HH:mm"
+    if (!isoString.includes("T")) return isoString.slice(0, 5); 
     const date = new Date(isoString);
     const h = String(date.getUTCHours()).padStart(2, "0");
     const m = String(date.getUTCMinutes()).padStart(2, "0");
@@ -131,15 +131,11 @@ export default function OwnerBookingsClient() {
 
   const countByStatus = (status: string) => filteredByDate.filter(n => n.trang_thai_dat === status).length;
 
-  /**
-   * THUẬT TOÁN GỘP CA TIÊU CHUẨN SENIOR:
-   * Kết nối các block 30 phút rời rạc liên tục của cùng một ca đá thành 1 khối duy nhất.
-   * Giúp dải màu kéo dài trọn vẹn đến mốc "08:00" thay vì dừng ở "07:30".
-   */
+  
   const getMergedTimelineBookings = (courtBookings: BookingDetail[]): BookingDetail[] => {
     if (courtBookings.length === 0) return [];
     
-    // Sắp xếp các ca tăng dần theo giờ đá bắt đầu
+    
     const sorted = [...courtBookings].sort((a, b) => {
       return getMinutesFromTimeString(a.gio_bat_dau) - getMinutesFromTimeString(b.gio_bat_dau);
     });
@@ -154,7 +150,7 @@ export default function OwnerBookingsClient() {
         const currentEnd = getMinutesFromTimeString(current.gio_ket_thuc);
         const itemStart = getMinutesFromTimeString(item.gio_bat_dau);
         
-        // Điều kiện gộp: Cùng đơn đặt sân tổng (hoặc cùng một khách hàng) và thời gian liên tục khít nhau
+        
         const isSameOrder = item.ma_dat_san && current.ma_dat_san ? item.ma_dat_san === current.ma_dat_san : true;
         const userA = item.datsan?.nguoidung ? `${item.datsan.nguoidung.ho_ten}-${item.datsan.nguoidung.so_dien_thoai}` : "A";
         const userB = current.datsan?.nguoidung ? `${current.datsan.nguoidung.ho_ten}-${current.datsan.nguoidung.so_dien_thoai}` : "B";
@@ -164,7 +160,7 @@ export default function OwnerBookingsClient() {
           const itemEndMin = getMinutesFromTimeString(item.gio_ket_thuc);
           const currentEndMin = getMinutesFromTimeString(current.gio_ket_thuc);
           
-          // Kéo dài mốc giờ kết thúc tổng chạm đúng block cuối (Ví dụ: 08:00)
+          
           if (itemEndMin > currentEndMin) {
             current.gio_ket_thuc = item.gio_ket_thuc;
             current.tien_coc = Number(current.tien_coc) + Number(item.tien_coc);
@@ -182,7 +178,7 @@ export default function OwnerBookingsClient() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* ===== Top Bar ===== */}
+      {}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
         <div>
           <h2 className="text-lg md:text-xl font-bold text-slate-900">Lịch đặt sân</h2>
@@ -210,7 +206,7 @@ export default function OwnerBookingsClient() {
         </div>
       </header>
 
-      {/* ===== TIMELINE GRAPHICS ===== */}
+      {}
       <div className="p-4 md:p-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="timeline-wrapper overflow-x-auto">
@@ -239,7 +235,7 @@ export default function OwnerBookingsClient() {
               <div className="p-10 text-center text-slate-400 text-sm">Chưa có dữ liệu sân hoặc lịch đặt trong ngày này.</div>
             ) : courts.map(court => {
               const courtBookings = activeBookings.filter(b => b.ma_san === court.ma_san);
-              // Chạy mảng qua hàm gộp ca liên tiếp
+              
               const mergedBookings = getMergedTimelineBookings(courtBookings);
 
               return (
@@ -264,7 +260,7 @@ export default function OwnerBookingsClient() {
                       
                       const totalTimelineMinutes = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60;
 
-                      // Phép toán phần trăm CSS mượt mà chiếm đủ chiều rộng đến điểm "08:00" kết thúc
+                      
                       const leftPct = (startMinutes / totalTimelineMinutes) * 100;
                       const widthPct = ((endMinutes - startMinutes) / totalTimelineMinutes) * 100;
                       
@@ -309,7 +305,7 @@ export default function OwnerBookingsClient() {
         </div>
       </div>
 
-      {/* ===== DANH SÁCH ĐẶT CHỖ PHÍA DƯỚI ===== */}
+      {}
       <div className="px-4 md:px-6 pb-4 md:pb-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center justify-between mb-5 flex-wrap gap-3">

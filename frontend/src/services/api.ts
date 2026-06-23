@@ -1,8 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-/**
- * Enhanced API layer with centralized configuration and interceptor-like behavior.
- */
+
 
 interface RequestOptions extends RequestInit {
   token?: string | null;
@@ -35,13 +33,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
         data = JSON.parse(textData);
       }
     } catch {
-      // Nếu backend crash văng ra HTML/Text thay vì JSON
+      
       const excerpt = textData.length > 200 ? textData.substring(0, 200) + "..." : textData;
       data = { message: excerpt || `API Error: ${response.status} ${response.statusText}` };
     }
 
     if (!response.ok) {
-      // Global Interceptor logic (e.g., handle 401 Unauthorized)
+      
       if (response.status === 401) {
         console.warn("Session expired. Redirection logic should be handled by the caller or a global event.");
       }

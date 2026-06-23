@@ -81,7 +81,7 @@ export default function AdminUsersClient() {
     (async () => { await fetchUsers(); })();
   }, [fetchUsers]);
 
-  // Filters
+  
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchSearch =
@@ -103,7 +103,7 @@ export default function AdminUsersClient() {
   const pagedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
 
-  // Stats
+  
   const totalUsers = users.length;
   const totalOwners = users.filter((u) => u.vai_tro === "Chủ sân").length;
   const totalRenters = users.filter((u) => u.vai_tro === "Khách hàng").length;
@@ -161,14 +161,14 @@ export default function AdminUsersClient() {
 
   return (
     <div className="flex flex-col min-h-screen pb-10">
-      {/* Header */}
+      {}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4">
         <h2 className="text-lg md:text-xl font-bold text-slate-900">Quản lý người dùng</h2>
         <p className="text-xs md:text-sm text-slate-400">Quản lý tài khoản Chủ sân và Khách hàng</p>
       </header>
 
       <div className="p-4 md:p-8">
-        {/* Stat Cards */}
+        {}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -208,7 +208,7 @@ export default function AdminUsersClient() {
           </div>
         </div>
 
-        {/* Filters */}
+        {}
         <div className="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm mb-6">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
             <div className="relative w-full md:flex-1 md:min-w-[280px]">
@@ -249,7 +249,7 @@ export default function AdminUsersClient() {
           </div>
         </div>
 
-        {/* Table */}
+        {}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">Danh sách người dùng</h3>
@@ -337,7 +337,7 @@ export default function AdminUsersClient() {
             </div>
           )}
           
-          {/* Pagination Controls */}
+          {}
           {totalPages > 1 && (
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
               <p className="text-sm text-slate-500">
@@ -364,7 +364,7 @@ export default function AdminUsersClient() {
         </div>
       </div>
 
-      {/* Detail Modal */}
+      {}
       {selectedUser && (
         <div
           className="fixed inset-0 z-100 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"

@@ -55,7 +55,7 @@ export default function ProfileClient() {
     const file = e.target.files?.[0];
     if (!file || !token) return;
 
-    // Validate file
+    
     if (!file.type.startsWith("image/")) {
       setError("Vui lòng chọn file ảnh (jpg, png, webp)");
       return;
@@ -65,7 +65,7 @@ export default function ProfileClient() {
       return;
     }
 
-    // Show preview immediately
+    
     const previewUrl = URL.createObjectURL(file);
     setAvatarPreview(previewUrl);
     setError(null);
@@ -75,7 +75,7 @@ export default function ProfileClient() {
       const res = await userService.updateAvatar(token, file);
       setProfile(res.user);
 
-      // Update AuthContext so Navbar etc. reflect the change
+      
       if (user) {
         login(token, {
           ...user,
@@ -92,7 +92,7 @@ export default function ProfileClient() {
       setAvatarPreview(null);
     } finally {
       setAvatarUploading(false);
-      // Reset input
+      
       if (fileInputRef.current) fileInputRef.current.value = "";
       URL.revokeObjectURL(previewUrl);
     }
@@ -132,7 +132,7 @@ export default function ProfileClient() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 lg:px-8 py-8 min-h-[calc(100vh-200px)]">
-      {/* Hidden file input */}
+      {}
       <input
         ref={fileInputRef}
         type="file"
@@ -142,7 +142,7 @@ export default function ProfileClient() {
         id="avatar-upload-input"
       />
 
-      {/* Success Toast */}
+      {}
       <div
         className={`fixed top-6 right-6 z-50 flex items-center gap-3 bg-emerald-500 text-white px-5 py-3.5 rounded-xl shadow-2xl shadow-emerald-500/30 transition-all duration-500 ${
           showSuccess
@@ -154,7 +154,7 @@ export default function ProfileClient() {
         <span className="font-semibold text-sm">Cập nhật ảnh đại diện thành công!</span>
       </div>
 
-      {/* Error Toast */}
+      {}
       {error && (
         <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-red-500 text-white px-5 py-3.5 rounded-xl shadow-2xl shadow-red-500/30 animate-[slideIn_0.3s_ease-out]">
           <span className="material-symbols-outlined text-xl">error</span>
@@ -168,10 +168,10 @@ export default function ProfileClient() {
         </div>
       )}
 
-      {/* Profile Header */}
+      {}
       <div className="bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-6 md:p-8 mb-6">
         <div className="flex items-center gap-5">
-          {/* Avatar with Upload */}
+          {}
           <div className="relative shrink-0 group">
             <button
               onClick={handleAvatarClick}
@@ -202,7 +202,7 @@ export default function ProfileClient() {
                 />
               )}
 
-              {/* Upload overlay */}
+              {}
               <div
                 className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
                   avatarUploading
@@ -220,13 +220,13 @@ export default function ProfileClient() {
               </div>
             </button>
 
-            {/* Status indicator */}
+            {}
             <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#2a1d1d] flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-[10px]">check</span>
             </div>
           </div>
 
-          {/* User Info */}
+          {}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5 flex-wrap">
               <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white truncate">
@@ -251,19 +251,19 @@ export default function ProfileClient() {
         </div>
       </div>
 
-      {/* Wallet Card */}
+      {}
       <div className="relative overflow-hidden rounded-2xl shadow-xl mb-6 group">
-        {/* Gradient Background */}
+        {}
         <div className="absolute inset-0 bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-700" />
         
-        {/* Decorative Patterns */}
+        {}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white" />
           <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-white" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-white/30 blur-3xl" />
         </div>
         
-        {/* Subtle grid pattern */}
+        {}
         <div
           className="absolute inset-0"
           style={{
@@ -295,7 +295,7 @@ export default function ProfileClient() {
         </div>
       </div>
 
-      {/* Account Details Card */}
+      {}
       <div className="bg-white dark:bg-[#2a1d1d] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-6 md:p-8">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">info</span>
@@ -303,7 +303,7 @@ export default function ProfileClient() {
         </h2>
 
         <div className="space-y-4">
-          {/* Name */}
+          {}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-blue-500">person</span>
@@ -314,7 +314,7 @@ export default function ProfileClient() {
             </div>
           </div>
 
-          {/* Email */}
+          {}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
             <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-violet-500">mail</span>
@@ -325,7 +325,7 @@ export default function ProfileClient() {
             </div>
           </div>
 
-          {/* Phone */}
+          {}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-amber-500">phone</span>
@@ -338,7 +338,7 @@ export default function ProfileClient() {
             </div>
           </div>
 
-          {/* Role */}
+          {}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-emerald-500">shield_person</span>
@@ -351,7 +351,7 @@ export default function ProfileClient() {
             </div>
           </div>
 
-          {/* Wallet Balance Detail */}
+          {}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
             <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-teal-500">account_balance_wallet</span>
@@ -364,7 +364,7 @@ export default function ProfileClient() {
             </div>
           </div>
 
-          {/* Member Since */}
+          {}
           {profile?.ngay_tao && (
             <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
               <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center shrink-0">
