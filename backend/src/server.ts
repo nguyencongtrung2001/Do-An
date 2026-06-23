@@ -1,6 +1,6 @@
 import app from './app.js';
 import prisma from './config/prisma.js';
-import { chuyenTienCoc } from './cron/hoantiencoc.js';
+import { chuyenTienCoc } from './cron/chuyentiencoc.js';
 
 const PORT = process.env.PORT || 3000;
 
