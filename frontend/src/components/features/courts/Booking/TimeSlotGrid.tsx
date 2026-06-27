@@ -28,13 +28,12 @@ function timeToMinutes(time: string): number {
 
 function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
   const slotStart = timeToMinutes(marker);
-  const slotEnd = slotStart + 30;
 
   return bookedSlots.some((booked) => {
     const bookedStart = timeToMinutes(booked.gio_bat_dau);
     const bookedEnd = timeToMinutes(booked.gio_ket_thuc);
     
-    return slotStart < bookedEnd && slotEnd > bookedStart;
+    return slotStart >= bookedStart && slotStart <= bookedEnd;
   });
 }
 
