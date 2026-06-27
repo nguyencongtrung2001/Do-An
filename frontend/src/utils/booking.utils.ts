@@ -37,9 +37,9 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
     if (!currentGroup) {
       currentGroup = { 
         ...marker, 
-        gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
+        gio_ket_thuc: marker.gio_bat_dau, 
         slots: [marker],
-        gia_thue: marker.gia_thue 
+        gia_thue: 0 
       };
     } else {
       const lastMarker = currentGroup.slots[currentGroup.slots.length - 1];
@@ -54,23 +54,29 @@ export function mergeSelectedSlots(markers: SelectedSlot[]): GroupedSlot[] {
         marker.gio_bat_dau === expectedTime
       ) {
         
-        currentGroup.gio_ket_thuc = addThirtyMinutes(marker.gio_bat_dau);
+        currentGroup.gio_ket_thuc = marker.gio_bat_dau;
         currentGroup.slots.push(marker);
-        currentGroup.gia_thue = currentGroup.slots.length * (currentGroup.slots[0]?.gia_thue ?? 0);
       } else {
         
+        const numSlots = currentGroup.slots.length - 1;
+        currentGroup.gia_thue = Math.max(0, numSlots) * (currentGroup.slots[0]?.gia_thue ?? 0);
         grouped.push(currentGroup);
+
         currentGroup = { 
           ...marker, 
-          gio_ket_thuc: addThirtyMinutes(marker.gio_bat_dau), 
+          gio_ket_thuc: marker.gio_bat_dau, 
           slots: [marker],
-          gia_thue: marker.gia_thue
+          gia_thue: 0
         };
       }
     }
   }
   
-  if (currentGroup) grouped.push(currentGroup);
+  if (currentGroup) {
+    const numSlots = currentGroup.slots.length - 1;
+    currentGroup.gia_thue = Math.max(0, numSlots) * (currentGroup.slots[0]?.gia_thue ?? 0);
+    grouped.push(currentGroup);
+  }
 
   
   return grouped;

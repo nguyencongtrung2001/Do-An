@@ -40,7 +40,7 @@ export function useBooking() {
 
   const groupedSlots = useMemo(() => mergeSelectedSlots(selectedSlots), [selectedSlots]);
   
-  const invalidGroups = groupedSlots.filter(g => g.slots.length < 2);
+  const invalidGroups = groupedSlots.filter(g => g.slots.length < 3);
   const isInvalid = invalidGroups.length > 0;
 
   const totalPrice = useMemo(() => {
@@ -59,7 +59,7 @@ export function useBooking() {
       setPaymentStatus(paymentMethod === "vnpay" ? "Đang kết nối cổng thanh toán VNPAY..." : "Đang xử lý đơn hàng...");
       
       const slotsForBackend = groupedSlots.flatMap(group => {
-        return group.slots.map((marker: SelectedSlot) => {
+        return group.slots.slice(0, -1).map((marker: SelectedSlot) => {
           const [h, m] = marker.gio_bat_dau.split(':').map(Number);
           const endDate = new Date(0, 0, 0, h, m + 30);
           const gio_ket_thuc = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
