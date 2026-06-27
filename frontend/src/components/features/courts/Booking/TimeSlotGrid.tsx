@@ -109,7 +109,7 @@ export default function TimeSlotGrid({
                     disabled
                     className="px-1 py-2 text-xs font-medium rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50 m-0.5 z-0 flex flex-col items-center justify-center gap-0.5"
                   >
-                    <span className="font-bold">{slot}</span>
+                    <span className="font-bold">{slot} - {getSlotEndTime(slot)}</span>
                     <span className="text-[10px] text-red-400 font-semibold">Đã đặt</span>
                   </button>
                 );
@@ -143,7 +143,7 @@ export default function TimeSlotGrid({
                       : "bg-white text-slate-600 hover:bg-primary/5 hover:border-primary/30 border-gray-200 m-0.5 rounded-lg z-0"
                   }`}
                 >
-                  <span className="font-bold">{slot}</span>
+                  <span className="font-bold">{slot} - {getSlotEndTime(slot)}</span>
                 </button>
               );
             })}

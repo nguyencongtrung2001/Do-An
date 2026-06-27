@@ -58,7 +58,6 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
     return data as T;
   } catch (error) {
-    console.error(`API Request Failure [${options.method || 'GET'} ${path}]:`, error);
     throw error;
   }
 }
