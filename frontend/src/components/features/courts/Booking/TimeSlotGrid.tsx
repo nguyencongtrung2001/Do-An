@@ -38,13 +38,13 @@ function isSlotBooked(marker: string, bookedSlots: BookedSlot[]): boolean {
 }
 
 
-function getSlotEndTime(startTime: string): string {
-  const [h, m] = startTime.split(":").map(Number);
-  const total = h * 60 + m + 30;
-  const newH = Math.floor(total / 60) % 24;
-  const newM = total % 60;
-  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
-}
+// function getSlotEndTime(startTime: string): string {
+//   const [h, m] = startTime.split(":").map(Number);
+//   const total = h * 60 + m + 30;
+//   const newH = Math.floor(total / 60) % 24;
+//   const newM = total % 60;
+//   return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+// }
 
 export default function TimeSlotGrid({
   court,

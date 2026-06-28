@@ -23,10 +23,10 @@ export const errorHandler = (
     } else {
       message = `Lỗi Database (${prismaErr.code}): ${prismaErr.message.split('\n').pop()}`;
     }
-    console.error("❌ [Prisma Error]:", err);
+    console.error(" [Prisma Error]:", err);
   } else {
     
-    console.error("❌ [Server Error]:", err);
+    console.error("[Server Error]:", err);
     
     message = err.message || "Lỗi không xác định ở Server";
   }

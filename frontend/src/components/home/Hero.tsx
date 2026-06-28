@@ -21,7 +21,7 @@ export default function Hero() {
           <span className="text-white">đặt lịch trong 30 giây</span>
         </h1>
         <p className="text-gray-200 text-lg sm:text-xl font-medium max-w-xl mx-auto drop-shadow-md">
-          Kết nối với hàng nghìn sân thể thao chất lượng cao trên toàn quốc. Trải nghiệm đặt sân mượt mà nhất.
+          Kết nối với hàng nghìn sân thể thao chất lượng cao tại Đà Nẵng. Trải nghiệm đặt sân mượt mà nhất.
         </p>
       </div>
     </section>
